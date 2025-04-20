@@ -1,62 +1,44 @@
 import React, { useState } from "react";
 import "../css/weather-icons.min.css";
-
 const Weather = () => {
   const [city, setCity] = useState("");
   const [weather, setWeather] = useState(null);
   const [forecast, setForecast] = useState(null);
   const [error, setError] = useState("");
 
-  const apiKey = process.env.REACT_APP_WEATHER_API_KEY;
-  const getWeather = async (selectedCity = null) => {
-    const cityName = selectedCity || city;
+  const apiKey = import.meta.env.VITE_WEATHER_API_KEY;
 
-    if (!cityName) {
-      setError("Please enter a city name");
-      setWeather(null);
-      return;
-    }
-
+  const fetchWeatherData = async (endpoint, cityName, setData) => {
     try {
       const res = await fetch(
-        `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&units=metric&appid=${apiKey}`
+        `https://api.openweathermap.org/data/2.5/${endpoint}?q=${cityName}&units=metric&appid=${apiKey}`
       );
 
       if (!res.ok) throw new Error("City not found");
 
       const data = await res.json();
-      setWeather(data);
+      setData(data);
       setError("");
     } catch (err) {
       setError(err.message);
-      setWeather(null);
+      setData(null);
     }
   };
 
-  const getForecast = async (selectedCity = null) => {
+  const handleGetWeather = (selectedCity = null) => {
     const cityName = selectedCity || city;
 
     if (!cityName) {
       setError("Please enter a city name");
+      setWeather(null);
       setForecast(null);
       return;
     }
 
-    try {
-      const res = await fetch(
-        `https://api.openweathermap.org/data/2.5/forecast?q=${cityName}&units=metric&appid=${apiKey}`
-      );
-
-      if (!res.ok) throw new Error("City not found");
-
-      const data = await res.json();
-      setForecast(data);
-      setError("");
-    } catch (err) {
-      setError(err.message);
-      setForecast(null);
-    }
+    fetchWeatherData("weather", cityName, setWeather);
+    fetchWeatherData("forecast", cityName, setForecast);
   };
+
   const getCurrentDateTime = () => {
     const now = new Date();
     return now.toLocaleString();
@@ -72,13 +54,12 @@ const Weather = () => {
           placeholder="Enter city name"
           value={city}
           onChange={(e) => setCity(e.target.value)}
+          aria-label="City name input"
         />
         <button
           className="btn btn-primary"
-          onClick={() => {
-            getWeather();
-            getForecast();
-          }}
+          onClick={() => handleGetWeather()}
+          aria-label="Get Weather"
         >
           Get Weather
         </button>
@@ -91,10 +72,8 @@ const Weather = () => {
             <button
               key={city}
               className="btn btn-secondary"
-              onClick={() => {
-                getWeather(city);
-                getForecast(city);
-              }}
+              onClick={() => handleGetWeather(city)}
+              aria-label={`Get weather for ${city}`}
             >
               {city}
             </button>
@@ -118,7 +97,7 @@ const Weather = () => {
                       : weather.weather[0].main.toLowerCase() === "clouds"
                       ? "day-cloudy"
                       : weather.weather[0].main.toLowerCase()
-                  } `}
+                  }`}
                   style={{ fontSize: "2.5rem" }}
                 ></i>
               </div>
@@ -158,10 +137,7 @@ const Weather = () => {
           <h2>5-Day Forecast</h2>
           <div className="d-flex justify-content-center gap-3 flex-wrap">
             {forecast.list
-              .filter((day) => {
-                console.log(new Date(day.dt * 1000).toLocaleString());
-                return new Date(day.dt * 1000).getHours() === 14;
-              }) // Filter for 12 PM
+              .filter((day) => new Date(day.dt * 1000).getHours() === 14) // Filter for 2 PM
               .map((day, index) => (
                 <div
                   key={index}
