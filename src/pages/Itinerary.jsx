@@ -20,63 +20,6 @@ function Itinerary() {
 
   }, [tripId, navigate])
 
-  // const [trip, setTrip] = useState({
-  //   id: 1,
-  //   title: "Switzerland Trip Rundown",
-  //   startDate: "2024-08-21",
-  //   endDate: "2024-08-29",
-  //   days: [
-  //     {
-  //       date: "2024-08-21",
-  //       activities: [
-  //         {
-  //           time: "15:00",
-  //           place: "Arrive at Zurich International Airport",
-  //           icon: "plane",
-  //           details: "",
-  //           imageUrl: "https://media.istockphoto.com/id/1308631254/photo/zurich-international-airport.jpg?s=612x612&w=0&k=20&c=u8BDh5zwBk3LGmRFl8sHMKYmkbRHlN0XqVV5yMNPWyE="
-  //         },
-  //         {
-  //           time: "16:00",
-  //           place: "Elfrentes Roasting",
-  //           icon: "coffee",
-  //           details: "Open now - 23:00, 4.7 from 2735 reviews"
-  //         },
-  //         {
-  //           time: "17:00",
-  //           place: "Spend the day exploring Zurich",
-  //           icon: "compass",
-  //           details: ""
-  //         },
-  //         {
-  //           time: "19:00",
-  //           place: "Elmira fine dining",
-  //           icon: "food",
-  //           details: ""
-  //         },
-  //         {
-  //           time: "19:45",
-  //           place: "BVLGARI Hotel",
-  //           icon: "hotel",
-  //           details: ""
-  //         }
-  //       ]
-  //     },
-  //     {
-  //       date: "2024-08-22",
-  //       activities: [
-  //         {
-  //           time: "09:00",
-  //           place: "Elfrentes Roasting",
-  //           icon: "coffee",
-  //           details: ""
-  //         }
-  //       ]
-  //     }
-  //   ]
-  // });
-
-
 
   const [newActivity, setNewActivity] = useState({
     date: "",

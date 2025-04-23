@@ -1,44 +1,57 @@
-import React, { useState } from 'react';
-import { Container, Row, Col, Card, Badge } from 'react-bootstrap';
-import { Calendar, MapPin, ArrowRight } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import React, {useEffect, useState} from 'react';
+import {Container, Row, Col, Card, Badge, InputGroup, Form, Button, Dropdown,} from 'react-bootstrap';
+import {Calendar, MapPin, ArrowRight, Search, X, Filter} from 'lucide-react';
+import {useNavigate} from 'react-router-dom';
 import tripsData from "../data/tripsData.js";
 
 const Trip = () => {
   const navigate = useNavigate();
   const [trips] = useState(tripsData);
-  // const [trips, setTrips] = useState([
-  //   {
-  //     id: 1,
-  //     title: "Switzerland Trip Rundown",
-  //     startDate: "2024-08-21",
-  //     endDate: "2024-08-29",
-  //     location: "Switzerland",
-  //     image: "https://images.unsplash.com/photo-1527668752968-14dc70a27c95?q=80&w=1000",
-  //     description: "Explore the beauty of the Swiss Alps and charming cities."
-  //   },
-  //   {
-  //     id: 2,
-  //     title: "Italy Adventure",
-  //     startDate: "2024-09-15",
-  //     endDate: "2024-09-25",
-  //     location: "Italy",
-  //     image: "https://images.unsplash.com/photo-1516483638261-f4dbaf036963?q=80&w=1000",
-  //     description: "Experience the rich history and cuisine of Italy."
-  //   },
-  //   {
-  //     id: 3,
-  //     title: "Japan Discovery",
-  //     startDate: "2024-10-10",
-  //     endDate: "2024-10-22",
-  //     location: "Japan",
-  //     image: "https://images.unsplash.com/photo-1528164344705-47542687000d?q=80&w=1000",
-  //     description: "Immerse yourself in the unique blend of tradition and modernity."
-  //   }
-  // ]);
-
   const handleTripSelect = (tripId) => {
     navigate(`/itinerary/${tripId}`);
+  };
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedTags, setSelectedTags] = useState([]);
+  const [priceRange, setPriceRange] = useState("all");
+  const [filteredTrips, setFilteredTrips] = useState(trips);
+
+  const allTags = ['hiking', 'cycling', 'wildlife', 'sustainable-dining', 'cultural', 'kayaking'];
+  const priceRanges = [
+    {value: 'all', label: 'All Prices'},
+    {value: 'low', label: '$'},
+    {value: 'medium', label: '$$'},
+    {value: 'high', label: '$$$'}
+  ];
+
+  useEffect(() => {
+    const results = trips.filter(trip => {
+      const matchesSearch = trip.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          trip.location.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesTags = selectedTags.length === 0 ||
+          selectedTags.some(tag => trip.tags.includes(tag));
+
+      const matchesPrice = priceRange === 'all' || trip.budgetRange === priceRange;
+
+      return matchesSearch && matchesTags && matchesPrice;
+    });
+    setFilteredTrips(results);
+  }, [searchTerm, selectedTags, priceRange, trips]);
+
+  const handleTagToggle = (tag) => {
+    setSelectedTags(prev =>
+        prev.includes(tag)
+            ? prev.filter(t => t !== tag)
+            : [...prev, tag]
+    );
+  };
+
+  // Clear all filters
+  const clearFilters = () => {
+    setSearchTerm('');
+    setSelectedTags([]);
+    setPriceRange('all');
   };
 
   // Calculate trip duration in days
@@ -52,74 +65,219 @@ const Trip = () => {
 
   // Format date to display in a readable format
   const formatDate = (dateString) => {
-    const options = { month: 'short', day: 'numeric', year: 'numeric' };
+    const options = {month: 'short', day: 'numeric', year: 'numeric'};
     return new Date(dateString).toLocaleDateString('en-US', options);
   };
 
   return (
-      <Container fluid className="bg-light min-vh-100 py-4" style={{ color: '#1A472A', fontFamily: 'Montserrat, sans-serif' }}>
+      <Container fluid className="bg-light min-vh-100 py-4"
+                 style={{color: '#1A472A', fontFamily: 'Montserrat, sans-serif'}}>
         <div className="text-center mb-5">
           <h1 className="fw-bold text-forest">My Travel Plans</h1>
           <p className="text-muted">Select a trip to view detailed itinerary</p>
         </div>
 
-        <Row className="g-4">
-          {trips.map((trip) => (
-              <Col key={trip.id} md={6} lg={4}>
-                <Card
-                    className="h-100 shadow-sm border-0 trip-card"
-                    style={{ cursor: 'pointer', transition: 'transform 0.3s' }}
-                    onClick={() => handleTripSelect(trip.id)}
-                >
-                  <div style={{ height: '200px', overflow: 'hidden' }}>
-                    <Card.Img
-                        variant="top"
-                        src={trip.image}
-                        style={{ objectFit: 'cover', height: '100%', width: '100%' }}
-                    />
+        {/*search input & filters*/}
+        <div>
+          <Row>
+            {/*  search input*/}
+            <Col className='mb-3'>
+              <InputGroup>
+                <InputGroup.Text>
+                  <Search/>
+                </InputGroup.Text>
+                <Form.Control
+                    placeholder='Search trips or locations...'
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                {searchTerm && (
+                    <Button variant='outline-secondary' onClick={() => setSearchTerm('')}>
+                      <X/>
+                    </Button>
+                )}
+              </InputGroup>
+
+            </Col>
+
+
+            {/*  Price filter*/}
+            <Col md={3}>
+              <Form.Select
+                  value={priceRange}
+                  onChange={(e) => setPriceRange(e.target.value)}
+              >
+                {priceRanges.map(range => (
+                    <option key={range.value} value={range.value}>
+                      {range.label}
+                    </option>
+                ))}
+              </Form.Select>
+            </Col>
+
+            {/*tags dropdown*/}
+            <Col md={3}>
+              <Dropdown>
+                <Dropdown.Toggle  variant='outline-forest' id='tags-dropdown'>
+                  <Filter className='me-1'/>
+                  {selectedTags.length > 0 ? `${selectedTags.length} selected` : 'Filter by Tags'}
+                </Dropdown.Toggle>
+                <Dropdown.Menu className='p-3' >
+                  <div className='d-flex flex-wrap gap-2'>
+                    {allTags.map(tag => (
+                        <Badge
+                            key={tag}
+                            bg={selectedTags.includes(tag) ? 'forest' : 'light'}
+                            text={selectedTags.includes(tag) ? 'white' : 'dark'}
+                            onClick={()=> handleTagToggle(tag)}
+                            style={{cursor:'pointer'}}
+                        >
+                          {tag}
+                        </Badge>
+                    ))}
                   </div>
-                  <Card.Body className="d-flex flex-column">
-                    <div className="d-flex align-items-center mb-2">
-                      <MapPin size={16} className="text-forest me-1" />
-                      <span className="text-muted small">{trip.location}</span>
-                      <Badge
-                          bg="light"
-                          text="dark"
-                          className="ms-auto px-2 py-1"
+                  {selectedTags.length > 0 && (
+                      <Button
+                        variant='link'
+                        size='sm'
+                        className='mt-2 p-0 text-danger'
+                        onClick={clearFilters}
                       >
-                        {calculateDuration(trip.startDate, trip.endDate)} days
-                      </Badge>
-                    </div>
+                        Clear all filters
+                      </Button>
+                  )}
+                </Dropdown.Menu>
+              </Dropdown>
+            </Col>
+          </Row>
 
-                    <Card.Title className="fw-bold mb-1 text-forest">{trip.title}</Card.Title>
 
-                    <div className="text-muted small mb-2 d-flex align-items-center">
-                      <Calendar size={14} className="me-1" />
-                      <span>
-                    {formatDate(trip.startDate)} - {formatDate(trip.endDate)}
-                  </span>
-                    </div>
+          {/* Active filters indicator */}
+          {(searchTerm || selectedTags.length > 0 || priceRange !== 'all') && (
+              <div className=" mb-3">
+                <small className="text-muted me-2">Active filters:</small>
+                {searchTerm && (
+                    <Badge bg="light" text="dark" className="me-2">
+                      Search: "{searchTerm}" <X size={12} onClick={() => setSearchTerm('')} style={{ cursor: 'pointer' }} />
+                    </Badge>
+                )}
+                {selectedTags.map(tag => (
+                    <Badge key={tag} bg="forest" className="me-2">
+                      {tag} <X size={12} onClick={() => handleTagToggle(tag)} style={{ cursor: 'pointer' }} />
+                    </Badge>
+                ))}
+                {priceRange !== 'all' && (
+                    <Badge bg="light" text="dark">
+                      Price: {priceRanges.find(r => r.value === priceRange)?.label}
+                      <X size={12} onClick={() => setPriceRange('all')} style={{ cursor: 'pointer' }} />
+                    </Badge>
+                )}
+              </div>
+          )}
+        {/*</div>*/}
+        </div>
 
-                    <Card.Text className="text-forest small mb-3">
-                      {trip.description}
-                    </Card.Text>
 
-                    <div className="mt-auto d-flex align-items-center text-forest">
-                      <span className="fw-semibold small">View Itinerary</span>
-                      <ArrowRight size={16} className="ms-1" />
-                    </div>
-                  </Card.Body>
-                </Card>
-              </Col>
-          ))}
-        </Row>
+        {/*trip card*/}
+        {filteredTrips.length > 0 ? (
+            <Row className="g-4 ">
+              {filteredTrips.map((trip) => (
+                  <Col key={trip.id} md={6} lg={4}>
+                    <Card
+                        className="h-100 shadow-sm border-0 trip-card"
+                        style={{cursor: 'pointer', transition: 'transform 0.3s'}}
+                        onClick={() => handleTripSelect(trip.id)}
+                    >
+                      <div style={{height: '200px', overflow: 'hidden'}}>
+                        <Card.Img
+                            variant="top"
+                            src={trip.image}
+                            style={{objectFit: 'cover', height: '100%', width: '100%'}}
+                        />
+                      </div>
+                      <Card.Body className="d-flex flex-column">
+                        <div className="d-flex align-items-center mb-2">
+                          <MapPin size={16} className="text-forest me-1"/>
+                          <span className="text-muted small">{trip.location}</span>
+                          <Badge bg="light" text="dark" className="ms-auto px-2 py-1">
+                            {calculateDuration(trip.startDate, trip.endDate)} days
+                          </Badge>
+                        </div>
+
+                        <Card.Title className="fw-bold mb-1 text-forest">{trip.title}</Card.Title>
+
+                        <div className="text-muted small mb-2 d-flex align-items-center">
+                          <Calendar size={14} className="me-1"/>
+                          <span>
+                      {formatDate(trip.startDate)} - {formatDate(trip.endDate)}
+                    </span>
+                        </div>
+
+                        <Card.Text className="text-forest small mb-3">
+                          {trip.description}
+                        </Card.Text>
+
+                        {/* Tags */}
+                        <div className="mb-3">
+                          {trip.tags.map(tag => (
+                              <Badge
+                                  key={tag}
+                                  bg="light"
+                                  text="dark"
+                                  className="me-1 mb-1"
+                              >
+                                {tag}
+                              </Badge>
+                          ))}
+                        </div>
+
+                        {/* Price Indicator */}
+                        <div className="mt-auto d-flex justify-content-between align-items-center">
+                    <span className={`fw-semibold small ${
+                        trip.budgetRange === 'low' ? 'text-success' :
+                            trip.budgetRange === 'high' ? 'text-warning' : 'text-forest'
+                    }`}>
+                      {trip.budgetRange === 'low' ? '$' :
+                          trip.budgetRange === 'medium' ? '$$' : '$$$'}
+                    </span>
+                          <div className="d-flex align-items-center text-forest">
+                            <span className="fw-semibold small">View Itinerary</span>
+                            <ArrowRight size={16} className="ms-1"/>
+                          </div>
+                        </div>
+                      </Card.Body>
+                    </Card>
+                  </Col>
+              ))}
+            </Row>
+        ) : (
+            <div className="text-center py-5">
+              <h4 className="text-muted">No trips match your filters</h4>
+              <Button variant="outline-forest" onClick={clearFilters}>
+                Clear all filters
+              </Button>
+            </div>)}
 
         <style jsx>{`
-        .trip-card:hover {
-          transform: translateY(-5px);
-          box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
-        }
-      `}</style>
+            .trip-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 .5rem 1rem rgba(0, 0, 0, .15) !important;
+            }
+            .bg-forest {
+                background-color: #1A472A;
+            }
+            .cursor-pointer{
+                cursor: pointer;
+            }
+            .btn-outline-forest {
+                color: #1A472A;
+                border-color: #1A472A;
+            }
+            .btn-outline-forest:hover {
+                background-color: #1A472A;
+                color: white;
+            }
+        `}</style>
       </Container>
   );
 };
