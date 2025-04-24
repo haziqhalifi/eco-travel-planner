@@ -22,10 +22,10 @@ function App() {
 
   return (
     <Router>
-      <div className="min-h-screen bg-light">
-        <nav className="navbar navbar-expand-lg navbar-light bg-success">
+      <div className="min-h-screen bg-light d-flex flex-column">
+        <nav className="navbar navbar-expand-lg navbar-light bg-white">
           <div className="container-fluid">
-            <a className="navbar-brand text-white fw-bold" href="/">
+            <a className="navbar-brand text-success fw-bold" href="/">
               Eco Travel Planner
             </a>
             <button
@@ -40,58 +40,56 @@ function App() {
               <span className="navbar-toggler-icon"></span>
             </button>
             <div className="collapse navbar-collapse" id="navbarNav">
-              <ul className="navbar-nav ms-auto">
+              <ul className="navbar-nav mx-auto">
                 {isLoggedIn ? (
                   <>
                     <li className="nav-item">
-                      <Link className="nav-link text-white" to="/dashboard">
+                      <Link className="nav-link text-black" to="/dashboard">
                         Dashboard
                       </Link>
                     </li>
                     <li className="nav-item">
-                      <Link className="nav-link text-white" to="/eco-options">
+                      <Link className="nav-link text-black" to="/eco-options">
                         Eco Options
                       </Link>
                     </li>
                     <li className="nav-item">
-                      <Link className="nav-link text-white" to="/trip">
+                      <Link className="nav-link text-black" to="/trip">
                         Trip
                       </Link>
                     </li>
                     <li className="nav-item">
-                      <Link className="nav-link text-white" to="/weather">
+                      <Link className="nav-link text-black" to="/weather">
                         Weather
                       </Link>
                     </li>
                     <li className="nav-item">
-                      <Link className="nav-link text-white" to="/footprint">
+                      <Link className="nav-link text-black" to="/footprint">
                         Carbon Calculator
                       </Link>
-                    </li>
-                    <li className="nav-item">
-                      <Link className="nav-link text-white" to="/profile">
-                        Profile
-                      </Link>
-                    </li>
-                    <li className="nav-item">
-                      <button
-                        className="btn btn-outline-light"
-                        onClick={() => setIsLoggedIn(false)}
-                      >
-                        Logout
-                      </button>
                     </li>
                   </>
                 ) : (
                   <>
                     <li className="nav-item">
-                      <Link className="nav-link text-white" to="/signin">
+                      <Link className="nav-link text-black" to="/signin">
                         Sign In
                       </Link>
                     </li>
                     <li className="nav-item">
-                      <Link className="nav-link text-white" to="/signup">
+                      <Link className="nav-link text-black" to="/signup">
                         Sign Up
+                      </Link>
+                    </li>
+                  </>
+                )}
+              </ul>
+              <ul className="navbar-nav ms-auto">
+                {isLoggedIn && (
+                  <>
+                    <li className="nav-item">
+                      <Link className="nav-link text-black" to="/profile">
+                        Profile
                       </Link>
                     </li>
                   </>
@@ -101,7 +99,7 @@ function App() {
           </div>
         </nav>
 
-        <div className="container py-4">
+        <div className="container py-4 flex-grow-1">
           <Routes>
             <Route
               path="/"
@@ -118,7 +116,7 @@ function App() {
             />
             <Route path="/eco-options" element={<EcoOptions />} />
             <Route path="/trip" element={<Trip />} />
-            <Route path="/itinerary/:tripId" element={<Itinerary/>}/>
+            <Route path="/itinerary/:tripId" element={<Itinerary />} />
             <Route path="/weather" element={<Weather />} />
             <Route path="/footprint" element={<CarbonCalculator />} />
             <Route path="/profile" element={<Profile />} />
