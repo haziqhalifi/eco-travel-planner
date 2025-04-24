@@ -41,7 +41,7 @@ function App() {
             </button>
             <div className="collapse navbar-collapse" id="navbarNav">
               <ul className="navbar-nav mx-auto">
-                {isLoggedIn ? (
+                {isLoggedIn && (
                   <>
                     <li className="nav-item">
                       <Link className="nav-link text-black" to="/dashboard">
@@ -69,6 +69,17 @@ function App() {
                       </Link>
                     </li>
                   </>
+                )}
+              </ul>
+              <ul className="navbar-nav ms-auto">
+                {isLoggedIn ? (
+                  <>
+                    <li className="nav-item">
+                      <Link className="nav-link text-black" to="/profile">
+                        Profile
+                      </Link>
+                    </li>
+                  </>
                 ) : (
                   <>
                     <li className="nav-item">
@@ -79,17 +90,6 @@ function App() {
                     <li className="nav-item">
                       <Link className="nav-link text-black" to="/signup">
                         Sign Up
-                      </Link>
-                    </li>
-                  </>
-                )}
-              </ul>
-              <ul className="navbar-nav ms-auto">
-                {isLoggedIn && (
-                  <>
-                    <li className="nav-item">
-                      <Link className="nav-link text-black" to="/profile">
-                        Profile
                       </Link>
                     </li>
                   </>
