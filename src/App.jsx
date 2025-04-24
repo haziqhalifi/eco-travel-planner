@@ -99,7 +99,7 @@ function App() {
           </div>
         </nav>
 
-        <div className="container py-4 flex-grow-1">
+        <div>
           <Routes>
             <Route
               path="/"
