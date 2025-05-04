@@ -3,7 +3,6 @@ import {
   Routes,
   Route,
   Navigate,
-  Link,
 } from "react-router-dom";
 import { useState } from "react";
 import "./App.css";
@@ -16,92 +15,18 @@ import Weather from "./pages/Weather";
 import CarbonCalculator from "./pages/CarbonCalculator";
 import Profile from "./pages/Profile";
 import Trip from "./pages/Trip.jsx";
+import Navbar from "./components/NavBar.jsx";
+import Footer from "./components/Footer.jsx";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   return (
     <Router>
-      <div className="min-h-screen bg-light">
-        <nav className="navbar navbar-expand-lg navbar-light bg-success">
-          <div className="container-fluid">
-            <a className="navbar-brand text-white fw-bold" href="/">
-              Eco Travel Planner
-            </a>
-            <button
-              className="navbar-toggler"
-              type="button"
-              data-bs-toggle="collapse"
-              data-bs-target="#navbarNav"
-              aria-controls="navbarNav"
-              aria-expanded="false"
-              aria-label="Toggle navigation"
-            >
-              <span className="navbar-toggler-icon"></span>
-            </button>
-            <div className="collapse navbar-collapse" id="navbarNav">
-              <ul className="navbar-nav ms-auto">
-                {isLoggedIn ? (
-                  <>
-                    <li className="nav-item">
-                      <Link className="nav-link text-white" to="/dashboard">
-                        Dashboard
-                      </Link>
-                    </li>
-                    <li className="nav-item">
-                      <Link className="nav-link text-white" to="/eco-options">
-                        Eco Options
-                      </Link>
-                    </li>
-                    <li className="nav-item">
-                      <Link className="nav-link text-white" to="/trip">
-                        Trip
-                      </Link>
-                    </li>
-                    <li className="nav-item">
-                      <Link className="nav-link text-white" to="/weather">
-                        Weather
-                      </Link>
-                    </li>
-                    <li className="nav-item">
-                      <Link className="nav-link text-white" to="/footprint">
-                        Carbon Calculator
-                      </Link>
-                    </li>
-                    <li className="nav-item">
-                      <Link className="nav-link text-white" to="/profile">
-                        Profile
-                      </Link>
-                    </li>
-                    <li className="nav-item">
-                      <button
-                        className="btn btn-outline-light"
-                        onClick={() => setIsLoggedIn(false)}
-                      >
-                        Logout
-                      </button>
-                    </li>
-                  </>
-                ) : (
-                  <>
-                    <li className="nav-item">
-                      <Link className="nav-link text-white" to="/signin">
-                        Sign In
-                      </Link>
-                    </li>
-                    <li className="nav-item">
-                      <Link className="nav-link text-white" to="/signup">
-                        Sign Up
-                      </Link>
-                    </li>
-                  </>
-                )}
-              </ul>
-            </div>
-          </div>
-        </nav>
+      <div className="min-vh-100 d-flex flex-column bg-light">
+        <Navbar isLoggedIn={isLoggedIn} />
 
-        <div className="container py-4">
+        <main className="flex-grow-1">
           <Routes>
             <Route
               path="/"
@@ -118,12 +43,14 @@ function App() {
             />
             <Route path="/eco-options" element={<EcoOptions />} />
             <Route path="/trip" element={<Trip />} />
-            <Route path="/itinerary/:tripId" element={<Itinerary/>}/>
+            <Route path="/itinerary/:tripId" element={<Itinerary />} />
             <Route path="/weather" element={<Weather />} />
             <Route path="/footprint" element={<CarbonCalculator />} />
             <Route path="/profile" element={<Profile />} />
           </Routes>
-        </div>
+        </main>
+
+        <Footer />
       </div>
     </Router>
   );
