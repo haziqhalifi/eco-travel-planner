@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Search, Calendar, Users, MapPin, Plane } from 'lucide-react';
 import AccommodationCard from './AccommodationCard.jsx';
@@ -6,7 +6,7 @@ import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { searchConfigs } from './SearchConfigs';
 import {DetailedFlightCard, FlightCard} from "./FlightCard.jsx";
-import ActivityCard, {RestaurantDetailView} from "./ActivityCard.jsx";
+import ActivityCard, {ActivityDetailView} from "./ActivityCard.jsx";
 
 const EcoOptions = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -84,10 +84,33 @@ const EcoOptions = () => {
   };
   const handleActivityViewDetails = (activty) => {
     setSelectedItem(activty);
+    setShowDetailView(true);
   };
   const handleActivityCloseDetails = () => {
     setSelectedItem(null);
   };
+
+  useEffect(() => {
+    // Clear all search-related states when tab changes
+    setSearchTerm('');
+    setTravelOptions([]);
+    setSelectedItem(null);
+    setShowDetailView(false);
+
+    // Add any other state resets you need for specific tabs
+    if (activeTab === 'accommodation') {
+      setCheckInDate(new Date());
+      setCheckOutDate(new Date());
+      setAdults(2);
+    }
+    if (activeTab === 'transportation') {
+      setOrigin('');
+      setDestination('');
+      setDepartureDate(null);
+      setReturnDate(null);
+    }
+  }, [activeTab]);
+
 
   // Custom tab style
   const tabStyle = (isActive) =>
@@ -406,10 +429,10 @@ const EcoOptions = () => {
                                       hours={option.hours}
                                       links={option.links}
                                       gps={option.gps}
-                                      onViewDetails={() => handleViewDetails(option)}
+                                      onViewDetails={() => handleActivityViewDetails(option)}
                                   />
                                     {showDetailView && selectedItem && (
-                                        <RestaurantDetailView
+                                        <ActivityDetailView
                                             item={selectedItem}
                                             onClose={() => setShowDetailView(false)}
                                         />
@@ -419,6 +442,12 @@ const EcoOptions = () => {
                             }
                             return null;
                           })}
+
+                          {!loading && travelOptions.length === 0 && (
+                              <div className="text-center text-gray-500">
+                                No results found. Try different search criteria.
+                              </div>
+                          )}
                         </div>
                     ) : (
                         <div className="text-center py-12">
