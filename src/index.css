@@ -31,6 +31,18 @@ a:hover {
   color: var(--dark-green);
 }
 
+.bg-dark-green {
+  background-color: var(--dark-green);
+}
+
+.bg-bronze {
+  background-color: #D98E2D;
+}
+
+.bg-blue {
+  background-color: #0096FF;
+}
+
 
 body {
   margin: 0;
