@@ -24,7 +24,7 @@ const SignUp = () => {
   };
 
   return (
-    <div className="container-fluid p-0">
+    <div className="container-fluid p-0 mb-5">
       <div className="row m-0">
         <div className="col-lg-6 p-0">
           <div
@@ -197,25 +197,6 @@ const SignUp = () => {
           </div>
         </div>
       </div>
-
-      <footer className="bg-light py-3 text-center text-muted">
-        <div className="container">
-          <div className="d-flex justify-content-between align-items-center">
-            <div>© 2025 EcoTravel. All rights reserved.</div>
-            <div>
-              <a href="#" className="text-muted me-3">
-                Privacy Policy
-              </a>
-              <a href="#" className="text-muted me-3">
-                Terms of Service
-              </a>
-              <a href="#" className="text-muted">
-                Help
-              </a>
-            </div>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 };

@@ -70,46 +70,36 @@ const Weather = () => {
   };
 
   return (
-    <div className="container text-center mt-5">
-      <h1 className="mb-4">Weather Forecast</h1>
-      <div className="input-group mb-3 w-50 mx-auto">
-        <form
-          className="d-flex w-100"
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleGetWeather();
-          }}
-        >
-          <input
-            type="text"
-            className="form-control mr-2"
-            placeholder="Enter city name"
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-            autoFocus
-          />
-          <button className="btn btn-success" type="submit">
-            Search
-          </button>
-        </form>
-      </div>
-
-      <div className="mb-4">
-        <h5>Popular Cities:</h5>
-        <div className="d-flex justify-content-center gap-2">
-          {["New York", "London", "Tokyo", "Paris", "Sydney"].map((city) => (
-            <button
-              key={city}
-              className="btn btn-secondary"
-              onClick={() => handleGetWeather(city)}
+    <div className="bg-light min-vh-100 py-8">
+      <div className="container mx-auto my-8">
+        <div className="bg-white rounded-xl shadow-xl p-6 md:p-8">
+          <h1 className="mb-4 text-center">🌤 Weather Forecast</h1>
+          <div className="input-group mb-3 w-50 mx-auto">
+            <form
+              className="d-flex w-100"
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleGetWeather();
+              }}
             >
-              {city}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {error && <p className="text-danger">{error}</p>}
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Enter city name"
+                value={city}
+                onChange={(e) => setCity(e.target.value)}
+                aria-label="City name input"
+                autoFocus
+              />
+              <button
+                className="btn btn-primary"
+                type="submit"
+                aria-label="Get Weather"
+              >
+                Get Weather
+              </button>
+            </form>
+          </div>
 
       {weather && (
         <div className="card p-4 mt-3 mx-auto" style={{ maxWidth: "800px" }}>
@@ -192,10 +182,60 @@ const Weather = () => {
                     {Math.round(day.main.feels_like)}°C
                   </p>
                 </div>
-              ))}
-          </div>
-        </div>
-      )}
+              </div>
+              <table className="table mt-3">
+                <thead>
+                  <tr>
+                    <th>Humidity</th>
+                    <th>Wind</th>
+                    <th>Pressure</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>{weather.main.humidity}%</td>
+                    <td>{weather.wind.speed} km/h</td>
+                    <td>{weather.main.pressure} hPa</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {forecast && (
+            <div className="mt-5">
+              <h2 className="text-center">5-Day Forecast</h2>
+              <div className="d-flex justify-content-center gap-3 flex-wrap">
+                {forecast.list
+                  .filter((day) => new Date(day.dt * 1000).getHours() === 14) // Filter for 2 PM
+                  .map((day, index) => (
+                    <div
+                      key={index}
+                      className="card p-3 text-center"
+                      style={{ width: "150px" }}
+                    >
+                      <h5>
+                        {new Date(day.dt * 1000).toLocaleDateString("en-US", {
+                          weekday: "long",
+                        })}
+                      </h5>
+                      <i
+                        className={`wi wi-${
+                          day.weather[0].main.toLowerCase() === "clear"
+                            ? "day-sunny"
+                            : day.weather[0].main.toLowerCase() === "clouds"
+                            ? "day-cloudy"
+                            : day.weather[0].main.toLowerCase()
+                        }`}
+                        style={{ fontSize: "2rem" }}
+                      ></i>
+                      <p>{day.main.temp}°C</p>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
+        </div>      )}
 
       {(forecast || weather) && (
         <div className="row justify-content-center mb-5">
