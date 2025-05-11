@@ -1,3 +1,4 @@
+import React from 'react';
 function CarbonCalculator() {
   return (
     <div className="bg-light min-vh-100 py-8">
@@ -10,5 +11,3 @@ function CarbonCalculator() {
     </div>
   );
 }
-
-export default CarbonCalculator;
