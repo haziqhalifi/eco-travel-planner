@@ -70,7 +70,13 @@ const Weather = () => {
   };
 
   return (
-    <div className="bg-light min-vh-100 py-8">
+    <div
+      className="min-vh-100 py-8"
+      style={{
+        background: "linear-gradient(135deg, #e0f7fa 0%, #fffde4 100%)",
+        backgroundAttachment: "fixed",
+      }}
+    >
       <div className="container mx-auto my-8">
         <div className="bg-white rounded-xl shadow-xl p-6 md:p-8">
           <h1 className="mb-4 text-center">🌤 Weather Forecast</h1>
@@ -81,138 +87,118 @@ const Weather = () => {
                 e.preventDefault();
                 handleGetWeather();
               }}
+              style={{ gap: "0.5rem" }}
             >
               <input
                 type="text"
-                className="form-control"
+                className="form-control mr-2 rounded-pill shadow-sm"
                 placeholder="Enter city name"
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
-                aria-label="City name input"
                 autoFocus
+                style={{ border: "2px solid #4caf50" }}
               />
               <button
-                className="btn btn-primary"
+                className="btn btn-success rounded-pill px-4 shadow"
                 type="submit"
-                aria-label="Get Weather"
               >
-                Get Weather
+                Search
               </button>
             </form>
           </div>
 
-      {weather && (
-        <div className="card p-4 mt-3 mx-auto" style={{ maxWidth: "800px" }}>
-          <h3>{weather.name}</h3>
-          <p className="text-muted">{getCurrentDateTime()}</p>
-          <div className="container text-center">
-            <div className="row justify-content-md-center">
-              <div className="col col-md-2 text-center justify-content-center">
-                <i
-                  className={`wi wi-${
-                    weather.weather[0].main.toLowerCase() === "clear"
-                      ? "day-sunny"
-                      : weather.weather[0].main.toLowerCase() === "clouds"
-                      ? "day-cloudy"
-                      : weather.weather[0].main.toLowerCase()
-                  }`}
-                  style={{ fontSize: "2.5rem" }}
-                ></i>
-              </div>
-              <div className="col col-md-4">
-                <h1>{Math.round(weather.main.temp)}°C</h1>
-                <p>
-                  {weather.weather[0].main === "Clear"
-                    ? "Sunny"
-                    : weather.weather[0].main === "Clouds"
-                    ? "Cloudy"
-                    : weather.weather[0].main}
-                </p>
-              </div>
-              <table className="table table-bordered mb-0">
-                <thead className="table-light">
-                  <tr>
-                    <th>Humidity</th>
-                    <th>Wind</th>
-                    <th>Pressure</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>{weather.main.humidity}%</td>
-                    <td>{Math.round(weather.wind.speed)} km/h</td>
-                    <td>{weather.main.pressure} hPa</td>
-                  </tr>
-                </tbody>
-              </table>
+          <div className="mb-4">
+            <h5 className="text-center">Popular Cities:</h5>
+            <div className="d-flex justify-content-center gap-2">
+              {["New York", "London", "Tokyo", "Paris", "Sydney"].map(
+                (city) => (
+                  <button
+                    key={city}
+                    className="btn btn-secondary"
+                    onClick={() => handleGetWeather(city)}
+                  >
+                    {city}
+                  </button>
+                )
+              )}
             </div>
           </div>
-        </div>
-      )}
 
-      {forecast && (
-        <div className="mt-5 mb-5">
-          <h2>5-Day Forecast</h2>
-          <div className="d-flex justify-content-center gap-3 flex-wrap">
-            {forecast.list
-              .filter((day) => new Date(day.dt * 1000).getHours() === 14)
-              .map((day, index) => (
-                <div
-                  key={index}
-                  className="card p-3 text-center"
-                  style={{ width: "150px" }}
-                >
-                  <h5>
-                    {new Date(day.dt * 1000).toLocaleDateString("en-US", {
-                      weekday: "long",
-                    })}
-                  </h5>
-                  <i
-                    className={`wi wi-${
-                      day.weather[0].main.toLowerCase() === "clear"
-                        ? "day-sunny"
-                        : day.weather[0].main.toLowerCase() === "clouds"
-                        ? "day-cloudy"
-                        : day.weather[0].main.toLowerCase()
-                    }`}
-                    style={{ fontSize: "2rem" }}
-                  ></i>
-                  <p>
-                    <strong>{Math.round(day.main.temp)}°C</strong>{" "}
-                    {Math.round(day.main.feels_like)}°C
-                  </p>
+          {error && <p className="text-danger text-center">{error}</p>}
+
+          {weather && (
+            <div
+              className="card p-4 mt-3 mx-auto"
+              style={{ maxWidth: "800px" }}
+            >
+              <h3>{weather.name}</h3>
+              <p className="text-muted">{getCurrentDateTime()}</p>
+              <div className="container text-center">
+                <div className="row justify-content-md-center">
+                  <div className="col col-md-2 text-center justify-content-center">
+                    <i
+                      className={`wi wi-${
+                        weather.weather[0].main.toLowerCase() === "clear"
+                          ? "day-sunny"
+                          : weather.weather[0].main.toLowerCase() === "clouds"
+                          ? "day-cloudy"
+                          : weather.weather[0].main.toLowerCase()
+                      } animate__animated animate__pulse animate__infinite`}
+                      style={{ fontSize: "2.5rem" }}
+                    ></i>
+                  </div>
+                  <div className="col col-md-4">
+                    <h1>{Math.round(weather.main.temp)}°C</h1>
+                    <p>
+                      {weather.weather[0].main === "Clear"
+                        ? "Sunny"
+                        : weather.weather[0].main === "Clouds"
+                        ? "Cloudy"
+                        : weather.weather[0].main}
+                    </p>
+                  </div>
+                  <table className="table table-bordered mb-0">
+                    <thead className="table-light">
+                      <tr>
+                        <th>Humidity</th>
+                        <th>Wind</th>
+                        <th>Pressure</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>{weather.main.humidity}%</td>
+                        <td>{Math.round(weather.wind.speed)} km/h</td>
+                        <td>{weather.main.pressure} hPa</td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
               </div>
-              <table className="table mt-3">
-                <thead>
-                  <tr>
-                    <th>Humidity</th>
-                    <th>Wind</th>
-                    <th>Pressure</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>{weather.main.humidity}%</td>
-                    <td>{weather.wind.speed} km/h</td>
-                    <td>{weather.main.pressure} hPa</td>
-                  </tr>
-                </tbody>
-              </table>
             </div>
           )}
 
           {forecast && (
-            <div className="mt-5">
+            <div className="mt-5 mb-5">
               <h2 className="text-center">5-Day Forecast</h2>
               <div className="d-flex justify-content-center gap-3 flex-wrap">
                 {forecast.list
-                  .filter((day) => new Date(day.dt * 1000).getHours() === 14) // Filter for 2 PM
+                  .filter((day) => new Date(day.dt * 1000).getHours() === 14)
                   .map((day, index) => (
                     <div
                       key={index}
-                      className="card p-3 text-center"
-                      style={{ width: "150px" }}
+                      className="card p-3 text-center shadow-sm border-0"
+                      style={{
+                        width: "150px",
+                        transition: "transform 0.2s, box-shadow 0.2s",
+                        cursor: "pointer",
+                      }}
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.transform = "scale(1.07)")
+                      }
+                      onMouseLeave={(e) =>
+                        (e.currentTarget.style.transform = "scale(1)")
+                      }
                     >
                       <h5>
                         {new Date(day.dt * 1000).toLocaleDateString("en-US", {
@@ -229,71 +215,104 @@ const Weather = () => {
                         }`}
                         style={{ fontSize: "2rem" }}
                       ></i>
-                      <p>{day.main.temp}°C</p>
+                      <p>
+                        <strong>{Math.round(day.main.temp)}°C</strong>{" "}
+                        {Math.round(day.main.feels_like)}°C
+                      </p>
                     </div>
                   ))}
               </div>
             </div>
           )}
-        </div>      )}
 
-      {(forecast || weather) && (
-        <div className="row justify-content-center mb-5">
-          {forecast && (
-            <div className="col-md-6 mb-4 d-flex justify-content-center">
-              <div
-                className="card shadow-sm p-4 h-100"
-                style={{ maxWidth: "600px", width: "100%" }}
-              >
-                <h4 className="mb-3">Hourly Temperature</h4>
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart
-                    data={getHourlyChartData()}
-                    margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
+          {(forecast || weather) && (
+            <div className="row justify-content-center mb-5">
+              {forecast && (
+                <div className="col-md-6 mb-4 d-flex justify-content-center">
+                  <div
+                    className="card shadow-sm p-4 h-100"
+                    style={{ maxWidth: "600px", width: "100%" }}
                   >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="time" />
-                    <YAxis unit="°C" />
-                    <Tooltip />
-                    <Line
-                      type="monotone"
-                      dataKey="temp"
-                      stroke="#007bff"
-                      strokeWidth={2}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          )}
-          {weather && (
-            <div className="col-md-6 mb-4 d-flex justify-content-center">
-              <div
-                className="card shadow-sm p-4 h-100"
-                style={{ maxWidth: "600px", width: "100%" }}
-              >
-                <h4 className="mb-3">Additional Details</h4>
-                <div className="d-flex flex-column gap-3 text-center">
-                  <div>
-                    <strong>Feels Like:</strong> {weather.main.feels_like}°C
-                  </div>
-                  <div>
-                    <strong>Visibility:</strong> {weather.visibility / 1000} km
-                  </div>
-                  <div>
-                    <strong>Sunrise:</strong>{" "}
-                    {formatUnixTime(weather.sys.sunrise)}
-                  </div>
-                  <div>
-                    <strong>Sunset:</strong>{" "}
-                    {formatUnixTime(weather.sys.sunset)}
+                    <h4 className="mb-3">Hourly Temperature</h4>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <LineChart
+                        data={getHourlyChartData()}
+                        margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="time" />
+                        <YAxis unit="°C" />
+                        <Tooltip />
+                        <Line
+                          type="monotone"
+                          dataKey="temp"
+                          stroke="#007bff"
+                          strokeWidth={2}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
                   </div>
                 </div>
-              </div>
+              )}
+              {weather && (
+                <div className="col-md-6 mb-4 d-flex justify-content-center">
+                  <div
+                    className="card p-4 h-100"
+                    style={{
+                      maxWidth: "600px",
+                      width: "100%",
+                    }}
+                  >
+                    <h4 className="mb-3">Additional Details</h4>
+                    <div className="d-flex flex-wrap gap-3 justify-content-center">
+                      <div className="detail-box text-center m-2 p-3 rounded shadow-sm bg-white">
+                        <i
+                          className="wi wi-thermometer text-primary"
+                          style={{ fontSize: "2rem" }}
+                        ></i>
+                        <div className="mt-2">
+                          <strong>Feels Like</strong>
+                          <div>{weather.main.feels_like}°C</div>
+                        </div>
+                      </div>
+                      <div className="detail-box text-center m-2 p-3 rounded shadow-sm bg-white">
+                        <i
+                          className="wi wi-fog text-info"
+                          style={{ fontSize: "2rem" }}
+                        ></i>
+                        <div className="mt-2">
+                          <strong>Visibility</strong>
+                          <div>{weather.visibility / 1000} km</div>
+                        </div>
+                      </div>
+                      <div className="detail-box text-center m-2 p-3 rounded shadow-sm bg-white">
+                        <i
+                          className="wi wi-sunrise text-warning"
+                          style={{ fontSize: "2rem" }}
+                        ></i>
+                        <div className="mt-2">
+                          <strong>Sunrise</strong>
+                          <div>{formatUnixTime(weather.sys.sunrise)}</div>
+                        </div>
+                      </div>
+                      <div className="detail-box text-center m-2 p-3 rounded shadow-sm bg-white">
+                        <i
+                          className="wi wi-sunset text-danger"
+                          style={{ fontSize: "2rem" }}
+                        ></i>
+                        <div className="mt-2">
+                          <strong>Sunset</strong>
+                          <div>{formatUnixTime(weather.sys.sunset)}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
-      )}
+      </div>
     </div>
   );
 };

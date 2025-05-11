@@ -120,7 +120,13 @@ const EcoOptions = () => {
     }`;
 
   return (
-    <div className="bg-light min-vh-100 py-8">
+    <div
+      className="min-vh-100 py-8"
+      style={{
+        background: "linear-gradient(135deg, #e0f7fa 0%, #fffde4 100%)",
+        backgroundAttachment: "fixed",
+      }}
+    >
       <div className="container mx-auto my-8">
         <div className="bg-white rounded-xl shadow-xl p-6 md:p-8">
           <div className="text-center mb-5">
@@ -484,15 +490,6 @@ const EcoOptions = () => {
           </div>
         </div>
       </div>
-      {/* Footer stays outside the main container */}
-      <footer className="bg-gray-50 py-8 mt-12">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-green-700 font-medium">
-            © 2025 Eco-Friendly Travel Options
-          </p>
-          <p className="text-gray-500 mt-2">Helping you travel sustainably</p>
-        </div>
-      </footer>
     </div>
   );
 };
