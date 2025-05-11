@@ -9,7 +9,7 @@ import "./App.css";
 import SignUp from "./pages/SignUp";
 import SignIn from "./pages/SignIn";
 import Dashboard from "./pages/Dashboard";
-import EcoOptions from "./pages/EcoOptions";
+import EcoOptions from "./pages/ecoOptions/EcoOptions.jsx";
 import Itinerary from "./pages/Itinerary";
 import Weather from "./pages/Weather";
 import CarbonCalculator from "./pages/CarbonCalculator";
