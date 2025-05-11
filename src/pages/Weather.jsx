@@ -73,16 +73,25 @@ const Weather = () => {
     <div className="container text-center mt-5">
       <h1 className="mb-4">Weather Forecast</h1>
       <div className="input-group mb-3 w-50 mx-auto">
-        <input
-          type="text"
-          className="form-control"
-          placeholder="Enter city name"
-          value={city}
-          onChange={(e) => setCity(e.target.value)}
-        />
-        <button className="btn btn-primary" onClick={() => handleGetWeather()}>
-          Get Weather
-        </button>
+        <form
+          className="d-flex w-100"
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleGetWeather();
+          }}
+        >
+          <input
+            type="text"
+            className="form-control mr-2"
+            placeholder="Enter city name"
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+            autoFocus
+          />
+          <button className="btn btn-success" type="submit">
+            Search
+          </button>
+        </form>
       </div>
 
       <div className="mb-4">
