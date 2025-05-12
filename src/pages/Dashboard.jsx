@@ -1,25 +1,9 @@
 import { Bed, Map, Calculator, Cloud } from "lucide-react";
 import { Link } from "react-router-dom";
 import CardImage from "../components/cardImage";
+import Card from "../components/card";
 import pataya from "../assets/pataya.jpg";
 import forest from "../assets/forest.jpg";
-
-function Card({ title, description, icon, linkText, link }) {
-  return (
-    <div className="card h-100 shadow-sm">
-      <div className="card-body text-center">
-        <div className="mb-3">{icon}</div>
-        <h5 className="card-title">{title}</h5>
-        <p className="card-text">{description}</p>
-        {link && (
-          <Link to={link} className="btn btn-success mt-2">
-            {linkText}
-          </Link>
-        )}
-      </div>
-    </div>
-  );
-}
 
 function Dashboard() {
   return (
@@ -98,9 +82,9 @@ function Dashboard() {
           <div className="col-md-3 mb-4">
             <Card
               title="Weather Forecast"
-              description="Check destination weather"
+              description="Check your destination weather"
               icon={<Cloud className="text-success" size={24} />}
-              linkText="View Weather"
+              linkText="Check Weather"
               link="/Weather"
             />
           </div>
