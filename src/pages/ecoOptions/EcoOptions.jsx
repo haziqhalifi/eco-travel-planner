@@ -450,9 +450,9 @@ const EcoOptions = () => {
                               hours={option.hours}
                               links={option.links}
                               gps={option.gps}
-                              onViewDetails={() =>
-                                handleActivityViewDetails(option)
-                              }
+                              // onViewDetails={() =>
+                              //   handleActivityViewDetails(option)
+                              // }
                             />
                             {showDetailView && selectedItem && (
                               <ActivityDetailView
