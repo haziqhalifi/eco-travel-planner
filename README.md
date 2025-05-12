@@ -33,3 +33,11 @@ This is a team project for WIF2003 Web Programming under Dr. Chiam Yin Kia.
 ```bash
 git clone https://github.com/your-username/eco-travel-planner.git
 cd eco-travel-planner
+
+### 2. Run the environment
+
+Run both commands concurrently in different terminal tabs
+
+```bash
+npm run dev
+npm run dev:backend
