@@ -79,7 +79,7 @@ const Weather = () => {
     >
       <div className="container mx-auto my-8">
         <div className="bg-white rounded-xl shadow-xl p-6 md:p-8">
-          <h1 className="mb-4 text-center">🌤 Weather Forecast</h1>
+          <h1 className="mb-4 text-center">Weather Forecast</h1>
           <div className="input-group mb-3 w-50 mx-auto">
             <form
               className="d-flex w-100"
