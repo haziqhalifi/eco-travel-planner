@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { useForm } from 'react-hook-form';
 import { User, Mail, Home } from 'lucide-react';
 import Input from '../ui/Input';
@@ -19,13 +18,10 @@ const ProfileForm = () => {
       accommodationPreferences: user?.preferences?.accommodationPreferences || [],
     }
   });
-  
+
   const onSubmit = async (data) => {
     try {
-      // Simulate network delay
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Update user in auth store
       updateUser({
         name: data.name,
         preferences: {
@@ -34,13 +30,12 @@ const ProfileForm = () => {
           accommodationPreferences: data.accommodationPreferences
         }
       });
-      
       alert('Profile updated successfully!');
     } catch (error) {
       console.error('Profile update error:', error);
     }
   };
-  
+
   const transportationOptions = [
     { value: 'walking', label: 'Walking' },
     { value: 'cycling', label: 'Cycling' },
@@ -50,7 +45,7 @@ const ProfileForm = () => {
     { value: 'car-sharing', label: 'Car Sharing' },
     { value: 'sailing', label: 'Sailing' },
   ];
-  
+
   const dietaryOptions = [
     { value: 'vegetarian', label: 'Vegetarian' },
     { value: 'vegan', label: 'Vegan' },
@@ -58,7 +53,7 @@ const ProfileForm = () => {
     { value: 'organic', label: 'Organic' },
     { value: 'local', label: 'Locally Sourced' },
   ];
-  
+
   const accommodationOptions = [
     { value: 'eco-lodge', label: 'Eco Lodge' },
     { value: 'green-hotel', label: 'Green Hotel' },
@@ -66,11 +61,11 @@ const ProfileForm = () => {
     { value: 'homestay', label: 'Local Homestay' },
     { value: 'farm-stay', label: 'Farm Stay' },
   ];
-  
+
   return (
     <div className="max-w-3xl mx-auto p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold text-earth-800 mb-6">Your Profile</h2>
-      
+
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Input
@@ -82,7 +77,7 @@ const ProfileForm = () => {
               required: 'Full name is required',
             })}
           />
-          
+
           <Input
             label="Email Address"
             type="email"
@@ -91,7 +86,7 @@ const ProfileForm = () => {
             disabled
             {...register('email')}
           />
-          
+
           <Input
             label="Location"
             leftIcon={<Home size={18} />}
@@ -100,7 +95,7 @@ const ProfileForm = () => {
             {...register('location')}
           />
         </div>
-        
+
         <div>
           <label htmlFor="bio" className="block text-sm font-medium text-gray-700 mb-1">
             Bio
@@ -113,10 +108,10 @@ const ProfileForm = () => {
             {...register('bio')}
           ></textarea>
         </div>
-        
+
         <div>
           <h3 className="text-lg font-medium text-earth-800 mb-3">Travel Preferences</h3>
-          
+
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -139,7 +134,7 @@ const ProfileForm = () => {
                 ))}
               </div>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Dietary Preferences
@@ -161,7 +156,7 @@ const ProfileForm = () => {
                 ))}
               </div>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Accommodation Preferences
@@ -185,7 +180,7 @@ const ProfileForm = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="flex justify-end gap-4 pt-4">
           <Button
             type="button"
@@ -205,19 +200,6 @@ const ProfileForm = () => {
       </form>
     </div>
   );
-};
-
-ProfileForm.propTypes = {
-  user: PropTypes.shape({
-    name: PropTypes.string,
-    email: PropTypes.string,
-    preferences: PropTypes.shape({
-      preferredTransportation: PropTypes.arrayOf(PropTypes.string),
-      dietaryPreferences: PropTypes.arrayOf(PropTypes.string),
-      accommodationPreferences: PropTypes.arrayOf(PropTypes.string),
-    }),
-  }),
-  updateUser: PropTypes.func,
 };
 
 export default ProfileForm;
