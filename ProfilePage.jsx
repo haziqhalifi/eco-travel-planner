@@ -1,28 +1,29 @@
 import React, { useState } from 'react';
-import { User, Mail, Key, AlertTriangle } from 'lucide-react';
+import { User, Mail, Key, AlertTriangle, MapPin, Info } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 
-const ProfilePage: React.FC = () => {
+const ProfilePage = () => {
   const { user, updateProfile, changePassword, deleteAccount, logout } = useAuth();
-  
+
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
-  
+  const [location, setLocation] = useState(user?.location || '');
+  const [bio, setBio] = useState(user?.bio || '');
+
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
-  
+
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
 
-  const handleProfileUpdate = async (e: React.FormEvent) => {
+  const handleProfileUpdate = async (e) => {
     e.preventDefault();
-    
     try {
-      await updateProfile({ name, email });
+      await updateProfile({ name, email, location, bio });
       setIsEditing(false);
       toast.success('Profile updated successfully');
     } catch (error) {
@@ -30,14 +31,12 @@ const ProfilePage: React.FC = () => {
     }
   };
 
-  const handlePasswordChange = async (e: React.FormEvent) => {
+  const handlePasswordChange = async (e) => {
     e.preventDefault();
-    
     if (newPassword !== confirmNewPassword) {
       toast.error('New passwords do not match');
       return;
     }
-    
     try {
       await changePassword(currentPassword, newPassword);
       setIsChangingPassword(false);
@@ -50,14 +49,12 @@ const ProfilePage: React.FC = () => {
     }
   };
 
-  const handleAccountDeletion = async (e: React.FormEvent) => {
+  const handleAccountDeletion = async (e) => {
     e.preventDefault();
-    
     if (deleteConfirmation !== 'DELETE') {
       toast.error('Please type DELETE to confirm account deletion');
       return;
     }
-    
     try {
       await deleteAccount();
       toast.success('Account deleted successfully');
@@ -70,20 +67,21 @@ const ProfilePage: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto px-4 py-12">
       <h1 className="text-3xl font-bold text-gray-900 mb-8">Your Profile</h1>
-      
+
+      {/* Account Info */}
       <div className="bg-white rounded-lg shadow-md p-6 mb-8">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold text-gray-800">Account Information</h2>
           {!isEditing && (
             <button
               onClick={() => setIsEditing(true)}
-              className="px-4 py-2 bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors duration-200"
+              className="px-4 py-2 bg-green-100 text-green-700 rounded-md hover:bg-green-200"
             >
               Edit Profile
             </button>
           )}
         </div>
-        
+
         {!isEditing ? (
           <div className="space-y-4">
             <div className="flex items-center">
@@ -93,7 +91,6 @@ const ProfilePage: React.FC = () => {
                 <p className="font-medium">{user?.name}</p>
               </div>
             </div>
-            
             <div className="flex items-center">
               <Mail className="h-5 w-5 text-gray-400 mr-3" />
               <div>
@@ -101,45 +98,53 @@ const ProfilePage: React.FC = () => {
                 <p className="font-medium">{user?.email}</p>
               </div>
             </div>
+            <div className="flex items-center">
+              <MapPin className="h-5 w-5 text-gray-400 mr-3" />
+              <div>
+                <p className="text-sm text-gray-500">Location</p>
+                <p className="font-medium">{user?.location}</p>
+              </div>
+            </div>
+            <div className="flex items-start">
+              <Info className="h-5 w-5 text-gray-400 mr-3 mt-1" />
+              <div>
+                <p className="text-sm text-gray-500">Bio</p>
+                <p className="font-medium">{user?.bio}</p>
+              </div>
+            </div>
           </div>
         ) : (
           <form onSubmit={handleProfileUpdate} className="space-y-4">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-                Name
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User className="h-5 w-5 text-gray-400" />
+            {[
+              ['Name', name, setName, User, 'text'],
+              ['Email', email, setEmail, Mail, 'email'],
+              ['Location', location, setLocation, MapPin, 'text'],
+            ].map(([label, value, setter, Icon, type], index) => (
+              <div key={index}>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Icon className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    type={type}
+                    value={value}
+                    onChange={(e) => setter(e.target.value)}
+                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
+                  />
                 </div>
-                <input
-                  id="name"
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
-                />
               </div>
-            </div>
-            
+            ))}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                Email
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
-                />
-              </div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
+              <textarea
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                rows={4}
+                className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
+              />
             </div>
-            
+
             <div className="flex justify-end space-x-3 pt-4">
               <button
                 type="button"
@@ -147,14 +152,16 @@ const ProfilePage: React.FC = () => {
                   setIsEditing(false);
                   setName(user?.name || '');
                   setEmail(user?.email || '');
+                  setLocation(user?.location || '');
+                  setBio(user?.bio || '');
                 }}
-                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
               >
                 Save Changes
               </button>
@@ -162,76 +169,44 @@ const ProfilePage: React.FC = () => {
           </form>
         )}
       </div>
-      
+
+      {/* Password Section */}
       <div className="bg-white rounded-lg shadow-md p-6 mb-8">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold text-gray-800">Password</h2>
           {!isChangingPassword && (
             <button
               onClick={() => setIsChangingPassword(true)}
-              className="px-4 py-2 bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors duration-200"
+              className="px-4 py-2 bg-green-100 text-green-700 rounded-md hover:bg-green-200"
             >
               Change Password
             </button>
           )}
         </div>
-        
+
         {isChangingPassword && (
           <form onSubmit={handlePasswordChange} className="space-y-4">
-            <div>
-              <label htmlFor="current-password" className="block text-sm font-medium text-gray-700 mb-1">
-                Current Password
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Key className="h-5 w-5 text-gray-400" />
+            {[
+              ['Current Password', currentPassword, setCurrentPassword],
+              ['New Password', newPassword, setNewPassword],
+              ['Confirm New Password', confirmNewPassword, setConfirmNewPassword],
+            ].map(([label, value, setter], index) => (
+              <div key={index}>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Key className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    type="password"
+                    value={value}
+                    onChange={(e) => setter(e.target.value)}
+                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
+                  />
                 </div>
-                <input
-                  id="current-password"
-                  type="password"
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
-                />
               </div>
-            </div>
-            
-            <div>
-              <label htmlFor="new-password" className="block text-sm font-medium text-gray-700 mb-1">
-                New Password
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Key className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="new-password"
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
-                />
-              </div>
-            </div>
-            
-            <div>
-              <label htmlFor="confirm-new-password" className="block text-sm font-medium text-gray-700 mb-1">
-                Confirm New Password
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Key className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="confirm-new-password"
-                  type="password"
-                  value={confirmNewPassword}
-                  onChange={(e) => setConfirmNewPassword(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500"
-                />
-              </div>
-            </div>
-            
+            ))}
+
             <div className="flex justify-end space-x-3 pt-4">
               <button
                 type="button"
@@ -241,13 +216,13 @@ const ProfilePage: React.FC = () => {
                   setNewPassword('');
                   setConfirmNewPassword('');
                 }}
-                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
               >
                 Update Password
               </button>
@@ -255,20 +230,21 @@ const ProfilePage: React.FC = () => {
           </form>
         )}
       </div>
-      
+
+      {/* Danger Zone */}
       <div className="bg-red-50 rounded-lg shadow-md p-6">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold text-red-800">Danger Zone</h2>
           {!isConfirmingDelete && (
             <button
               onClick={() => setIsConfirmingDelete(true)}
-              className="px-4 py-2 bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition-colors duration-200"
+              className="px-4 py-2 bg-red-100 text-red-700 rounded-md hover:bg-red-200"
             >
               Delete Account
             </button>
           )}
         </div>
-        
+
         {isConfirmingDelete && (
           <form onSubmit={handleAccountDeletion} className="space-y-4">
             <div className="bg-red-100 border-l-4 border-red-500 p-4 mb-4">
@@ -283,7 +259,7 @@ const ProfilePage: React.FC = () => {
                 </div>
               </div>
             </div>
-            
+
             <div>
               <label htmlFor="delete-confirmation" className="block text-sm font-medium text-gray-700 mb-1">
                 To confirm, type "DELETE"
@@ -296,7 +272,7 @@ const ProfilePage: React.FC = () => {
                 className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-red-500 focus:border-red-500"
               />
             </div>
-            
+
             <div className="flex justify-end space-x-3 pt-4">
               <button
                 type="button"
@@ -304,13 +280,13 @@ const ProfilePage: React.FC = () => {
                   setIsConfirmingDelete(false);
                   setDeleteConfirmation('');
                 }}
-                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
               >
                 Delete Account
               </button>
