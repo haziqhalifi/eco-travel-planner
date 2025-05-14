@@ -1,6 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 function CarbonCalculator() {
+  const [vehicleType, setVehicleType] = useState('');
+  const [carUsage, setCarUsage] = useState('');
+  const [flightHours, setFlightHours] = useState('');
+  const [footprint, setFootprint] = useState(null);
+
   const styles = {
     card: {
       background: 'white',
@@ -18,7 +23,15 @@ function CarbonCalculator() {
       fontWeight: 'bold',
     },
     input: {
-      width: '100%',
+      width: '50%',
+      padding: '0.5rem',
+      border: '1px solid #ccc',
+      borderRadius: '8px',
+      height: '5rem'
+      
+    },
+    select: {
+      width: '50%',
       padding: '0.5rem',
       border: '1px solid #ccc',
       borderRadius: '8px',
@@ -43,8 +56,28 @@ function CarbonCalculator() {
       height: '100%',
       backgroundColor: '#66bb6a',
       transition: 'width 0.5s ease',
-      width: '54%',
+      width: footprint ? `${Math.min((footprint / 1000) * 100, 100)}%` : '0%',
     }
+  };
+
+  const handleCalculate = () => {
+    let vehicleFactor = 0;
+    switch (vehicleType) {
+      case 'Diesel Car': vehicleFactor = 0.27; break;
+      case 'Petrol Car': vehicleFactor = 0.24; break;
+      case 'Electric Car': vehicleFactor = 0.10; break;
+      case 'Bicycle':
+      case 'Scooter':
+      case 'None': vehicleFactor = 0; break;
+      case 'Other': vehicleFactor = 0.20; break;
+      default: vehicleFactor = 0;
+    }
+
+    const carEmissions = parseFloat(carUsage || 0) * vehicleFactor * 30; // assuming daily usage * 30 days
+    const flightEmissions = parseFloat(flightHours || 0) * 90; // approx. 90 kg CO2 per flight hour
+    const total = carEmissions + flightEmissions;
+
+    setFootprint(total.toFixed(0));
   };
 
   return (
@@ -59,27 +92,67 @@ function CarbonCalculator() {
         <div className="bg-white rounded-xl shadow-xl p-6 md:p-8">
           <h1 className="mb-4 text-center">Carbon Footprint Calculator</h1>
 
-          {/* Inserted calculator content */}
           <div style={styles.card}>
             <h2>Input Your Activity</h2>
+
+            <div style={styles.inputGroup}>
+              <label htmlFor="vehicleType" style={styles.label}>Type of Vehicle</label>
+              <select
+                id="vehicleType"
+                value={vehicleType}
+                onChange={(e) => setVehicleType(e.target.value)}
+                style={styles.select}
+              >
+                <option value="">Select vehicle type</option>
+                <option value="None">None</option>
+                <option value="Diesel Car">Diesel Car</option>
+                <option value="Petrol Car">Petrol Car</option>
+                <option value="Electric Car">Electric Car</option>
+                <option value="Bicycle">Bicycle</option>
+                <option value="Electric Scooter">Scooter</option>
+                <option value="Diesel Motorcyle">Other</option>
+                <option value="Petrol Motorcyle">Other</option>
+              </select>
+            </div>
+
             <div style={styles.inputGroup}>
               <label htmlFor="car" style={styles.label}>Daily car usage (km)</label>
-              <input type="number" id="car" placeholder="e.g., 25" style={styles.input} />
+              <input
+                type="number"
+                id="car"
+                placeholder="e.g., 25"
+                value={carUsage}
+                onChange={(e) => setCarUsage(e.target.value)}
+                style={styles.input}
+              />
             </div>
+
             <div style={styles.inputGroup}>
               <label htmlFor="flight" style={styles.label}>Monthly flights (hours)</label>
-              <input type="number" id="flight" placeholder="e.g., 3" style={styles.input} />
+              <input
+                type="number"
+                id="flight"
+                placeholder="e.g., 3"
+                value={flightHours}
+                onChange={(e) => setFlightHours(e.target.value)}
+                style={styles.input}
+              />
             </div>
-            <button style={styles.button}>Calculate</button>
+
+            <button style={styles.button} onClick={handleCalculate}>
+              Calculate
+            </button>
           </div>
 
-          <div style={styles.card}>
-            <h2>Your Estimated Carbon Footprint</h2>
-            <p><strong>540 kg CO₂</strong> this month</p>
-            <div style={styles.progressBar}>
-              <div style={styles.progress}></div>
+          {footprint && (
+            <div style={styles.card}>
+              <h2>Your Estimated Carbon Footprint</h2>
+              <p><strong>{footprint} kg CO₂</strong> this month</p>
+              <div style={styles.progressBar}>
+                <div style={styles.progress}></div>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
