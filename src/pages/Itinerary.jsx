@@ -16,6 +16,7 @@ import {
   Compass,
   Utensils,
   Building,
+  Trash2,
 } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import tripsData from "../data/tripsData.js";
@@ -24,6 +25,7 @@ function Itinerary() {
   const { tripId } = useParams();
   const [trip, setTrip] = useState(null);
   const navigate = useNavigate();
+  const [isEditMode, setIsEditMode] = useState(false);
 
   useEffect(() => {
     const selectedTrip = tripsData.find((t) => t.id === parseInt(tripId));
@@ -141,6 +143,22 @@ function Itinerary() {
     setShowNewTrip(false);
   };
 
+  const handleDeleteActivity = (dayIndex, activityIndex) => {
+    const updatedTrip = { ...trip };
+    updatedTrip.days[dayIndex].activities.splice(activityIndex, 1);
+
+    // If this was the last activity in the day, remove the day
+    if (updatedTrip.days[dayIndex].activities.length === 0) {
+      updatedTrip.days.splice(dayIndex, 1);
+    }
+
+    setTrip(updatedTrip);
+  };
+
+  const toggleEditMode = () => {
+    setIsEditMode(!isEditMode);
+  };
+
   if (!trip) {
     return <div className="text-center p-5">Loading...</div>;
   }
@@ -172,6 +190,14 @@ function Itinerary() {
                       >
                         <path d="M15 18l-6-6 6-6" />
                       </svg>
+                    </Button>
+
+                    <Button
+                      variant={isEditMode ? "success" : "outline-primary"}
+                      size="sm"
+                      onClick={toggleEditMode}
+                    >
+                      {isEditMode ? "Save Changes" : "Edit Itinerary"}
                     </Button>
                   </div>
                   <div className="text-center text-forest">
@@ -252,10 +278,25 @@ function Itinerary() {
                             </div>
                           </div>
 
-                          <div className="pt-2 d-flex flex-column text-start ">
-                            <h6 className="mb-1 text-forest fw-semibold align-content-start">
-                              {activity.place}
-                            </h6>
+                          <div className="pt-2 d-flex flex-column text-start flex-grow-1">
+                            <div className="d-flex justify-content-between align-items-start">
+                              <h6 className="mb-1 text-forest fw-semibold align-content-start">
+                                {activity.place}
+                              </h6>
+
+                              {isEditMode && (
+                                <Button
+                                  variant="outline-danger"
+                                  size="sm"
+                                  className="p-1"
+                                  onClick={() => handleDeleteActivity(dayIndex, index)}
+                                  aria-label={`Delete ${activity.place}`}
+                                >
+                                  <Trash2 size={16} />
+                                </Button>
+                              )}
+                            </div>
+
                             {activity.imageUrl && (
                               <img
                                 src={activity.imageUrl}
@@ -268,11 +309,6 @@ function Itinerary() {
                                 {activity.details}
                               </div>
                             )}
-                            {/*{index < day.activities.length - 1 && <div className="mt-3 mb-0">*/}
-                            {/*  <Button variant="dark" size="sm" className="w-100">*/}
-                            {/*    Get directions*/}
-                            {/*  </Button>*/}
-                            {/*</div>}*/}
                           </div>
                         </div>
                       </ListGroup.Item>
@@ -281,102 +317,105 @@ function Itinerary() {
                 </Card>
               ))}
 
-              <Card className="shadow-sm mt-4">
-                <Card.Header className="bg-white">
-                  <h5 className="mb-0">Add New Activity</h5>
-                </Card.Header>
-                <Card.Body>
-                  <Form onSubmit={handleNewActivity}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Date</Form.Label>
-                      <Form.Control
-                        type="date"
-                        value={newActivity.date}
-                        onChange={(e) =>
-                          setNewActivity({
-                            ...newActivity,
-                            date: e.target.value,
-                          })
-                        }
-                        required
-                      />
-                    </Form.Group>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Time</Form.Label>
-                      <Form.Control
-                        type="time"
-                        value={newActivity.time}
-                        onChange={(e) =>
-                          setNewActivity({
-                            ...newActivity,
-                            time: e.target.value,
-                          })
-                        }
-                        required
-                      />
-                    </Form.Group>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Place</Form.Label>
-                      <Form.Control
-                        type="text"
-                        placeholder="Enter place name"
-                        value={newActivity.place}
-                        onChange={(e) =>
-                          setNewActivity({
-                            ...newActivity,
-                            place: e.target.value,
-                          })
-                        }
-                        required
-                      />
-                    </Form.Group>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Icon</Form.Label>
-                      <Form.Select
-                        value={newActivity.icon}
-                        onChange={(e) =>
-                          setNewActivity({
-                            ...newActivity,
-                            icon: e.target.value,
-                          })
-                        }
-                      >
-                        <option value="plane">Airplane</option>
-                        <option value="coffee">Coffee</option>
-                        <option value="compass">Explore</option>
-                        <option value="food">Food</option>
-                        <option value="hotel">Hotel</option>
-                      </Form.Select>
-                    </Form.Group>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Details (Optional)</Form.Label>
-                      <Form.Control
-                        type="text"
-                        placeholder="Additional information"
-                        value={newActivity.details}
-                        onChange={(e) =>
-                          setNewActivity({
-                            ...newActivity,
-                            details: e.target.value,
-                          })
-                        }
-                      />
-                    </Form.Group>
-                    <Button variant="primary" type="submit">
-                      Add Activity
-                    </Button>
-                  </Form>
-                </Card.Body>
-              </Card>
+              {/* Only show Add Activity section in edit mode */}
+              {isEditMode && (
+                <Card className="shadow-sm mt-4">
+                  <Card.Header className="bg-white">
+                    <h5 className="mb-0">Add New Activity</h5>
+                  </Card.Header>
+                  <Card.Body>
+                    <Form onSubmit={handleNewActivity}>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Date</Form.Label>
+                        <Form.Control
+                          type="date"
+                          value={newActivity.date}
+                          onChange={(e) =>
+                            setNewActivity({
+                              ...newActivity,
+                              date: e.target.value,
+                            })
+                          }
+                          required
+                        />
+                      </Form.Group>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Time</Form.Label>
+                        <Form.Control
+                          type="time"
+                          value={newActivity.time}
+                          onChange={(e) =>
+                            setNewActivity({
+                              ...newActivity,
+                              time: e.target.value,
+                            })
+                          }
+                          required
+                        />
+                      </Form.Group>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Place</Form.Label>
+                        <Form.Control
+                          type="text"
+                          placeholder="Enter place name"
+                          value={newActivity.place}
+                          onChange={(e) =>
+                            setNewActivity({
+                              ...newActivity,
+                              place: e.target.value,
+                            })
+                          }
+                          required
+                        />
+                      </Form.Group>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Icon</Form.Label>
+                        <Form.Select
+                          value={newActivity.icon}
+                          onChange={(e) =>
+                            setNewActivity({
+                              ...newActivity,
+                              icon: e.target.value,
+                            })
+                          }
+                        >
+                          <option value="plane">Airplane</option>
+                          <option value="coffee">Coffee</option>
+                          <option value="compass">Explore</option>
+                          <option value="food">Food</option>
+                          <option value="hotel">Hotel</option>
+                        </Form.Select>
+                      </Form.Group>
+                      <Form.Group className="mb-3">
+                        <Form.Label>Details (Optional)</Form.Label>
+                        <Form.Control
+                          type="text"
+                          placeholder="Additional information"
+                          value={newActivity.details}
+                          onChange={(e) =>
+                            setNewActivity({
+                              ...newActivity,
+                              details: e.target.value,
+                            })
+                          }
+                        />
+                      </Form.Group>
+                      <Button variant="primary" type="submit">
+                        Add Activity
+                      </Button>
+                    </Form>
+                  </Card.Body>
+                </Card>
+              )}
 
-              <div className="text-center mt-4">
+              {/* <div className="text-center mt-4">
                 <Button
                   variant="outline-primary"
                   onClick={() => setShowNewTrip(true)}
                 >
                   Create New Trip
                 </Button>
-              </div>
+              </div> */}
             </>
           ) : (
             <Card className="shadow-sm">
