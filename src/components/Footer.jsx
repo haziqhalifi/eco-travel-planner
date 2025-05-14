@@ -1,4 +1,4 @@
-import React from "react";
+import Logo from "../assets/logo.png";
 
 function Footer() {
   return (
@@ -8,60 +8,80 @@ function Footer() {
           {/* Brand Info */}
           <div className="col-md-4 mb-3">
             <h5 className="d-flex align-items-center mb-2">
-              <span className="me-2">🌱</span> EcoTravel
+              <img
+                src={Logo}
+                alt="Eco Travel Planner Logo"
+                style={{ width: "30px", height: "30px", marginRight: "10px" }}
+                className="rounded-md"
+              />
+              Eco Travel Planner
             </h5>
-            <p>
-              Making sustainable travel accessible and enjoyable for everyone.
+            <p style={{ fontSize: "0.95rem" }}>
+              Eco Travel Planner is your companion for planning environmentally
+              friendly journeys. Our platform helps you discover sustainable
+              destinations, eco-friendly accommodations, and green travel
+              options. We aim to make responsible travel easy, enjoyable, and
+              accessible for everyone who cares about the planet.
             </p>
             <div className="d-flex gap-3">
-              <a href="#" className="text-white">
+              <a href="#" className="text-white" style={{ fontSize: "1.3rem" }}>
                 <i className="bi bi-facebook"></i>
               </a>
-              <a href="#" className="text-white">
+              <a href="#" className="text-white" style={{ fontSize: "1.3rem" }}>
                 <i className="bi bi-twitter"></i>
               </a>
-              <a href="#" className="text-white">
+              <a href="#" className="text-white" style={{ fontSize: "1.3rem" }}>
                 <i className="bi bi-instagram"></i>
               </a>
-              <a href="#" className="text-white">
+              <a href="#" className="text-white" style={{ fontSize: "1.3rem" }}>
                 <i className="bi bi-linkedin"></i>
               </a>
             </div>
           </div>
-
           {/* Quick Links */}
           <div className="col-md-4 mb-3">
             <h6>Quick Links</h6>
             <ul className="list-unstyled">
               <li>
-                <a href="#" className="text-white text-decoration-none">
-                  About Us
+                <a
+                  href="/dashboard"
+                  className="text-white text-decoration-none"
+                >
+                  Dashboard
                 </a>
               </li>
               <li>
-                <a href="#" className="text-white text-decoration-none">
-                  How It Works
+                <a
+                  href="/eco-options"
+                  className="text-white text-decoration-none"
+                >
+                  Eco Options
                 </a>
               </li>
               <li>
-                <a href="#" className="text-white text-decoration-none">
-                  Sustainability Policy
+                <a href="/trip" className="text-white text-decoration-none">
+                  Travel Plan
                 </a>
               </li>
               <li>
-                <a href="#" className="text-white text-decoration-none">
-                  Partner With Us
+                <a href="/weather" className="text-white text-decoration-none">
+                  Weather
+                </a>
+              </li>
+              <li>
+                <a
+                  href="/carbon-calculator"
+                  className="text-white text-decoration-none"
+                >
+                  Carbon Calculator
                 </a>
               </li>
             </ul>
           </div>
-
           {/* Newsletter */}
           <div className="col-md-4 mb-3">
             <h6>Newsletter</h6>
-            <p>
-              Stay updated with sustainable travel tips and exclusive offers.
-            </p>
+            <p>Stay updated with travel tips and exclusive offers.</p>
             <div className="d-flex">
               <input
                 type="email"
@@ -74,8 +94,8 @@ function Footer() {
         </div>
 
         <hr className="border-secondary mt-4" />
-        <p className="text-center text-muted mb-0">
-          © 2024 EcoTravel. All rights reserved.
+        <p className="text-center mb-0">
+          © 2025 Eco Travel Planner. All rights reserved.
         </p>
       </div>
     </footer>

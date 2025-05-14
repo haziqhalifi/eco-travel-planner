@@ -16,7 +16,7 @@ import CarbonCalculator from "./pages/CarbonCalculator";
 import Profile from "./pages/Profile";
 import Trip from "./pages/Trip.jsx";
 import Navbar from "./components/NavBar.jsx";
-import Footer from "./components/Footer.jsx";
+import Footer from "./components/footer.jsx";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -45,7 +45,7 @@ function App() {
             <Route path="/trip" element={<Trip />} />
             <Route path="/itinerary/:tripId" element={<Itinerary />} />
             <Route path="/weather" element={<Weather />} />
-            <Route path="/footprint" element={<CarbonCalculator />} />
+            <Route path="/carbon-calculator" element={<CarbonCalculator />} />
             <Route path="/profile" element={<Profile />} />
           </Routes>
         </main>

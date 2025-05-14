@@ -24,56 +24,50 @@ const SignUp = () => {
   };
 
   return (
-    <div className="container-fluid p-0">
-      <div className="row m-0">
-        <div className="col-lg-6 p-0">
+    <div
+      className="container-fluid p-0 min-vh-100"
+      style={{
+        background: "linear-gradient(135deg, #e0f7fa 0%, #fffde4 100%)",
+      }}
+    >
+      <div className="row m-0 h-100 justify-content-center align-items-center">
+        <div className="col-12 col-md-8 col-lg-5 d-flex align-items-center justify-content-center p-4">
           <div
-            className="bg-image h-100"
+            className="w-100 shadow-lg rounded-4 bg-white p-4"
             style={{
-              backgroundImage:
-                'url("https://images.unsplash.com/photo-1448375240586-882707db888b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80")',
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              position: "relative",
+              maxWidth: "430px",
+              minHeight: "540px",
+              background: "rgba(255,255,255,0.97)",
             }}
           >
-            <div
-              className="mask h-100 w-100"
-              style={{ backgroundColor: "rgba(0, 0, 0, 0.4)" }}
-            >
-              <div className="d-flex flex-column justify-content-center align-items-center h-100 text-white p-4">
-                <h1 className="display-4 fw-bold mb-3">
-                  Join Our Sustainable Journey
-                </h1>
-                <p className="lead text-center">
-                  Connect with nature-loving travelers and explore the world
-                  responsibly
-                </p>
-              </div>
+            <div className="text-center mb-4">
+              <i
+                className="bi bi-globe2 text-success"
+                style={{ fontSize: "2.5rem" }}
+              ></i>
             </div>
-          </div>
-        </div>
-
-        <div className="col-lg-6 d-flex align-items-center justify-content-center p-4">
-          <div className="w-100" style={{ maxWidth: "450px" }}>
-            <h2 className="text-center mb-1">Welcome to EcoTravel</h2>
+            <h2 className="text-center mb-1 fw-bold">Welcome to EcoTravel</h2>
             <p className="text-center text-muted mb-4">
               Your gateway to sustainable travel
             </p>
 
             <div className="d-flex mb-4">
-              <button className="btn btn-outline-secondary flex-grow-1 active">
+              <button
+                className="btn btn-success flex-grow-1"
+                style={{ borderRadius: "2rem 0 0 2rem" }}
+              >
                 Sign Up
               </button>
               <a
                 href="/signin"
                 className="btn btn-outline-secondary flex-grow-1"
+                style={{ borderRadius: "0 2rem 2rem 0" }}
               >
                 Login
               </a>
             </div>
 
-            <div onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit}>
               <div className="mb-3">
                 <label htmlFor="username" className="form-label">
                   Username
@@ -180,42 +174,20 @@ const SignUp = () => {
                 </label>
               </div>
 
-              <button
-                onClick={handleSubmit}
-                className="btn btn-success w-100 py-2 mb-3"
-              >
+              <button type="submit" className="btn btn-success w-100 py-2 mb-3">
                 Create Account
               </button>
+            </form>
 
-              <div className="text-center">
-                Already have an account?{" "}
-                <a href="/signin" className="text-success">
-                  Sign in
-                </a>
-              </div>
+            <div className="text-center">
+              Already have an account?{" "}
+              <a href="/signin" className="text-success">
+                Sign in
+              </a>
             </div>
           </div>
         </div>
       </div>
-
-      <footer className="bg-light py-3 text-center text-muted">
-        <div className="container">
-          <div className="d-flex justify-content-between align-items-center">
-            <div>© 2025 EcoTravel. All rights reserved.</div>
-            <div>
-              <a href="#" className="text-muted me-3">
-                Privacy Policy
-              </a>
-              <a href="#" className="text-muted me-3">
-                Terms of Service
-              </a>
-              <a href="#" className="text-muted">
-                Help
-              </a>
-            </div>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 };

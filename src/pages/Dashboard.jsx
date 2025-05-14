@@ -1,7 +1,7 @@
-import React from "react";
 import { Bed, Map, Calculator, Cloud } from "lucide-react";
-import Card from "../components/Card";
+import { Link } from "react-router-dom";
 import CardImage from "../components/cardImage";
+import Card from "../components/card";
 import pataya from "../assets/pataya.jpg";
 import forest from "../assets/forest.jpg";
 
@@ -49,7 +49,6 @@ function Dashboard() {
           </div>
         </div>
       </section>
-
       {/* Feature Cards */}
       <section className="container py-5">
         <div className="row text-center">
@@ -59,6 +58,7 @@ function Dashboard() {
               description="Discover sustainable accommodations and dining"
               icon={<Bed className="text-success" size={24} />}
               linkText="Explore"
+              link="/eco-options"
             />
           </div>
           <div className="col-md-3 mb-4">
@@ -67,6 +67,7 @@ function Dashboard() {
               description="Create low-impact travel plans"
               icon={<Map className="text-success" size={24} />}
               linkText="Plan Now"
+              link="/trip"
             />
           </div>
           <div className="col-md-3 mb-4">
@@ -75,20 +76,21 @@ function Dashboard() {
               description="Calculate & offset your travel impact"
               icon={<Calculator className="text-success" size={24} />}
               linkText="Calculate"
+              link="/footprint"
             />
           </div>
           <div className="col-md-3 mb-4">
             <Card
               title="Weather Forecast"
-              description="Check destination weather"
+              description="Check your destination weather"
               icon={<Cloud className="text-success" size={24} />}
-              linkText="View Weather"
+              linkText="Check Weather"
+              link="/Weather"
             />
           </div>
         </div>
       </section>
 
-      {/* Top Destinations */}
       <section className="bg-light py-5">
         <div className="container">
           <h2 className="fw-semibold mb-4 text-center">Top Destinations</h2>
@@ -105,7 +107,6 @@ function Dashboard() {
           </div>
         </div>
       </section>
-
       {/* Environmental Impact Calculator */}
       <section className="container py-5">
         <div className="row align-items-start">
