@@ -8,6 +8,7 @@ import {
   CartesianGrid,
   ResponsiveContainer,
 } from "recharts";
+import { motion } from "framer-motion";
 import "../css/weather-icons.min.css";
 
 const Weather = () => {
@@ -157,15 +158,23 @@ const Weather = () => {
   // --- End styling variables ---
 
   return (
-    <div
+    <motion.div
       className="min-vh-100 py-8"
       style={{
         background: "linear-gradient(135deg, #e0f7fa 0%, #fffde4 100%)",
         backgroundAttachment: "fixed",
       }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.7 }}
     >
       <div className="container mx-auto my-8">
-        <div className="bg-white rounded-xl shadow-xl p-6 md:p-8">
+        <motion.div
+          className="bg-white rounded-xl shadow-xl p-6 md:p-8"
+          initial={{ y: 40, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.7, delay: 0.2 }}
+        >
           <h1 className="mb-4 text-center">Weather Forecast</h1>
           <div className="input-group mb-3 w-50 mx-auto">
             <form
@@ -209,23 +218,27 @@ const Weather = () => {
           <div className="mb-4">
             <h5 className="text-center">Popular Cities:</h5>
             <div className="d-flex justify-content-center gap-2 flex-wrap">
-              <button
+              <motion.button
                 className="btn btn-primary shadow"
                 style={cityBtnStyle}
                 onClick={handleGetLocationWeather}
+                whileHover={{ scale: 1.08 }}
+                whileTap={{ scale: 0.97 }}
               >
                 <i className="wi wi-day-sunny"></i> My Location
-              </button>
+              </motion.button>
               {["New York", "London", "Tokyo", "Paris", "Sydney"].map(
                 (city) => (
-                  <button
+                  <motion.button
                     key={city}
                     className="btn btn-secondary shadow"
                     style={cityBtnStyle}
                     onClick={() => handleGetWeather(city)}
+                    whileHover={{ scale: 1.08 }}
+                    whileTap={{ scale: 0.97 }}
                   >
                     <i className="wi wi-city"></i> {city}
-                  </button>
+                  </motion.button>
                 )
               )}
             </div>
@@ -235,8 +248,14 @@ const Weather = () => {
               <>
                 <h6 className="text-center mt-3">Saved Cities:</h6>
                 <div className="d-flex justify-content-center gap-2 flex-wrap">
-                  {savedCities.map((city) => (
-                    <div key={city} className="d-flex align-items-center">
+                  {savedCities.map((city, idx) => (
+                    <motion.div
+                      key={city}
+                      className="d-flex align-items-center"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.1 * idx }}
+                    >
                       <button
                         className="btn btn-outline-secondary d-flex align-items-center"
                         style={{
@@ -266,19 +285,30 @@ const Weather = () => {
                           &times;
                         </button>
                       </button>
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
               </>
             )}
           </div>
 
-          {error && <p className="text-danger text-center">{error}</p>}
+          {error && (
+            <motion.p
+              className="text-danger text-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+            >
+              {error}
+            </motion.p>
+          )}
 
           {weather && (
-            <div
+            <motion.div
               className="card p-4 mt-3 mx-auto"
               style={{ maxWidth: "800px" }}
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.5 }}
             >
               <h3>{weather.name}</h3>
               <p className="text-muted">{getCurrentDateTime()}</p>
@@ -324,7 +354,7 @@ const Weather = () => {
                   </table>
                 </div>
               </div>
-            </div>
+            </motion.div>
           )}
 
           {forecast && (
@@ -334,7 +364,7 @@ const Weather = () => {
                 {forecast.list
                   .filter((day) => new Date(day.dt * 1000).getHours() === 14)
                   .map((day, index) => (
-                    <div
+                    <motion.div
                       key={index}
                       className="card p-3 text-center shadow-sm border-0"
                       style={{
@@ -342,12 +372,13 @@ const Weather = () => {
                         transition: "transform 0.2s, box-shadow 0.2s",
                         cursor: "pointer",
                       }}
-                      onMouseEnter={(e) =>
-                        (e.currentTarget.style.transform = "scale(1.07)")
-                      }
-                      onMouseLeave={(e) =>
-                        (e.currentTarget.style.transform = "scale(1)")
-                      }
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.1 * index }}
+                      whileHover={{
+                        scale: 1.07,
+                        boxShadow: "0 4px 16px rgba(0,0,0,0.12)",
+                      }}
                     >
                       <h5>
                         {new Date(day.dt * 1000).toLocaleDateString("en-US", {
@@ -368,7 +399,7 @@ const Weather = () => {
                         <strong>{Math.round(day.main.temp)}°C</strong>{" "}
                         {Math.round(day.main.feels_like)}°C
                       </p>
-                    </div>
+                    </motion.div>
                   ))}
               </div>
             </div>
@@ -460,9 +491,9 @@ const Weather = () => {
               )}
             </div>
           )}
-        </div>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
