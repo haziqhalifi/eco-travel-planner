@@ -1,0 +1,89 @@
+/* General backgrounds */
+.weather-bg {
+  background: linear-gradient(135deg, #e0f7fa 0%, #fffde4 100%);
+  background-attachment: fixed;
+}
+
+.weather-card-bg {
+  backdrop-filter: blur(10px);
+  background-color: rgba(255, 255, 255, 0.95);
+}
+
+.weather-input {
+  border: 2px solid #4caf50;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+}
+
+.weather-search-btn {
+  min-width: 120px;
+}
+
+.weather-location-btn {
+  background: linear-gradient(45deg, #007bff, #0056b3);
+  border: none;
+  box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+}
+
+.weather-quick-btn {
+  border-color: #6c757d;
+  transition: all 0.3s ease;
+}
+
+.weather-saved-btn {
+  border-color: #ffc107;
+  color: #856404;
+  position: relative;
+  padding-right: 2.5rem;
+}
+
+.weather-remove-btn {
+  width: 24px;
+  height: 24px;
+  background: #dc3545;
+  border: 2px solid white;
+  color: white;
+  font-size: 12px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(220, 53, 69, 0.15);
+}
+
+.weather-alert {
+  background: linear-gradient(45deg, #dc3545, #c82333);
+}
+
+.weather-main-card {
+  max-width: 900px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-radius: 20px;
+}
+
+.weather-icon {
+  font-size: 5rem;
+  color: #4caf50;
+  filter: drop-shadow(0 4px 8px rgba(76, 175, 80, 0.3));
+}
+
+.weather-forecast-card {
+  border-radius: 15px;
+  background: linear-gradient(135deg, #ffffff 0%, #f1f3f4 100%);
+  transition: all 0.3s ease;
+}
+
+.weather-forecast-icon {
+  font-size: 2.5rem;
+}
+
+.weather-chart-card {
+  border-radius: 20px;
+}
+
+.weather-chart-tooltip {
+  background-color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
