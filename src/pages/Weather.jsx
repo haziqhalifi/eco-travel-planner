@@ -14,8 +14,8 @@ const Weather = () => {
   const [city, setCity] = useState("");
   const [weather, setWeather] = useState(null);
   const [forecast, setForecast] = useState(null);
-  const [uvIndex, setUvIndex] = useState(null);
   const [error, setError] = useState("");
+  const [savedCities, setSavedCities] = useState([]);
 
   const apiKey = import.meta.env.VITE_WEATHER_API_KEY;
 
@@ -36,6 +36,50 @@ const Weather = () => {
     }
   };
 
+  const fetchWeatherByCoords = async (lat, lon) => {
+    try {
+      const weatherRes = await fetch(
+        `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`
+      );
+      const forecastRes = await fetch(
+        `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`
+      );
+
+      if (!weatherRes.ok || !forecastRes.ok)
+        throw new Error("Location not found");
+
+      const weatherData = await weatherRes.json();
+      const forecastData = await forecastRes.json();
+
+      setWeather(weatherData);
+      setForecast(forecastData);
+      setCity(weatherData.name);
+      setError("");
+    } catch (err) {
+      setError(err.message);
+      setWeather(null);
+      setForecast(null);
+    }
+  };
+
+  const handleGetLocationWeather = () => {
+    if (!navigator.geolocation) {
+      setError("Geolocation is not supported by your browser.");
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        fetchWeatherByCoords(
+          position.coords.latitude,
+          position.coords.longitude
+        );
+      },
+      () => {
+        setError("Unable to retrieve your location.");
+      }
+    );
+  };
+
   const handleGetWeather = (selectedCity = null) => {
     const cityName = selectedCity || city;
 
@@ -46,8 +90,19 @@ const Weather = () => {
       return;
     }
 
+    setCity(cityName);
     fetchWeatherData("weather", cityName, setWeather);
     fetchWeatherData("forecast", cityName, setForecast);
+  };
+
+  const handleSaveCity = () => {
+    if (weather && weather.name && !savedCities.includes(weather.name)) {
+      setSavedCities([...savedCities, weather.name]);
+    }
+  };
+
+  const handleRemoveCity = (cityToRemove) => {
+    setSavedCities(savedCities.filter((c) => c !== cityToRemove));
   };
 
   const getCurrentDateTime = () => {
@@ -68,6 +123,38 @@ const Weather = () => {
       temp: item.main.temp,
     }));
   };
+
+  // --- Styling variables ---
+  const cityBtnStyle = {
+    borderRadius: "25px",
+    fontWeight: "bold",
+    padding: "0.5rem 1.25rem",
+    boxShadow: "0 2px 8px rgba(0,0,0,0.07)",
+    transition: "background 0.2s, box-shadow 0.2s",
+    display: "flex",
+    alignItems: "center",
+    gap: "0.5rem",
+  };
+
+  const removeBtnStyle = {
+    borderRadius: "50%",
+    width: "1.5rem",
+    height: "1.5rem",
+    padding: 0,
+    marginLeft: "0.5rem",
+    fontWeight: "bold",
+    lineHeight: "1.2rem",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.07)",
+    background: "#e57373",
+    color: "#fff",
+    border: "none",
+    transition: "background 0.2s",
+  };
+
+  // --- End styling variables ---
 
   return (
     <div
@@ -105,23 +192,85 @@ const Weather = () => {
                 Search
               </button>
             </form>
+            {weather && (
+              <div className="text-center mt-2">
+                <button
+                  className="btn btn-outline-success rounded-pill px-4 shadow"
+                  onClick={handleSaveCity}
+                  disabled={!weather || savedCities.includes(weather.name)}
+                >
+                  Save City
+                </button>
+              </div>
+            )}
           </div>
 
+          {/* --- Enhanced Popular Cities & Current Location --- */}
           <div className="mb-4">
             <h5 className="text-center">Popular Cities:</h5>
-            <div className="d-flex justify-content-center gap-2">
+            <div className="d-flex justify-content-center gap-2 flex-wrap">
+              <button
+                className="btn btn-primary shadow"
+                style={cityBtnStyle}
+                onClick={handleGetLocationWeather}
+              >
+                <i className="wi wi-day-sunny"></i> My Location
+              </button>
               {["New York", "London", "Tokyo", "Paris", "Sydney"].map(
                 (city) => (
                   <button
                     key={city}
-                    className="btn btn-secondary"
+                    className="btn btn-secondary shadow"
+                    style={cityBtnStyle}
                     onClick={() => handleGetWeather(city)}
                   >
-                    {city}
+                    <i className="wi wi-city"></i> {city}
                   </button>
                 )
               )}
             </div>
+
+            {/* --- Enhanced Saved Cities List --- */}
+            {savedCities.length > 0 && (
+              <>
+                <h6 className="text-center mt-3">Saved Cities:</h6>
+                <div className="d-flex justify-content-center gap-2 flex-wrap">
+                  {savedCities.map((city) => (
+                    <div key={city} className="d-flex align-items-center">
+                      <button
+                        className="btn btn-outline-secondary d-flex align-items-center"
+                        style={{
+                          ...cityBtnStyle,
+                          paddingRight: "0.5rem",
+                          marginRight: "0.5rem",
+                          position: "relative",
+                        }}
+                        onClick={() => handleGetWeather(city)}
+                      >
+                        <i className="wi wi-city"></i> {city}
+                        <button
+                          className="btn btn-sm btn-danger"
+                          style={removeBtnStyle}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveCity(city);
+                          }}
+                          title="Remove"
+                          onMouseOver={(e) =>
+                            (e.currentTarget.style.background = "#d32f2f")
+                          }
+                          onMouseOut={(e) =>
+                            (e.currentTarget.style.background = "#e57373")
+                          }
+                        >
+                          &times;
+                        </button>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
 
           {error && <p className="text-danger text-center">{error}</p>}
