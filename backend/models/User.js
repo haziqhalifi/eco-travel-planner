@@ -82,6 +82,12 @@ const userSchema = new mongoose.Schema(
         ],
       },
     ],
+    favorites: {
+      accommodations: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Accommodation' }],
+      restaurants: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Restaurant' }],
+      activities: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Activity' }],
+      transportation: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Transportation' }],
+    },
   },
   {
     timestamps: true,

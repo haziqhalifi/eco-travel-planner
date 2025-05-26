@@ -6,6 +6,8 @@ import connectDB from "./config/database.js";
 import authRoutes from "./routes/auth.js";
 import tripRoutes from "./routes/trips.js";
 import personalTripRoutes from "./routes/personalTrips.js";
+import serpRoutes from "./routes/serpRoutes.js";
+import axios from "axios";
 
 dotenv.config();
 
@@ -22,6 +24,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/trips", tripRoutes);
 app.use("/api/personal-trips", personalTripRoutes);
+app.use('/api/serp', serpRoutes);
 
 // Health check endpoint
 app.get("/api/health", (req, res) => {
@@ -29,6 +32,26 @@ app.get("/api/health", (req, res) => {
     message: "Server is running",
     timestamp: new Date().toISOString(),
   });
+});
+
+app.get('/proxy-image', async (req, res) => {
+  const imageUrl = req.query.url;
+  if (!imageUrl) {
+    return res.status(400).json({ error: 'Missing image URL' });
+  }
+
+
+  try {
+    const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+
+
+    // Forward the content type from the response
+    res.setHeader('Content-Type', response.headers['content-type'] || 'image/jpeg');
+    res.send(response.data);
+  } catch (err) {
+    console.error('Error fetching image:', err.message);
+    res.status(500).json({ error: 'Failed to fetch image', details: err.message });
+  }
 });
 
 // Error handling middleware
