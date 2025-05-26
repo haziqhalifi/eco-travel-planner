@@ -1,11 +1,13 @@
-const express = require("express");
-const cors = require("cors");
-require("dotenv").config();
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
 
-const connectDB = require("./config/database");
-const authRoutes = require("./routes/auth");
-const tripRoutes = require("./routes/trips");
-const personalTripRoutes = require("./routes/personalTrips");
+import connectDB from "./config/database.js";
+import authRoutes from "./routes/auth.js";
+import tripRoutes from "./routes/trips.js";
+import personalTripRoutes from "./routes/personalTrips.js";
+
+dotenv.config();
 
 const app = express();
 
@@ -47,4 +49,4 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-module.exports = app;
+export default app;
