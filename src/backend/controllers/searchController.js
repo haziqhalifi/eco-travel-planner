@@ -51,6 +51,7 @@ export const handleSerpSearch = async (req, res) => {
 
         await model.insertMany([responseData]);
 
+        console.log('response.data', response.data);
         res.json(response.data);
     } catch (err) {
         console.error('Search error:', err.message);

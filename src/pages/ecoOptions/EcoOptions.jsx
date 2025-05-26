@@ -20,9 +20,10 @@ const EcoOptions = () => {
   const [destination, setDestination] = useState("");
   const [departureDate, setDepartureDate] = useState(null);
   const [returnDate, setReturnDate] = useState(null);
-  const [selectedFlight, setSelectedFlight] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
-  const [showDetailView, setShowDetailView] = useState(false);
+  const [showActivityDetailView, setShowActivityDetailView] = useState(false);
+  const [selectedFlight, setSelectedFlight] = useState(null);
+  const [showFlightDetailView, setShowFlightDetailView] = useState(false);
 
   const handleSearch = async () => {
     setLoading(true);
@@ -78,13 +79,15 @@ const EcoOptions = () => {
 
   const handleViewDetails = (flight) => {
     setSelectedFlight(flight);
+    setShowFlightDetailView(true);
   };
   const handleCloseDetails = () => {
     setSelectedFlight(null);
+    setShowFlightDetailView(false);
   };
   const handleActivityViewDetails = (activty) => {
     setSelectedItem(activty);
-    setShowDetailView(true);
+    setShowActivityDetailView(true);
   };
   const handleActivityCloseDetails = () => {
     setSelectedItem(null);
@@ -95,7 +98,7 @@ const EcoOptions = () => {
     setSearchTerm("");
     setTravelOptions([]);
     setSelectedItem(null);
-    setShowDetailView(false);
+    setShowActivityDetailView(false);
 
     // Add any other state resets you need for specific tabs
     if (activeTab === "accommodation") {
@@ -414,8 +417,9 @@ const EcoOptions = () => {
                               onViewDetails={() => handleViewDetails(option)}
                             />
                             {activeTab === "transportation" &&
-                              selectedFlight && (
+                              selectedFlight && showFlightDetailView && (
                                 <DetailedFlightCard
+                                  flight={selectedFlight}
                                   flights={selectedFlight.legs}
                                   layovers={selectedFlight.layovers}
                                   stops_description={
@@ -427,6 +431,11 @@ const EcoOptions = () => {
                                   emissions={selectedFlight.emissions}
                                   travelClass={selectedFlight.travelClass}
                                   extensions={selectedFlight.extensions}
+                                  type={selectedFlight.type}
+                                  booking_token={selectedFlight.booking_token}
+                                  departure_token={selectedFlight.departure_token}
+                                  flightSegments={selectedFlight.flightSegments}
+                                  layoverSegments={selectedFlight.layoverSegments}
                                   onClose={handleCloseDetails}
                                 />
                               )}
@@ -454,10 +463,10 @@ const EcoOptions = () => {
                               //   handleActivityViewDetails(option)
                               // }
                             />
-                            {showDetailView && selectedItem && (
+                            {showActivityDetailView && selectedItem && (
                               <ActivityDetailView
                                 item={selectedItem}
-                                onClose={() => setShowDetailView(false)}
+                                onClose={() => setShowActivityDetailView(false)}
                               />
                             )}
                           </>
