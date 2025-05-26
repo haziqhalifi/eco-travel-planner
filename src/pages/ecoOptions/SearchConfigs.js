@@ -110,9 +110,6 @@ export const searchConfigs = {
 
             return flights;
         }
-
-
-
     },
 
     restaurant: {
