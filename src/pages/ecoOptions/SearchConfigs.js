@@ -26,7 +26,6 @@ export const searchConfigs = {
             // image: Array.isArray(h.images) && h.images.length > 0
             //     ? `http://localhost:5173/proxy-image?url=${encodeURIComponent(h.images[0].thumbnail)}`
             //     : 'https://via.placeholder.com/150'
-
         })),
     },
     transportation: {
