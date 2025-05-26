@@ -9,18 +9,23 @@ import {
   Form,
   Button,
   Dropdown,
+  Alert,
 } from "react-bootstrap";
 import { Calendar, MapPin, ArrowRight, Search, X, Filter, PlusCircle, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import tripsData from "../data/tripsData.js";
 import PersonalItinerary from "../components/PersonalItinerary.jsx";
 import TripCard from "../components/TripCard.jsx";
 import TripList from "../components/TripList.jsx";
+import { tripsAPI, personalTripsAPI, handleApiError } from "../services/api";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 const Trip = () => {
   const navigate = useNavigate();
-  const [trips] = useState(tripsData);
-  const [personalItineraryItems, setPersonalItineraryItems] = useState([]);
+  const [trips, setTrips] = useState([]);
+  const [personalTrips, setPersonalTrips] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [showNewTripForm, setShowNewTripForm] = useState(false);
   const [newTripData, setNewTripData] = useState({
     title: "",
@@ -40,22 +45,88 @@ const Trip = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedTags, setSelectedTags] = useState([]);
   const [priceRange, setPriceRange] = useState("all");
-  const [filteredTrips, setFilteredTrips] = useState(trips);
+  const [filteredTrips, setFilteredTrips] = useState([]);
+  const [allTags, setAllTags] = useState([]);
 
-  const allTags = [
-    "hiking",
-    "cycling",
-    "wildlife",
-    "sustainable-dining",
-    "cultural",
-    "kayaking",
-  ];
   const priceRanges = [
     { value: "all", label: "All Prices" },
     { value: "low", label: "$" },
     { value: "medium", label: "$$" },
     { value: "high", label: "$$$" },
   ];
+
+  // Fetch data on component mount
+  useEffect(() => {
+    fetchTrips();
+    fetchPersonalTrips();
+    fetchTags();
+  }, []);
+
+  // Filter trips when search criteria change
+  useEffect(() => {
+    if (trips.length > 0) {
+      fetchTripsWithFilters();
+    }
+  }, [searchTerm, selectedTags, priceRange]);
+
+  const fetchTrips = async () => {
+    try {
+      setIsLoading(true);
+      setError("");
+      const response = await tripsAPI.getAllTrips();
+      setTrips(response.data);
+      setFilteredTrips(response.data);
+    } catch (error) {
+      setError(handleApiError(error, "Failed to fetch trips"));
+      console.error("Error fetching trips:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchTripsWithFilters = async () => {
+    try {
+      const filters = {
+        search: searchTerm,
+        budgetRange: priceRange !== "all" ? priceRange : undefined,
+        tags: selectedTags.length > 0 ? selectedTags.join(',') : undefined
+      };
+
+      const response = await tripsAPI.getAllTrips(filters);
+      setFilteredTrips(response.data);
+    } catch (error) {
+      setError(handleApiError(error, "Failed to filter trips"));
+      console.error("Error filtering trips:", error);
+    }
+  };
+
+  const fetchPersonalTrips = async () => {
+    try {
+      const response = await personalTripsAPI.getPersonalTrips();
+      setPersonalTrips(response.data);
+    } catch (error) {
+      console.error("Failed to fetch personal trips:", error);
+      // Don't show error for personal trips as it's not critical for initial load
+    }
+  };
+
+  const fetchTags = async () => {
+    try {
+      const response = await tripsAPI.getAllTags();
+      setAllTags(response.data);
+    } catch (error) {
+      console.error("Failed to fetch tags:", error);
+      // Fallback to default tags
+      setAllTags([
+        "hiking",
+        "cycling",
+        "wildlife",
+        "sustainable-dining",
+        "cultural",
+        "kayaking",
+      ]);
+    }
+  };
 
   useEffect(() => {
     const results = trips.filter((trip) => {
@@ -104,29 +175,47 @@ const Trip = () => {
   };
 
   // Add function to add a trip to personal itinerary
-  const handleAddToItinerary = (tripId) => {
-    // Check if this trip is already in the itinerary
-    if (personalItineraryItems.some(item => item.tripId === tripId)) {
-      alert("This trip is already in your personal itinerary!");
-      return;
+  const handleAddToItinerary = async (tripId) => {
+    try {
+      setError("");
+      setSuccess("");
+
+      // Check if trip is already in personal collection
+      if (personalTrips.some(trip => trip.id === tripId)) {
+        setError("This trip is already in your personal collection!");
+        return;
+      }
+
+      await personalTripsAPI.addTripToPersonal(tripId);
+      setSuccess("Trip added to your personal collection!");
+
+      // Refresh personal trips
+      await fetchPersonalTrips();
+
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (error) {
+      setError(handleApiError(error, "Failed to add trip to personal collection"));
     }
-
-    const trip = trips.find(t => t.id === tripId);
-    if (!trip) return;
-
-    const newItem = {
-      id: Date.now(), // Generate a unique ID
-      tripId: tripId,
-      userStartDate: trip.startDate, // Initial value same as trip's original date
-      userEndDate: trip.endDate
-    };
-
-    setPersonalItineraryItems(prev => [...prev, newItem]);
   };
 
   // Remove a trip from personal itinerary
-  const handleRemoveFromItinerary = (itemId) => {
-    setPersonalItineraryItems(prev => prev.filter(item => item.id !== itemId));
+  const handleRemoveFromItinerary = async (tripId) => {
+    try {
+      setError("");
+      setSuccess("");
+
+      await personalTripsAPI.removeTripFromPersonal(tripId);
+      setSuccess("Trip removed from your personal collection!");
+
+      // Refresh personal trips
+      await fetchPersonalTrips();
+
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccess(""), 3000);
+    } catch (error) {
+      setError(handleApiError(error, "Failed to remove trip from personal collection"));
+    }
   };
 
   const handleCreateTrip = () => {
@@ -170,6 +259,10 @@ const Trip = () => {
     });
   };
 
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
+
   return (
     <div
       className="min-vh-100 py-8"
@@ -180,6 +273,18 @@ const Trip = () => {
     >
       <div className="container mx-auto my-8">
         <div className="bg-white rounded-xl shadow-xl p-6 md:p-8">
+          {/* Error and Success Messages */}
+          {error && (
+            <Alert variant="danger" dismissible onClose={() => setError("")}>
+              {error}
+            </Alert>
+          )}
+          {success && (
+            <Alert variant="success" dismissible onClose={() => setSuccess("")}>
+              {success}
+            </Alert>
+          )}
+
           {!showNewTripForm ? (
             <>
               <div className="text-center mb-5 d-flex justify-content-between align-items-center">
@@ -466,11 +571,10 @@ const Trip = () => {
         </div>
 
         {/* Only show Personal Itinerary when not in new trip form */}
-        {!showNewTripForm && (
+        {!showNewTripForm && personalTrips.length > 0 && (
           <div className="mt-4">
             <PersonalItinerary
-              personalItineraryItems={personalItineraryItems}
-              allTrips={trips}
+              personalTrips={personalTrips}
               onRemoveFromItinerary={handleRemoveFromItinerary}
               formatDate={formatDate}
             />

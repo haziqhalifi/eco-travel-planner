@@ -30,7 +30,7 @@ const SignUp = () => {
     e.preventDefault();
     setIsLoading(true);
     console.log("Form submitted:", formData);
-    
+
     // Simulate API call
     setTimeout(() => {
       setIsLoading(false);
@@ -41,7 +41,7 @@ const SignUp = () => {
   const handleGoogleSignIn = () => {
     setIsLoading(true);
     console.log("Google sign up initiated");
-    
+
     // Simulate Google auth
     setTimeout(() => {
       setIsLoading(false);
@@ -273,14 +273,14 @@ const SignUp = () => {
                   className="btn btn-light w-100 py-2 border d-flex align-items-center justify-content-center"
                   onClick={handleGoogleSignIn}
                   disabled={isLoading}
-                  style={{ 
+                  style={{
                     backgroundColor: '#fff',
                     color: '#5F6368',
                     fontWeight: '500'
                   }}
                 >
-                  <img 
-                    src="https://www.google.com/favicon.ico" 
+                  <img
+                    src="https://www.google.com/favicon.ico"
                     alt="Google"
                     style={{ width: '20px', height: '20px', marginRight: '10px' }}
                   />
