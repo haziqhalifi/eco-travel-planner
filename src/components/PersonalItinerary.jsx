@@ -43,7 +43,7 @@ const PersonalItinerary = ({ personalTrips, onRemoveFromItinerary, formatDate })
                                  variant="outline-secondary"
                                  size="sm"
                                  className="mb-2 mb-md-0 me-md-2 d-flex align-items-center justify-content-center"
-                                 onClick={() => navigate(`/itinerary/${trip.id}`)}
+                                 onClick={() => navigate(`/my-itinerary/${trip._id}`)}
                                  aria-label={`Edit activities for ${trip.title}`}
                               >
                                  <Edit3 size={16} className="me-1" /> Edit
@@ -52,7 +52,7 @@ const PersonalItinerary = ({ personalTrips, onRemoveFromItinerary, formatDate })
                                  variant="outline-danger"
                                  size="sm"
                                  className="d-flex align-items-center justify-content-center"
-                                 onClick={() => onRemoveFromItinerary && onRemoveFromItinerary(trip.id)}
+                                 onClick={() => onRemoveFromItinerary && onRemoveFromItinerary(trip._id)}
                                  aria-label={`Remove ${trip.title} from collection`}
                               >
                                  <Trash2 size={16} className="me-1" /> Remove

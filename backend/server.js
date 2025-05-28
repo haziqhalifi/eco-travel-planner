@@ -3,9 +3,9 @@ import cors from "cors";
 import dotenv from "dotenv";
 
 import connectDB from "./config/database.js";
-import authRoutes from "./routes/auth.js";
-import tripRoutes from "./routes/trips.js";
-import personalTripRoutes from "./routes/personalTrips.js";
+import authRoutes from "./routes/authRoutes.js";
+import tripRoutes from "./routes/tripRoutes.js";
+import personalTripRoutes from "./routes/personalTripRoutes.js";
 import serpRoutes from "./routes/serpRoutes.js";
 import axios from "axios";
 
