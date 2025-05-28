@@ -21,21 +21,27 @@ export const getFilteredTrips = async ({
   }
 
   if (search) {
-    query.$text = { $search: search };
+    const regex = new RegExp(search, "i");
+    query.$or = [
+      {title: regex},
+      {description: regex},
+      {location: regex},
+      {tags : regex},
+      {transportation : regex},
+      {activities : regex},
+    ]
   }
   const trips = await Trip.find(query).lean();
   return trips;
 };
 
 export const getTripById = async (tripId) => {
-  // Try to find by tripId first (string field in database)
   let trip = await Trip.findOne({ tripId: tripId.toString() });
 
-  // If not found, try to find by id field (in case data was seeded with id)
   if (!trip) {
     trip = await Trip.findOne({ id: parseInt(tripId) });
   }
-  
+
   return trip;
 };
 

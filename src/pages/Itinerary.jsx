@@ -1,8 +1,5 @@
 import React, {useEffect, useState} from "react";
 import {
-  Container,
-  Row,
-  Col,
   Card,
   Form,
   Button,
@@ -10,7 +7,6 @@ import {
 } from "react-bootstrap";
 import {
   Calendar,
-  Clock,
   MapPin,
   Coffee,
   Compass,
@@ -127,36 +123,64 @@ function Itinerary({editable}) {
     navigate("/trip");
   };
 
-  const handleNewActivity = (e) => {
+  const handleNewActivity = async (e) => {
     e.preventDefault();
     if (!newActivity.date || !newActivity.time || !newActivity.place) return;
 
-    const updatedTrip = {...trip};
-    const dayIndex = updatedTrip.days.findIndex(
-        (day) => day.date === newActivity.date
-    );
-
-    if (dayIndex >= 0) {
-      updatedTrip.days[dayIndex].activities.push({...newActivity});
-      updatedTrip.days[dayIndex].activities.sort((a, b) =>
-          a.time.localeCompare(b.time)
-      );
-    } else {
-      updatedTrip.days.push({
-        date: newActivity.date,
-        activities: [{...newActivity}],
-      });
-      updatedTrip.days.sort((a, b) => a.date.localeCompare(b.date));
+    if (newActivity.date < trip.startDate || newActivity.date > trip.endDate) {
+      setError("Date must be between start date and end date");
+      return;
     }
 
-    setTrip(updatedTrip);
-    setNewActivity({
-      date: "",
-      time: "",
-      place: "",
-      icon: "compass",
-      details: "",
-    });
+    try {
+      const details = {
+        date: newActivity.date,
+        activity: {
+          time: newActivity.time,
+          place: newActivity.place,
+          icon: newActivity.icon,
+          details: newActivity.details,
+        }
+      };
+      const response = await personalTripsAPI.addCustomActivity(tripId, details);
+      setTrip(response.data);
+      setNewActivity({
+        date: "",
+        time: "",
+        place: "",
+        icon: "compass",
+        details: "",
+      });
+    } catch (error) {
+      setError(error.message);
+    }
+
+    // const updatedTrip = {...trip};
+    // const dayIndex = updatedTrip.days.findIndex(
+    //     (day) => day.date === newActivity.date
+    // );
+    //
+    // if (dayIndex >= 0) {
+    //   updatedTrip.days[dayIndex].activities.push({...newActivity});
+    //   updatedTrip.days[dayIndex].activities.sort((a, b) =>
+    //       a.time.localeCompare(b.time)
+    //   );
+    // } else {
+    //   updatedTrip.days.push({
+    //     date: newActivity.date,
+    //     activities: [{...newActivity}],
+    //   });
+    //   updatedTrip.days.sort((a, b) => a.date.localeCompare(b.date));
+    // }
+
+    // setTrip(updatedTrip);
+    // setNewActivity({
+    //   date: "",
+    //   time: "",
+    //   place: "",
+    //   icon: "compass",
+    //   details: "",
+    // });
   };
 
   const createNewTrip = () => {
@@ -172,15 +196,17 @@ function Itinerary({editable}) {
     setShowNewTrip(false);
   };
 
-  const handleDeleteActivity = (dayIndex, activityIndex) => {
-    const updatedTrip = {...trip};
-    updatedTrip.days[dayIndex].activities.splice(activityIndex, 1);
-
-    if (updatedTrip.days[dayIndex].activities.length === 0) {
-      updatedTrip.days.splice(dayIndex, 1);
-    }
-
-    setTrip(updatedTrip);
+  const handleDeleteActivity = async ( activityId) => {
+    const response = await personalTripsAPI.deleteActivity(tripId, activityId);
+    setTrip(response.data);
+    // const updatedTrip = {...trip};
+    // updatedTrip.days[dayIndex].activities.splice(activityIndex, 1);
+    //
+    // if (updatedTrip.days[dayIndex].activities.length === 0) {
+    //   updatedTrip.days.splice(dayIndex, 1);
+    // }
+    //
+    // setTrip(updatedTrip);
   };
 
   const toggleEditMode = () => {
@@ -330,7 +356,7 @@ function Itinerary({editable}) {
                                               variant="outline-danger"
                                               size="sm"
                                               className="p-1"
-                                              onClick={() => handleDeleteActivity(dayIndex, index)}
+                                              onClick={() => handleDeleteActivity(activity._id)}
                                               aria-label={`Delete ${activity.place}`}
                                           >
                                             <Trash2 size={16}/>

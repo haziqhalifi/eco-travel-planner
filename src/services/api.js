@@ -167,12 +167,12 @@ export const personalTripsAPI = {
   },
 
   // Delete activity from personal trip
-  deleteActivity: async (tripId, dayIndex, activityIndex) => {
+  deleteActivity: async (tripId, activityId) => {
     return await apiRequest(
-      `/personal-trips/${tripId}/activities/${dayIndex}/${activityIndex}`,
-      {
-        method: "DELETE",
-      }
+        `/personal-trips/${tripId}/activities/${activityId}`,
+        {
+          method: "DELETE",
+        }
     );
   },
 };
