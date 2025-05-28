@@ -8,7 +8,7 @@ import tripRoutes from "./routes/tripRoutes.js";
 import personalTripRoutes from "./routes/personalTripRoutes.js";
 import serpRoutes from "./routes/serpRoutes.js";
 import weatherRoutes from "./routes/weatherRoutes.js";
-//adding new code here 
+//adding new code here
 import carbonRoutes from "./routes/carbonRoutes.js";
 import axios from "axios";
 
@@ -76,8 +76,9 @@ app.use("*", (req, res) => {
   res.status(404).json({ message: "Route not found" });
 });
 
-const PORT = process.env.PORT || 1;
-app.listen(PORT, () => {
+const PORT = process.env.PORT || 5000;
+// TODO: Change to port 5000 later
+app.listen(5001, () => {
   console.log(`Server running on port ${PORT}`);
 });
 

@@ -1,4 +1,6 @@
-import { useState } from "react";
+import {useEffect, useState} from "react";
+// import {fetchAllPersonalTrips,addPlaceToTrip} from "../../../backend/controller/personalTripController.js";
+import {personalTripsAPI} from "/src/services/api.js";
 
 const renderStars = (rating) => {
     const fullStars = Math.floor(rating);
@@ -18,23 +20,34 @@ const renderStars = (rating) => {
     return stars;
 };
 
-const AccommodationCard = ({ type, title, rating, location, description, image }) => {
+const AccommodationCard = ({ type, title, rating, location, description, image, serpData }) => {
     const [isFavorited, setIsFavorited] = useState(false);
     const [showTripPopup, setShowTripPopup] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
 
-    const trips = [
-        "North America Trip",
-        "South East Asia Trip",
-        "Japan Trip",
-        "Australia Trip",
-        "Europe Adventure",
-        "South America Expedition"
-    ];
+    const [trips, setTrips] = useState([]);
+    const [loadingTrips, setLoadingTrips] = useState(true);
+
+    useEffect(() => {
+        async function fetchTrips() {
+            try {
+                const response = await personalTripsAPI.getPersonalTrips();
+                if (response.success) {
+                    setTrips(response.data);  // assuming response.data is an array of trips
+                    console.log("Personal Trip ID: ", response.data);
+                }
+            } catch (err) {
+                console.error("Failed to fetch trips:", err);
+            } finally {
+                setLoadingTrips(false);
+            }
+        }
+        fetchTrips();
+    }, []);
 
     // Filter trips based on search term
     const filteredTrips = trips.filter(trip =>
-        trip.toLowerCase().includes(searchTerm.toLowerCase())
+        trip.title && trip.title.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (
@@ -104,28 +117,61 @@ const AccommodationCard = ({ type, title, rating, location, description, image }
                         </div>
 
                         {/* Trips List */}
-                        <div className="max-h-60 overflow-y-auto">
-                            {filteredTrips.length > 0 ? (
-                                <ul className="divide-y divide-gray-200">
-                                    {filteredTrips.map((trip, index) => (
-                                        <li key={index} className="py-2">
-                                            <button
-                                                className="w-full text-left px-2 py-1 rounded hover:bg-gray-100 flex items-center"
-                                                onClick={() => {
-                                                    alert(`Added to ${trip}`);
+                        {/*<div className="max-h-60 overflow-y-auto">*/}
+                        {/*    {filteredTrips.length > 0 ? (*/}
+                        {/*        <ul className="divide-y divide-gray-200">*/}
+                        {/*            {filteredTrips.map((trip, index) => (*/}
+                        {/*                <li key={index} className="py-2">*/}
+                        {/*                    <button*/}
+                        {/*                        className="w-full text-left px-2 py-1 rounded hover:bg-gray-100 flex items-center"*/}
+                        {/*                        onClick={() => {*/}
+                        {/*                            alert(`Added to ${trip}`);*/}
+                        {/*                            setShowTripPopup(false);*/}
+                        {/*                        }}*/}
+                        {/*                    >*/}
+                        {/*                        <span className="mr-2">📋</span>*/}
+                        {/*                        {trip}*/}
+                        {/*                    </button>*/}
+                        {/*                </li>*/}
+                        {/*            ))}*/}
+                        {/*        </ul>*/}
+                        {/*    ) : (*/}
+                        {/*        <p className="text-gray-500 text-center py-2">No trips found</p>*/}
+                        {/*    )}*/}
+                        {/*</div>*/}
+
+                        {loadingTrips ? (
+                            <p>Loading trips...</p>
+                        ) : filteredTrips.length > 0 ? (
+                            <ul className="max-h-60 overflow-y-auto divide-y divide-gray-200">
+                                {filteredTrips.map((trip) => (
+                                    <li key={trip._id} className="py-2">
+                                        <button
+                                            className="w-full text-left px-2 py-1 rounded hover:bg-gray-100 flex items-center"
+                                            onClick={async () => {
+                                                try {
+                                                    console.log("Clicked trip ID:", trip._id);
+                                                    const meow = await personalTripsAPI.getPersonalTripById(trip._id);
+                                                    console.log("Get trip: ", meow);
+                                                    await personalTripsAPI.addPlaceToTrip(trip._id, serpData, "accommodation");
+                                                    alert(`Added to ${trip.title}`);
                                                     setShowTripPopup(false);
-                                                }}
-                                            >
-                                                <span className="mr-2">📋</span>
-                                                {trip}
-                                            </button>
-                                        </li>
-                                    ))}
-                                </ul>
-                            ) : (
-                                <p className="text-gray-500 text-center py-2">No trips found</p>
-                            )}
-                        </div>
+                                                } catch (err) {
+                                                    alert("Failed to add accommodation to trip");
+                                                    console.error(err);
+                                                }
+                                            }}
+                                        >
+                                            <span className="mr-2">📋</span>
+                                            {trip.title}
+                                        </button>
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <p className="text-gray-500 text-center py-2">No trips found</p>
+                        )}
+
 
                         <button
                             className="mt-4 w-full bg-dark-green text-white py-2 rounded hover:bg-blue-600"
