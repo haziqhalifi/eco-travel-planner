@@ -6,7 +6,7 @@ import {
   Card,
   Form,
   Button,
-  ListGroup,
+  ListGroup, Alert,
 } from "react-bootstrap";
 import {
   Calendar,
@@ -176,7 +176,6 @@ function Itinerary({editable}) {
     const updatedTrip = {...trip};
     updatedTrip.days[dayIndex].activities.splice(activityIndex, 1);
 
-    // If this was the last activity in the day, remove the day
     if (updatedTrip.days[dayIndex].activities.length === 0) {
       updatedTrip.days.splice(dayIndex, 1);
     }
@@ -201,6 +200,11 @@ function Itinerary({editable}) {
       <div className="bg-light min-vh-100 py-8">
         <div className="container mx-auto my-8">
           <div className="bg-white rounded-xl shadow-xl p-6 md:p-8">
+            {error && (
+                <Alert variant="danger" dismissible onClose={() => setError("")}>
+                  {error}
+                </Alert>
+            )}
             {!showNewTrip ? (
                 <>
                   {/*title */}

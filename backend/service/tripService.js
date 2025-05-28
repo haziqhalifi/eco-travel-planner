@@ -1,4 +1,3 @@
-import tripsData from "../data/tripsData.js";
 import Trip from "../models/Trip.js";
 
 export const getFilteredTrips = async ({
