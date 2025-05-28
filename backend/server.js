@@ -68,7 +68,8 @@ app.use("*", (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+// TODO: Change to port 5000 later
+app.listen(5001, () => {
   console.log(`Server running on port ${PORT}`);
 });
 

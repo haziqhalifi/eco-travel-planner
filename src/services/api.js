@@ -1,4 +1,6 @@
 // API configuration
+import axios from "axios";
+
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || "http://localhost:5001/api";
 
@@ -148,6 +150,29 @@ export const personalTripsAPI = {
   addTripToPersonal: async (tripId) => {
     return await apiRequest(`/personal-trips/${tripId}`, {
       method: "POST",
+    });
+  },
+
+  // addPlaceToTrip: async (tripId, serpData, placeType) => {
+  //   const payload = {
+  //     type: placeType,  // or dynamic type if needed
+  //     serpData,
+  //   };
+  //
+  //   const res = await axios.post(`/api/personal-trips/${tripId}/add-place`, payload);
+  //   return res.data;
+  // },
+
+  addPlaceToTrip: async (tripId, serpData, placeType) => {
+    const payload = {
+      type: placeType,  // or dynamic type if needed
+      serpData: serpData,
+    };
+    console.log("Payload: " , payload);
+
+    return await apiRequest(`/personal-trips/${tripId}/add-place`, {
+      method: "POST",
+      body: payload,
     });
   },
 

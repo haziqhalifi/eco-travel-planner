@@ -391,6 +391,7 @@ const EcoOptions = () => {
                             description={option.description}
                             image={option.image}
                             price={option.price}
+                            serpData={option}
                           />
                         );
                       } else if (activeTab === "transportation") {
