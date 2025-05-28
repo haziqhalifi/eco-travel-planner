@@ -35,19 +35,14 @@ export const getTripById = async (tripId) => {
   if (!trip) {
     trip = await Trip.findOne({ id: parseInt(tripId) });
   }
-
-  // If still not found in database, fall back to tripsData.js
-  if (!trip) {
-    trip = tripsData.find((t) => t.id === parseInt(tripId));
-  }
-
+  
   return trip;
 };
 
-export const getAllTags = () => [
-  ...new Set(tripsData.flatMap((trip) => trip.tags)),
-];
-
-export const getAllBudgetRanges = () => [
-  ...new Set(tripsData.map((trip) => trip.budgetRange)),
-];
+// export const getAllTags = () => [
+//   ...new Set(tripsData.flatMap((trip) => trip.tags)),
+// ];
+//
+// export const getAllBudgetRanges = () => [
+//   ...new Set(tripsData.map((trip) => trip.budgetRange)),
+// ];
