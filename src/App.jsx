@@ -13,7 +13,7 @@ import Itinerary from "./pages/Itinerary";
 import Weather from "./pages/Weather";
 import CarbonCalculator from "./pages/CarbonCalculator";
 import Profile from "./pages/Profile";
-import Trip from "./pages/Trip.jsx";
+import Trip from "./pages/TripPage.jsx";
 import Navbar from "./components/NavBar.jsx";
 import Footer from "./components/footer.jsx";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
@@ -78,9 +78,17 @@ const AppContent = () => {
             path="/itinerary/:tripId"
             element={
               <ProtectedRoute>
-                <Itinerary />
+                <Itinerary editable={false}/>
               </ProtectedRoute>
             }
+          />
+          <Route
+              path="/my-itinerary/:tripId"
+              element={
+                <ProtectedRoute>
+                  <Itinerary editable={true}/>
+                </ProtectedRoute>
+              }
           />
           <Route
             path="/weather"

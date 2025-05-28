@@ -112,7 +112,7 @@ const tripsData = [
     ],
   },
   {
-    id: 3,
+    tripId: 3,
     title: "Kyoto Bamboo & Culture",
     startDate: "2024-10-10",
     endDate: "2024-10-22",
@@ -155,7 +155,7 @@ const tripsData = [
     ],
   },
   {
-    id: 4,
+    tripId: 4,
     title: "Langkawi Island Eco-Escape",
     startDate: "2024-11-05",
     endDate: "2024-11-08",
@@ -199,7 +199,7 @@ const tripsData = [
     ],
   },
   {
-    id: 5,
+    tripId: 5,
     title: "Cameron Highlands Tea Trail",
     startDate: "2024-12-10",
     endDate: "2024-12-12",

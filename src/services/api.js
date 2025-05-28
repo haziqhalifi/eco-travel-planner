@@ -140,6 +140,10 @@ export const personalTripsAPI = {
     return await apiRequest("/personal-trips");
   },
 
+  getPersonalTripById: async (tripId) => {
+    return await apiRequest(`/personal-trips/${tripId}`);
+  },
+
   // Add trip to personal collection
   addTripToPersonal: async (tripId) => {
     return await apiRequest(`/personal-trips/${tripId}`, {

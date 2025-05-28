@@ -26,62 +26,10 @@ const userSchema = new mongoose.Schema(
       required: true,
       minlength: 6,
     },
-    personalTrips: [
-      {
-        tripId: {
-          type: String,
-          required: true,
-        },
-        customActivities: [
-          {
-            dayIndex: {
-              type: Number,
-              required: true,
-            },
-            activityIndex: {
-              type: Number,
-              required: true,
-            },
-            time: {
-              type: String,
-              required: true,
-            },
-            place: {
-              type: String,
-              required: true,
-            },
-            icon: {
-              type: String,
-              default: "compass",
-            },
-            type: {
-              type: String,
-              default: "activity",
-            },
-            details: String,
-            ecoRating: {
-              type: Number,
-              min: 1,
-              max: 5,
-              default: 3,
-            },
-            imageUrl: String,
-          },
-        ],
-        deletedActivities: [
-          {
-            dayIndex: {
-              type: Number,
-              required: true,
-            },
-            activityIndex: {
-              type: Number,
-              required: true,
-            },
-          },
-        ],
-      },
-    ],
+    personalTrips: {
+      type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'PersonalTrip' }],
+      default: [],
+    },
     favorites: {
       accommodations: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Accommodation' }],
       restaurants: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Restaurant' }],
@@ -97,7 +45,6 @@ const userSchema = new mongoose.Schema(
 // Index for better query performance
 userSchema.index({ email: 1 });
 userSchema.index({ username: 1 });
-userSchema.index({ "personalTrips.tripId": 1 });
 
 // const User = mongoose.model("User", userSchema);
 
