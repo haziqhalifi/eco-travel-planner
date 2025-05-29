@@ -121,31 +121,57 @@ const ProfilePage = () => {
                   const response = await ecoOptionsAPI.findDocumentByPropertyToken(favoritePropertyToken, type);
                   const searchResultDocument = response.data;
 
-                  if (type === "accommodations") { // Special handling for accommodations
-                    if (
-                        searchResultDocument &&
-                        searchResultDocument.serpData &&
-                        Array.isArray(searchResultDocument.serpData.properties)
-                    ) {
-                      // Find the specific property object within the 'properties' array
-                      const targetProperty = searchResultDocument.serpData.properties.find(
-                          (property) => property.property_token === favoritePropertyToken
+                  const typeMap = {
+                    accommodations: {
+                      arrayPath: "properties",
+                      matchKey: "property_token",
+                    },
+                    restaurants: {
+                      arrayPath: "local_results",
+                      matchKey: "place_id",
+                    },
+                    activities: {
+                      arrayPath: "local_results",
+                      matchKey: "place_id",
+                    },
+                    transportation: {
+                      arrayPath: "local_results",
+                      matchKey: "place_id",
+                    }
+                  };
+
+                  const config = typeMap[type];
+
+                  if (
+                      searchResultDocument &&
+                      searchResultDocument.serpData &&
+                      config
+                  ) {
+                    const dataArray = searchResultDocument.serpData[config.arrayPath];
+                    const matchKey = config.matchKey;
+
+                    if (Array.isArray(dataArray)) {
+                      const targetProperty = dataArray.find(
+                          (property) => property[matchKey] === favoritePropertyToken
                       );
 
                       if (targetProperty) {
-                        return targetProperty; // This is the object you want
+                        return targetProperty;
                       } else {
-                        console.warn(`Property with token ${favoritePropertyToken} not found in fetched document for type ${type}.`);
-                        return null; // Or handle as an error/skip
+                        console.warn(
+                            `Item with ${matchKey} ${favoritePropertyToken} not found in ${config.arrayPath} for type ${type}.`
+                        );
+                        return null;
                       }
                     } else {
-                      console.warn(`Fetched document for token ${favoritePropertyToken} (type ${type}) is missing serpData.properties.`);
+                      console.warn(
+                          `Expected an array at ${config.arrayPath} in serpData for type ${type}.`
+                      );
                       return null;
                     }
                   } else {
-                    // For other types, assume response.data is the direct item
-                    // (Adjust this if other types also have nested structures)
-                    return searchResultDocument;
+                    console.warn(`Missing serpData or invalid type config for type ${type}.`);
+                    return null;
                   }
                 } catch (error) {
                   console.error(`Failed to fetch or process item with token ${favoritePropertyToken} for type ${type}:`, error);
