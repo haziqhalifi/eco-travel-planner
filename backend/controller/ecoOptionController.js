@@ -5,7 +5,7 @@ export const getDocumentByPropertyToken = async (req, res) => {
     const {itemType} = req.body;
 
     try {
-        const result = await service.findDocumentIdByPropertyToken(propertyToken, itemType);
+        const result = await service.findDocumentByPropertyToken(propertyToken, itemType);
         return res.status(200).json({
             success: true,
             data: result,

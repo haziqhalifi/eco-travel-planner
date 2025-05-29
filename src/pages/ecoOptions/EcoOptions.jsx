@@ -460,7 +460,6 @@ const EcoOptions = () => {
                               userId={userId}
                               itemId={option.id}
                               type={activeTab}
-                              placeType={activeTab}
                               name={option.name}
                               location={option.location}
                               rating={option.rating}

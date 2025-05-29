@@ -3,7 +3,7 @@ import Restaurant from "../models/Restaurant.js";
 import Activity from "../models/Activity.js";
 import Transportation from "../models/Transportation.js";
 
-export async function findDocumentIdByPropertyToken(propertyToken, itemType) {
+export async function findDocumentByPropertyToken(propertyToken, itemType) {
     const modelMap = {
         accommodations: Accommodation,
         restaurants: Restaurant,
@@ -34,5 +34,5 @@ export async function findDocumentIdByPropertyToken(propertyToken, itemType) {
         throw new Error(`No document found with property_token ${propertyToken} in ${itemType}`);
     }
 
-    return doc._id;
+    return doc;
 }
