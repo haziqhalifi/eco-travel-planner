@@ -1,7 +1,7 @@
 import {useEffect, useState} from "react";
 import {ecoOptionsAPI, userAPI} from "/src/services/api.js"
 import {personalTripsAPI} from "/src/services/api.js";
-// import {findDocumentIdByPropertyToken} from "../../../backend/utils/findDocumentIdByPropertyToken.js";
+// import {findDocumentByPropertyToken} from "../../../backend/utils/findDocumentByPropertyToken.js";
 
 const renderStars = (rating) => {
     const fullStars = Math.floor(rating);
@@ -98,7 +98,7 @@ const AccommodationCard = ({ userId, itemId, type, title, rating, location, desc
 
     const handleToggleFavourite = async () => {
         try {
-            // const doc = await ecoOptionsAPI.findDocumentIdByPropertyToken(itemId, type);
+            // const doc = await ecoOptionsAPI.findDocumentByPropertyToken(itemId, type);
             // const docId = doc.data;
             await userAPI.toggleFavourite(userId, itemId, type);
             setIsFavorited(prev => !prev);

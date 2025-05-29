@@ -1,5 +1,11 @@
-import React, { useState } from 'react';
-import { User, Mail, Info } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import {ecoOptionsAPI, userAPI as userApi} from '../services/api.js';
+import { User, Mail, Info, Heart, MapPin, Plane, UtensilsCrossed, Camera, Car, Filter } from 'lucide-react';
+import {useAuth} from "../contexts/AuthContext.jsx";
+import AccommodationCard from "./ecoOptions/AccommodationCard.jsx";
+import {FlightCard} from "./ecoOptions/FlightCard.jsx";
+import ActivityCard from "./ecoOptions/ActivityCard.jsx";
+
 
 const ProfilePage = () => {
   const [name, setName] = useState('John Doe');
@@ -16,6 +22,9 @@ const ProfilePage = () => {
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
 
   const [accountDeleted, setAccountDeleted] = useState(false);
+
+  const { user } = useAuth();
+  const userId = user?.id;
 
   const handleSaveProfile = () => {
     setName(tempName);
@@ -58,6 +67,172 @@ const ProfilePage = () => {
     }
   };
 
+  const [selectedFilter, setSelectedFilter] = useState('all');
+  const [isLoadingFavorites, setIsLoadingFavorites] = useState(false);
+
+  const filterTypes = [
+    { key: 'all', label: 'All', icon: Heart },
+    { key: 'accommodations', label: 'Hotels', icon: MapPin },
+    { key: 'restaurants', label: 'Restaurants', icon: UtensilsCrossed },
+    { key: 'activities', label: 'Activities', icon: Camera },
+    { key: 'transportation', label: 'Flights', icon: Plane }
+  ];
+
+  const [favorites, setFavorites] = useState({
+    accommodations: [],
+    restaurants: [],
+    activities: [],
+    transportation: []
+  });
+
+  useEffect(() => {
+    const fetchFavorites = async () => {
+      try {
+        setIsLoadingFavorites(true);
+
+        // 1. Fetch IDs from backend
+        const favoritesRes = await userApi.getFavourites(userId);
+        const rawFavorites = favoritesRes.data; // { accommodations: [...], etc. }
+
+        console.log("rawFavorites", rawFavorites)
+        const populatedFavorites = {};
+
+        // 2. For each type, fetch full data using itemId
+        // for (const [type, ids] of Object.entries(rawFavorites)) {
+        //   const populatedItems = await Promise.all(
+        //       ids.map(async (id) => {
+        //         const response = await ecoOptionsAPI.findDocumentByPropertyToken(id, type);
+        //         return response.data; // Adjust if your API returns differently
+        //       })
+        //   );
+        //   populatedFavorites[type] = populatedItems;
+        // }
+
+        for (const [type, ids] of Object.entries(rawFavorites)) {
+          if (!Array.isArray(ids) || ids.length === 0) {
+            populatedFavorites[type] = []; // Handle empty or invalid IDs list
+            continue;
+          }
+
+          const populatedItemsForType = await Promise.all(
+              ids.map(async (favoritePropertyToken) => { // Renamed 'id' for clarity
+                try {
+                  // This API call fetches the whole search document that *contains* properties
+                  const response = await ecoOptionsAPI.findDocumentByPropertyToken(favoritePropertyToken, type);
+                  const searchResultDocument = response.data;
+
+                  if (type === "accommodations") { // Special handling for accommodations
+                    if (
+                        searchResultDocument &&
+                        searchResultDocument.serpData &&
+                        Array.isArray(searchResultDocument.serpData.properties)
+                    ) {
+                      // Find the specific property object within the 'properties' array
+                      const targetProperty = searchResultDocument.serpData.properties.find(
+                          (property) => property.property_token === favoritePropertyToken
+                      );
+
+                      if (targetProperty) {
+                        return targetProperty; // This is the object you want
+                      } else {
+                        console.warn(`Property with token ${favoritePropertyToken} not found in fetched document for type ${type}.`);
+                        return null; // Or handle as an error/skip
+                      }
+                    } else {
+                      console.warn(`Fetched document for token ${favoritePropertyToken} (type ${type}) is missing serpData.properties.`);
+                      return null;
+                    }
+                  } else {
+                    // For other types, assume response.data is the direct item
+                    // (Adjust this if other types also have nested structures)
+                    return searchResultDocument;
+                  }
+                } catch (error) {
+                  console.error(`Failed to fetch or process item with token ${favoritePropertyToken} for type ${type}:`, error);
+                  return null; // Or re-throw, or handle error appropriately
+                }
+              })
+          );
+
+          // Filter out any nulls that might have resulted from errors or not finding items
+          populatedFavorites[type] = populatedItemsForType.filter(item => item !== null);
+        }
+
+        console.log("Populated Favorites:", populatedFavorites);
+        // 3. Save to state
+        setFavorites(populatedFavorites);
+      } catch (error) {
+        console.error("Failed to fetch and populate favorites:", error);
+      } finally {
+        setIsLoadingFavorites(false);
+      }
+    };
+
+    fetchFavorites();
+  }, []);
+
+  const renderFavoriteItem = (item, type) => {
+    console.log('renderFavoriteItem item:', item);
+    switch (type) {
+      case 'accommodations':
+        return <AccommodationCard
+            userId={userId}
+            itemId={item.property_token}
+            type={type}
+            title={item.name}
+            rating={item.overall_rating}
+            // location={item.gps_coordinates ? `${item.gps_coordinates.latitude}, ${item.gps_coordinates.longitude}`
+            //     : 'Location not available'}
+            description={item.description}
+            image={Array.isArray(item.images) && item.images.length > 0 ? `https://images.weserv.nl/?url=${encodeURIComponent(item.images[0].thumbnail.replace(/^https?:\/\//, ''))}` : 'https://via.placeholder.com/150'}
+            price={item.price}
+            serpData={item}
+        />
+      case 'transportation':
+        return <FlightCard key={item._id || item} data={item} />;
+      case 'restaurants':
+      case 'activities':
+        return <ActivityCard
+            userId={userId}
+            itemId={item.local_results.id}
+            type={type}
+            name={item.local_results.title}
+            location={item.local_results.address}
+            rating={item.local_results.rating}
+            reviews={item.local_results.reviews}
+            priceLevel={item.local_results.price}
+            description={item.local_results.description}
+            image={item.local_results.thumbnail}
+            hours={item.local_results.hours}
+            links={item.local_results.links}
+            gps={item.local_results.gps}
+            serpData={item.local_results}
+            // onViewDetails={() =>
+            //   handleActivityViewDetails(option)
+            // }
+        />
+      default:
+        return null;
+    }
+  };
+
+  const getFilteredFavorites = () => {
+    if (selectedFilter === 'all') {
+      const allFavorites = [];
+      Object.entries(favorites).forEach(([type, items]) => {
+        items.forEach(item => {
+          allFavorites.push({ ...item, type });
+        });
+      });
+      return allFavorites;
+    }
+    return favorites[selectedFilter] || [];
+  };
+
+  const getTotalFavoritesCount = () => {
+    return Object.values(favorites).reduce((total, items) => total + items.length, 0);
+  };
+  
   return (
     <div className="min-h-screen bg-gradient-to-r from-green-50 via-white to-yellow-50 py-12 px-4">
       <div className="max-w-4xl mx-auto">
@@ -230,6 +405,81 @@ const ProfilePage = () => {
                 Delete Account
               </button>
             </div>
+
+            {/* Favorites Section */}
+            <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <Heart className="text-red-500" />
+                  <h2 className="text-xl font-semibold text-gray-800">My Favorites</h2>
+                  <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-sm">
+                    {getTotalFavoritesCount()}
+                  </span>
+                </div>
+                <button
+                    // onClick={getAllFavourites}
+                    disabled={isLoadingFavorites}
+                    className="px-4 py-2 bg-green-100 text-green-700 rounded-md hover:bg-green-200 disabled:opacity-50"
+                >
+                  {isLoadingFavorites ? 'Refreshing...' : 'Refresh'}
+                </button>
+              </div>
+
+              {/* Filter Buttons */}
+              <div className="flex flex-wrap gap-2 mb-6">
+                {filterTypes.map(({ key, label, icon: Icon }) => (
+                    <button
+                        key={key}
+                        onClick={() => setSelectedFilter(key)}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                            selectedFilter === key
+                                ? 'bg-green-100 text-green-700 border border-green-200'
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        }`}
+                    >
+                      <Icon size={16} />
+                      {label}
+                      {key !== 'all' && (
+                          <span className="bg-white px-1.5 py-0.5 rounded text-xs">
+                        {favorites[key]?.length || 0}
+                      </span>
+                      )}
+                    </button>
+                ))}
+              </div>
+
+              {/* Favorites Grid */}
+              {isLoadingFavorites ? (
+                  <div className="flex justify-center py-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+                  </div>
+              ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {selectedFilter === 'all' ? (
+                        Object.entries(favorites).map(([type, items]) =>
+                            items.map(item => renderFavoriteItem(item, type))
+                        )
+                    ) : (
+                        (favorites[selectedFilter] || []).map(item =>
+                            renderFavoriteItem(item, selectedFilter)
+                        )
+                    )}
+                  </div>
+              )}
+
+              {!isLoadingFavorites && getFilteredFavorites().length === 0 && (
+                  <div className="text-center py-12">
+                    <Heart className="mx-auto h-12 w-12 text-gray-300 mb-4" />
+                    <p className="text-gray-500">
+                      {selectedFilter === 'all'
+                          ? 'No favorites yet. Start exploring to add some!'
+                          : `No ${selectedFilter} in your favorites yet.`
+                      }
+                    </p>
+                  </div>
+              )}
+            </div>
+
           </>
         )}
       </div>

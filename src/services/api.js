@@ -114,7 +114,7 @@ export const userAPI = {
 };
 
 export const ecoOptionsAPI = {
-  findDocumentIdByPropertyToken: async (itemId, itemType) => {
+  findDocumentByPropertyToken: async (itemId, itemType) => {
     return await apiRequest(`/search/${itemId}`, {
       method: "POST",
       body: JSON.stringify({itemType}),

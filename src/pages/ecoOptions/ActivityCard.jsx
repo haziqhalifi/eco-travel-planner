@@ -7,7 +7,6 @@ export default function ActivityCard({
                                          itemId,
                                          type,
                                          name,
-                                         placeType,
                                          location,
                                          rating,
                                          reviews,
@@ -80,7 +79,7 @@ export default function ActivityCard({
 
     const handleToggleFavourite = async () => {
         try {
-            // const doc = await ecoOptionsAPI.findDocumentIdByPropertyToken(itemId, type);
+            // const doc = await ecoOptionsAPI.findDocumentByPropertyToken(itemId, type);
             // const docId = doc.data;
             await userAPI.toggleFavourite(userId, itemId, type);
             setIsFavorited(prev => !prev);
