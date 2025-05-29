@@ -52,23 +52,14 @@ export const getPersonalTripById = async (userId, ptId) => {
   return trip;
 }
 
-export const getPersonalTripByIdAndUpdate = async (userId, tripId, update, options = {}) => {
+export const getPersonalTripByIdAndUpdate = async (userId, tripId, update) => {
   // Check if the user exists
   console.log("Updating trip:", { tripId, userId, update });
   const user = await User.findById(userId);
   if (!user) throw new Error("User not found");
 
-  // Update the personal trip with the given update operation
-  console.log("HUEHUE")
-  console.log(typeof update.type, update.type);         // should print: string accommodation
+  console.log(typeof update.type, update.type); // should print: string accommodation
   console.log(typeof update.serpData, update.serpData);
-
-  // const trip = await PersonalTrip.findOne({ _id: tripId, userId: user._id });
-  // if (!trip) {
-  //   console.log("No trip found with that tripId and userId");
-  //   return { success: false, message: "Trip not found" };
-  // }
-  // console.log("Trip found:", trip);
 
   const updatedTrip = await PersonalTrip.findOneAndUpdate(
       { _id: tripId },    // filter by trip ID and user ID
@@ -76,7 +67,7 @@ export const getPersonalTripByIdAndUpdate = async (userId, tripId, update, optio
         $push: {
           addedPlaces: {
             type: update.type,     // e.g. 'accommodation'
-            data: update.serpData  // your place data object
+            serpData: update.serpData  // your place data object
           }
         }
       },

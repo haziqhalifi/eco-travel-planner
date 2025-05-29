@@ -12,7 +12,7 @@ export const searchConfigs = {
             eco_certified: true,
         }),
         mapResults: (data) => (data.properties || []).map((h, i) => ({
-            id: `hotel-${i}`,
+            id: h.property_token,
             type: 'Accommodation',
             name: h.name,
             location: h.gps_coordinates
@@ -135,7 +135,8 @@ export const searchConfigs = {
             }
 
             return data.local_results.map((r, i) => ({
-                id:           `restaurant-${i}`,
+                // id:           `restaurant-${i}`,
+                id:           r.place_id,
                 type:         'Restaurant',
                 name:         r.title,
                 location:     r.address,
@@ -169,7 +170,8 @@ export const searchConfigs = {
             gl: 'us',
         }),
         mapResults: (data) => (data.local_results || []).map((a, i) => ({
-            id:           `activity-${i}`,
+            // id:           `activity-${i}`,
+            id:           a.place_id,
             type:         'Activities',
             name:         a.title,
             location:     a.address,

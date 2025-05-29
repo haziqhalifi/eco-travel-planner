@@ -3,6 +3,7 @@ import { X, Clock, Plane, MapPin, AlertTriangle, Leaf } from 'lucide-react';
 
 // Summary Flight Card component - shown in search results
 export const FlightCard = ({
+                               userId,
                                airline,
                                flightNumber,
                                departureAirport,

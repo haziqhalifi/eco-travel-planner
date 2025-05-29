@@ -11,6 +11,8 @@ import weatherRoutes from "./routes/weatherRoutes.js";
 //adding new code here
 import carbonRoutes from "./routes/carbonRoutes.js";
 import axios from "axios";
+import userRoutes from "./routes/userRoutes.js";
+import ecoOptionRoutes from "./routes/ecoOptionRoutes.js";
 
 dotenv.config();
 
@@ -27,7 +29,9 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/trips", tripRoutes);
 app.use("/api/personal-trips", personalTripRoutes);
-app.use("/api/serp", serpRoutes);
+app.use('/api/serp', serpRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/search', ecoOptionRoutes);
 app.use("/api/weather", weatherRoutes);
 //new line of code here
 app.use("/api/carbon", carbonRoutes);

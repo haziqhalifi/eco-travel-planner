@@ -1,6 +1,4 @@
 // API configuration
-import axios from "axios";
-
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || "http://localhost:5001/api";
 
@@ -98,6 +96,32 @@ export const authAPI = {
   },
 };
 
+export const userAPI = {
+  // Get all favorites
+  getFavourites: async (userId) => {
+    return await apiRequest(`/users/${userId}/favorites`, {
+      method: "GET",
+    });
+  },
+
+  // Toggle a favorite (add/remove based on current state)
+  toggleFavourite: async (userId, itemId, itemType) => {
+    return await apiRequest(`/users/${userId}/favorites/${itemId}/toggle`, {
+      method: "POST",
+      body: JSON.stringify({ itemId, itemType }),
+    });
+  },
+};
+
+export const ecoOptionsAPI = {
+  findDocumentIdByPropertyToken: async (itemId, itemType) => {
+    return await apiRequest(`/search/${itemId}`, {
+      method: "POST",
+      body: JSON.stringify({itemType}),
+    })
+  }
+}
+
 // Trips API
 export const tripsAPI = {
   // Get all trips with optional filters
@@ -165,14 +189,14 @@ export const personalTripsAPI = {
 
   addPlaceToTrip: async (tripId, serpData, placeType) => {
     const payload = {
-      type: placeType,  // or dynamic type if needed
+      type: placeType,
       serpData: serpData,
     };
     console.log("Payload: " , payload);
 
     return await apiRequest(`/personal-trips/${tripId}/add-place`, {
       method: "POST",
-      body: payload,
+      body: JSON.stringify(payload),
     });
   },
 
