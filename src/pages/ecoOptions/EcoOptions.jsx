@@ -7,8 +7,12 @@ import "react-datepicker/dist/react-datepicker.css";
 import { searchConfigs } from "./SearchConfigs";
 import { DetailedFlightCard, FlightCard } from "./FlightCard.jsx";
 import ActivityCard, { ActivityDetailView } from "./ActivityCard.jsx";
+import {useAuth} from "../../contexts/AuthContext.jsx";
 
 const EcoOptions = () => {
+  const { user } = useAuth();
+  const userId = user?.id;
+
   const [searchTerm, setSearchTerm] = useState("");
   const [travelOptions, setTravelOptions] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -383,8 +387,9 @@ const EcoOptions = () => {
                       if (activeTab === "accommodation") {
                         return (
                           <AccommodationCard
-                            key={option.id}
-                            type={option.type}
+                            userId={userId}
+                            itemId={option.id}
+                            type={activeTab}
                             title={option.name}
                             rating={option.rating}
                             location={option.address}
@@ -398,7 +403,9 @@ const EcoOptions = () => {
                         return (
                           <>
                             <FlightCard
+                              userId={userId}
                               key={option.id}
+                              type={activeTab}
                               airline={option.airline}
                               flightNumber={option.flightNumber}
                               departureAirport={option.departureAirport}
@@ -443,13 +450,17 @@ const EcoOptions = () => {
                           </>
                         );
                       } else if (
-                        activeTab === "activity" ||
+                        activeTab === "activity"||
                         activeTab === "restaurant"
                       ) {
+                        console.log("place_id", option.id)
                         return (
                           <>
                             <ActivityCard
-                              key={option.id}
+                              userId={userId}
+                              itemId={option.id}
+                              type={activeTab}
+                              placeType={activeTab}
                               name={option.name}
                               location={option.location}
                               rating={option.rating}
@@ -460,6 +471,7 @@ const EcoOptions = () => {
                               hours={option.hours}
                               links={option.links}
                               gps={option.gps}
+                              serpData={option}
                               // onViewDetails={() =>
                               //   handleActivityViewDetails(option)
                               // }

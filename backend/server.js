@@ -8,6 +8,8 @@ import tripRoutes from "./routes/tripRoutes.js";
 import personalTripRoutes from "./routes/personalTripRoutes.js";
 import serpRoutes from "./routes/serpRoutes.js";
 import axios from "axios";
+import userRoutes from "./routes/userRoutes.js";
+import ecoOptionRoutes from "./routes/ecoOptionRoutes.js";
 
 dotenv.config();
 
@@ -25,6 +27,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/trips", tripRoutes);
 app.use("/api/personal-trips", personalTripRoutes);
 app.use('/api/serp', serpRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/search', ecoOptionRoutes);
 
 // Health check endpoint
 app.get("/api/health", (req, res) => {

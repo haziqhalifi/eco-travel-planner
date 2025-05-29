@@ -1,8 +1,13 @@
 import React, {useEffect, useState} from 'react';
 import { Star, MapPin, Clock, Phone, Globe, ChevronDown, ChevronUp, Search, Tag, DollarSign } from 'lucide-react';
+import {personalTripsAPI, userAPI} from "../../services/api.js";
 
 export default function ActivityCard({
+                                         userId,
+                                         itemId,
+                                         type,
                                          name,
+                                         placeType,
                                          location,
                                          rating,
                                          reviews,
@@ -12,25 +17,77 @@ export default function ActivityCard({
                                          hours,
                                          links,
                                          gps,
+                                         serpData,
                                          onViewDetails,
                                      }) {
-    const [isFavorited, setIsFavorited] = useState(false);
     const [showTripPopup, setShowTripPopup] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
 
-    const trips = [
-        "North America Trip",
-        "South East Asia Trip",
-        "Japan Trip",
-        "Australia Trip",
-        "Europe Adventure",
-        "South America Expedition"
-    ];
+    const [trips, setTrips] = useState([]);
+    const [loadingTrips, setLoadingTrips] = useState(true);
+    const [favourites, setFavourites] = useState([]);
+    const [isFavorited, setIsFavorited] = useState(false);
+
+    useEffect(() => {
+        async function fetchTrips() {
+            try {
+                const response = await personalTripsAPI.getPersonalTrips();
+                if (response.success) {
+                    setTrips(response.data);
+                }
+            } catch (err) {
+                console.error("Failed to fetch trips:", err);
+            } finally {
+                setLoadingTrips(false);
+            }
+        }
+        fetchTrips();
+    }, []);
 
     // Filter trips based on search term
     const filteredTrips = trips.filter(trip =>
-        trip.toLowerCase().includes(searchTerm.toLowerCase())
+        trip.title && trip.title.toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+    useEffect(() => {
+        const fetchAndDetermineFavouriteStatus = async () => {
+            setIsFavorited(false); // Default to not favorited
+
+            try {
+                const favouritesRes = await userAPI.getFavourites(userId);
+                let favouritesList = []
+                if (type === "activity") favouritesList = favouritesRes.data.activities;
+                else if (type === "restaurant") favouritesList = favouritesRes.data.restaurants;
+                setFavourites(favouritesList);
+
+                console.log( "itemId",itemId);
+
+                if (typeof itemId === 'string' && favouritesList.includes(itemId)) {
+                    setIsFavorited(true);
+                    console.log(`Match found for current item! Property token: ${itemId} is in favourites.`);
+                }
+
+            } catch (error) {
+                console.error("Failed to fetch favourites or determine status:", error);
+                setIsFavorited(false);
+            }
+        };
+
+        if (userId && itemId) { // Only run if we have the necessary IDs
+            fetchAndDetermineFavouriteStatus();
+        }
+    }, [itemId, type, userId, setIsFavorited, setFavourites]);
+
+    const handleToggleFavourite = async () => {
+        try {
+            // const doc = await ecoOptionsAPI.findDocumentIdByPropertyToken(itemId, type);
+            // const docId = doc.data;
+            await userAPI.toggleFavourite(userId, itemId, type);
+            setIsFavorited(prev => !prev);
+        } catch (err) {
+            console.error("Failed to toggle favourite", err);
+        }
+    };
 
     return (
         <div className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col relative" onClick={onViewDetails}>
@@ -120,9 +177,11 @@ export default function ActivityCard({
 
                 {/* Heart Icon for Favorites */}
                 <button
-                    onClick={() => setIsFavorited(!isFavorited)}
-                    className="absolute bottom-3 right-3 text-red-500 text-xl bg-transparent border-none focus:outline-none"
-                    aria-label="Add to favorites"
+                    onClick={handleToggleFavourite}
+                    className={`absolute bottom-3 right-3 text-xl bg-transparent border-none focus:outline-none ${
+                        isFavorited ? "text-red-500" : "text-gray-400"
+                    }`}
+                    aria-label={isFavorited ? "Remove from favorites" : "Add to favorites"}
                 >
                     {isFavorited ? "❤️" : "🤍"}
                 </button>
@@ -130,12 +189,13 @@ export default function ActivityCard({
 
             {/* Trip Selection Popup */}
             {showTripPopup && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50" onClick={(e) => {
-                    e.stopPropagation();
-                    setShowTripPopup(false);
-                }}>
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+                     onClick={(e) => {
+                         e.stopPropagation();
+                         setShowTripPopup(false);
+                     }}>
                     <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex justify-between items-center mb-4">
+                    <div className="flex justify-between items-center mb-4">
                             <h3 className="font-bold text-lg">Select a Trip</h3>
                             <button
                                 onClick={(e) => {
@@ -162,30 +222,36 @@ export default function ActivityCard({
                             />
                         </div>
 
-                        {/* Trips List */}
-                        <div className="max-h-60 overflow-y-auto">
-                            {filteredTrips.length > 0 ? (
-                                <ul className="divide-y divide-gray-200">
-                                    {filteredTrips.map((trip, index) => (
-                                        <li key={index} className="py-2">
-                                            <button
-                                                className="w-full text-left px-2 py-1 rounded hover:bg-gray-100 flex items-center"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    alert(`Added to ${trip}`);
+                        {loadingTrips ? (
+                            <p>Loading trips...</p>
+                        ) : filteredTrips.length > 0 ? (
+                            <ul className="max-h-60 overflow-y-auto divide-y divide-gray-200">
+                                {filteredTrips.map((trip) => (
+                                    <li key={trip._id} className="py-2">
+                                        <button
+                                            className="w-full text-left px-2 py-1 rounded hover:bg-gray-100 flex items-center"
+                                            onClick={async () => {
+                                                try {
+                                                    const meow = await personalTripsAPI.getPersonalTripById(trip._id);
+                                                    console.log("Get trip: ", meow);
+                                                    await personalTripsAPI.addPlaceToTrip(trip._id, serpData, placeType);
+                                                    alert(`Added to ${trip.title}`);
                                                     setShowTripPopup(false);
-                                                }}
-                                            >
-                                                <span className="mr-2">📋</span>
-                                                {trip}
-                                            </button>
-                                        </li>
-                                    ))}
-                                </ul>
-                            ) : (
-                                <p className="text-gray-500 text-center py-2">No trips found</p>
-                            )}
-                        </div>
+                                                } catch (err) {
+                                                    alert("Failed to add activity to trip");
+                                                    console.error(err);
+                                                }
+                                            }}
+                                        >
+                                            <span className="mr-2">📋</span>
+                                            {trip.title}
+                                        </button>
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <p className="text-gray-500 text-center py-2">No trips found</p>
+                        )}
 
                         <button
                             className="mt-4 w-full bg-dark-green text-white py-2 rounded hover:bg-blue-600"

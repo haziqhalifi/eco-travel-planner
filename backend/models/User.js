@@ -31,10 +31,10 @@ const userSchema = new mongoose.Schema(
       default: [],
     },
     favorites: {
-      accommodations: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Accommodation' }],
-      restaurants: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Restaurant' }],
-      activities: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Activity' }],
-      transportation: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Transportation' }],
+      accommodations: [{ type: String, ref: 'Accommodation', default: [] }],
+      restaurants: [{ type: String, ref: 'Restaurant', default: [] }],
+      activities: [{ type: String, ref: 'Activity', default: [] }],
+      transportation: [{ type: String, ref: 'Transportation', default: [] }],
     },
   },
   {
@@ -47,6 +47,9 @@ userSchema.index({ email: 1 });
 userSchema.index({ username: 1 });
 
 // const User = mongoose.model("User", userSchema);
+if (mongoose.models.User) {
+    delete mongoose.models.User;
+}
 
 // module.exports = User;
 export default mongoose.model("User", userSchema);

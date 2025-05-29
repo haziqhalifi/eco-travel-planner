@@ -54,18 +54,18 @@ const personalTripSchema = new mongoose.Schema({
       activities: [activitySchema]
     }
   ],
+  addedPlaces: [
+    {
+      type: { type: String, required: true }, // this is fine because it's inside an object
+      serpData: { type: mongoose.Schema.Types.Mixed, required: true }
+    }
+  ]
   // addedPlaces: [
-  //   {
+  //   new mongoose.Schema({
   //     type: String,
   //     data: mongoose.Schema.Types.Mixed
-  //   }
+  //   })
   // ]
-  addedPlaces: [
-    new mongoose.Schema({
-      type: String,
-      data: mongoose.Schema.Types.Mixed
-    })
-  ]
   // addedPlaces: [addedPlaceSchema]
 })
 

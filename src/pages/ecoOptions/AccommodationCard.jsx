@@ -1,6 +1,7 @@
 import {useEffect, useState} from "react";
-// import {fetchAllPersonalTrips,addPlaceToTrip} from "../../../backend/controller/personalTripController.js";
+import {ecoOptionsAPI, userAPI} from "/src/services/api.js"
 import {personalTripsAPI} from "/src/services/api.js";
+// import {findDocumentIdByPropertyToken} from "../../../backend/utils/findDocumentIdByPropertyToken.js";
 
 const renderStars = (rating) => {
     const fullStars = Math.floor(rating);
@@ -9,32 +10,32 @@ const renderStars = (rating) => {
 
     const stars = [];
     for (let i = 0; i < fullStars; i++) {
-        stars.push(<span key={`full-${i}`} className="text-yellow-500">★</span>);
+        stars.push(<span id={`full-${i}`} className="text-yellow-500">★</span>);
     }
     if (hasHalfStar) {
-        stars.push(<span key="half" className="text-yellow-500">⯪</span>);
+        stars.push(<span id="half" className="text-yellow-500">⯪</span>);
     }
     for (let i = 0; i < emptyStars; i++) {
-        stars.push(<span key={`empty-${i}`} className="text-gray-300">★</span>);
+        stars.push(<span id={`empty-${i}`} className="text-gray-300">★</span>);
     }
     return stars;
 };
 
-const AccommodationCard = ({ type, title, rating, location, description, image, serpData }) => {
-    const [isFavorited, setIsFavorited] = useState(false);
+const AccommodationCard = ({ userId, itemId, type, title, rating, location, description, image, serpData }) => {
     const [showTripPopup, setShowTripPopup] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
 
     const [trips, setTrips] = useState([]);
     const [loadingTrips, setLoadingTrips] = useState(true);
+    const [favourites, setFavourites] = useState([]);
+    const [isFavorited, setIsFavorited] = useState(false);
 
     useEffect(() => {
         async function fetchTrips() {
             try {
                 const response = await personalTripsAPI.getPersonalTrips();
                 if (response.success) {
-                    setTrips(response.data);  // assuming response.data is an array of trips
-                    console.log("Personal Trip ID: ", response.data);
+                    setTrips(response.data);
                 }
             } catch (err) {
                 console.error("Failed to fetch trips:", err);
@@ -49,6 +50,62 @@ const AccommodationCard = ({ type, title, rating, location, description, image, 
     const filteredTrips = trips.filter(trip =>
         trip.title && trip.title.toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+    // useEffect(() => {
+    //     if (!userId) return; // avoid running if userId is missing
+    //
+    //     const fetchFavourites = async () => {
+    //         try {
+    //             const response = await userAPI.getFavourites(userId);
+    //             console.log(response.data.accommodations);
+    //             setFavourites(response.data.accommodations);
+    //         } catch (error) {
+    //             console.error("Failed to fetch favourites:", error);
+    //         }
+    //     };
+    //
+    //     fetchFavourites();
+    // }, [userId]);
+    //
+    // useEffect(() => {
+    //     setIsFavorited(favourites.some(fav => fav.id === itemId));
+    // }, [favourites, itemId]);
+
+    useEffect(() => {
+        const fetchAndDetermineFavouriteStatus = async () => {
+            setIsFavorited(false); // Default to not favorited
+
+            try {
+                const favouritesRes = await userAPI.getFavourites(userId);
+                const favouritesList = favouritesRes.data.accommodations || [];
+                setFavourites(favouritesList);
+
+                if (typeof itemId === 'string' && favouritesList.includes(itemId)) {
+                    setIsFavorited(true);
+                    console.log(`Match found for current item! Property token: ${itemId} is in favourites.`);
+                }
+
+            } catch (error) {
+                console.error("Failed to fetch favourites or determine status:", error);
+                setIsFavorited(false);
+            }
+        };
+
+        if (userId && itemId) { // Only run if we have the necessary IDs
+            fetchAndDetermineFavouriteStatus();
+        }
+    }, [itemId, type, userId, setIsFavorited, setFavourites]);
+
+    const handleToggleFavourite = async () => {
+        try {
+            // const doc = await ecoOptionsAPI.findDocumentIdByPropertyToken(itemId, type);
+            // const docId = doc.data;
+            await userAPI.toggleFavourite(userId, itemId, type);
+            setIsFavorited(prev => !prev);
+        } catch (err) {
+            console.error("Failed to toggle favourite", err);
+        }
+    };
 
     return (
         <div className="bg-white rounded-lg shadow-md overflow-hidden relative">
@@ -81,9 +138,11 @@ const AccommodationCard = ({ type, title, rating, location, description, image, 
 
                 {/* Heart Icon for Favorites */}
                 <button
-                    onClick={() => setIsFavorited(!isFavorited)}
-                    className="absolute bottom-3 right-3 text-red-500 text-xl bg-transparent border-none focus:outline-none"
-                    aria-label="Add to favorites"
+                    onClick={handleToggleFavourite}
+                    className={`absolute bottom-3 right-3 text-xl bg-transparent border-none focus:outline-none ${
+                        isFavorited ? "text-red-500" : "text-gray-400"
+                    }`}
+                    aria-label={isFavorited ? "Remove from favorites" : "Add to favorites"}
                 >
                     {isFavorited ? "❤️" : "🤍"}
                 </button>
@@ -93,8 +152,8 @@ const AccommodationCard = ({ type, title, rating, location, description, image, 
             {showTripPopup && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
                     <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-                        <div className="flex justify-between items-center mb-4">
-                            <h3 className="font-bold text-lg">Select a Trip</h3>
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="font-bold text-lg">Select a Trip</h3>
                             <button
                                 onClick={() => setShowTripPopup(false)}
                                 className="text-gray-500 hover:text-gray-700"
@@ -116,41 +175,16 @@ const AccommodationCard = ({ type, title, rating, location, description, image, 
                             />
                         </div>
 
-                        {/* Trips List */}
-                        {/*<div className="max-h-60 overflow-y-auto">*/}
-                        {/*    {filteredTrips.length > 0 ? (*/}
-                        {/*        <ul className="divide-y divide-gray-200">*/}
-                        {/*            {filteredTrips.map((trip, index) => (*/}
-                        {/*                <li key={index} className="py-2">*/}
-                        {/*                    <button*/}
-                        {/*                        className="w-full text-left px-2 py-1 rounded hover:bg-gray-100 flex items-center"*/}
-                        {/*                        onClick={() => {*/}
-                        {/*                            alert(`Added to ${trip}`);*/}
-                        {/*                            setShowTripPopup(false);*/}
-                        {/*                        }}*/}
-                        {/*                    >*/}
-                        {/*                        <span className="mr-2">📋</span>*/}
-                        {/*                        {trip}*/}
-                        {/*                    </button>*/}
-                        {/*                </li>*/}
-                        {/*            ))}*/}
-                        {/*        </ul>*/}
-                        {/*    ) : (*/}
-                        {/*        <p className="text-gray-500 text-center py-2">No trips found</p>*/}
-                        {/*    )}*/}
-                        {/*</div>*/}
-
                         {loadingTrips ? (
                             <p>Loading trips...</p>
                         ) : filteredTrips.length > 0 ? (
                             <ul className="max-h-60 overflow-y-auto divide-y divide-gray-200">
                                 {filteredTrips.map((trip) => (
-                                    <li key={trip._id} className="py-2">
+                                    <li id={trip._id} className="py-2">
                                         <button
                                             className="w-full text-left px-2 py-1 rounded hover:bg-gray-100 flex items-center"
                                             onClick={async () => {
                                                 try {
-                                                    console.log("Clicked trip ID:", trip._id);
                                                     const meow = await personalTripsAPI.getPersonalTripById(trip._id);
                                                     console.log("Get trip: ", meow);
                                                     await personalTripsAPI.addPlaceToTrip(trip._id, serpData, "accommodation");

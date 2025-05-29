@@ -1,5 +1,4 @@
 import * as service from "../service/personalTripService.js";
-import {getTripById} from "../service/tripService.js";
 
 export const fetchAllPersonalTrips = async (req, res) => {
   try {
@@ -25,21 +24,14 @@ export const addPlaceToTrip = async (req, res) => {
   const { serpData, type } = req.body;
   console.log("serpdata:", serpData);
 
-
-  // const trip = await getTripById(tripId);
-
-
-
-
-  // console.log("MEOWMEOWMOEW", tripId);
-  console.log("req.params:", req.params);
+  console.log("req.params:", req.params.tripId);
   console.log("req.body:", req.body);
-  // console.log("req.user:", req.user.userId); // Must include userId
-  // console.log(type);
   if (!serpData || !type) {
     return res.status(400).json({ error: "Missing serpData or type" });
   }
 
+  console.log(req.body.type);
+  console.log(req.body.serpData);
   try {
     const updatedTrip = await service.getPersonalTripByIdAndUpdate(
         req.user.userId,   // user ID for scoping
