@@ -55,17 +55,14 @@ export default function ActivityCard({
             try {
                 const favouritesRes = await userAPI.getFavourites(userId);
                 let favouritesList = []
-                if (type === "activity") favouritesList = favouritesRes.data.activities;
-                else if (type === "restaurant") favouritesList = favouritesRes.data.restaurants;
+                if (type === "activities") favouritesList = favouritesRes.data.activities;
+                else if (type === "restaurants") favouritesList = favouritesRes.data.restaurants;
                 setFavourites(favouritesList);
-
-                console.log( "itemId",itemId);
 
                 if (typeof itemId === 'string' && favouritesList.includes(itemId)) {
                     setIsFavorited(true);
                     console.log(`Match found for current item! Property token: ${itemId} is in favourites.`);
                 }
-
             } catch (error) {
                 console.error("Failed to fetch favourites or determine status:", error);
                 setIsFavorited(false);
@@ -98,6 +95,9 @@ export default function ActivityCard({
                         alt={name}
                         className="w-full h-full object-cover"
                     />
+                    <div className="absolute top-2 left-2 bg-green-100 text-green-800 text-xs px-2 py-1 rounded">
+                        {type}
+                    </div>
 
                     {/* Plus Icon */}
                     <button
@@ -108,8 +108,11 @@ export default function ActivityCard({
                         className="absolute top-2 right-2 bg-white p-1 rounded-full shadow-md hover:bg-gray-100"
                         aria-label="Add to trip"
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-700" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-700" viewBox="0 0 20 20"
+                             fill="currentColor">
+                            <path fillRule="evenodd"
+                                  d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+                                  clipRule="evenodd"/>
                         </svg>
                     </button>
                 </div>

@@ -5,7 +5,6 @@ import findQueryParams from '../utils/findQueryParams.js';
 export const handleSerpSearch = async (req, res) => {
     const type = req.headers['type'];
     console.log('Received request:', req.query);
-    console.log('Search type:', type);
 
     try {
         const model = getModelForType(type);
@@ -25,6 +24,7 @@ export const handleSerpSearch = async (req, res) => {
         let responseData;
         const { q, check_in_date, check_out_date, adults, departure_id, arrival_id, outbound_date, return_date } = req.query;
 
+        console.log("response.data:", response.data);
         switch (type) {
             case 'accommodation':
                 responseData = {
