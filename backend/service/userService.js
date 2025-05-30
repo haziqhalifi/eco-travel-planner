@@ -20,8 +20,7 @@ export const getAllFavourites = async (req, res) => {
 
 
 export const toggleFavourites = async (userId, docId, itemId, itemType) => {
-  console.log("itemType", itemType);
-  if (!["accommodation", "restaurant", "activity", "transportation"].includes(itemType)) {
+  if (!["accommodations", "restaurants", "activities", "transportation"].includes(itemType)) {
     throw new Error("Invalid item type");
   }
 
@@ -35,14 +34,14 @@ export const toggleFavourites = async (userId, docId, itemId, itemType) => {
     case "activity":
       itemType="activities";
       break;
+    default:
+      break;
   }
 
   const user = await User.findById(userId);
   if (!user) throw new Error("User not found");
 
   const favoritesList = user.favorites[itemType];
-
-  console.log(user);
 
   const index = favoritesList.indexOf(itemId);
 

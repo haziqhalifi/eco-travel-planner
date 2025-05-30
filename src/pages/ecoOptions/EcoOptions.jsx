@@ -453,7 +453,7 @@ const EcoOptions = () => {
                         activeTab === "activity"||
                         activeTab === "restaurant"
                       ) {
-                        console.log("place_id", option.id)
+                        console.log("links", option.links)
                         return (
                           <>
                             <ActivityCard

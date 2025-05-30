@@ -46,8 +46,8 @@ const findQueryParams = async (model, queryParams) =>  {
 
         // If data is found, return the serpData
         if (data && data.length > 0) {
-            console.log("DATA", data[0].serpData);
-            console.log("Data length", data.length);
+            // console.log("DATA", data[0].serpData);
+            // console.log("Data length", data.length);
             return data[0].serpData;
         } else {
             // throw new Error("No data found for the provided query parameters.");

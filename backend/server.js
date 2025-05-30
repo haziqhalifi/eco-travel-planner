@@ -83,7 +83,7 @@ app.use("*", (req, res) => {
 const PORT = process.env.PORT || 5000;
 // TODO: Change to port 5000 later
 app.listen(5001, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`Server running on port 5001`);
 });
 
 export default app;

@@ -198,7 +198,6 @@ const ProfilePage = () => {
   }, []);
 
   const renderFavoriteItem = (item, type) => {
-    console.log('renderFavoriteItem item:', item);
     switch (type) {
       case 'accommodations':
         return <AccommodationCard
@@ -220,19 +219,19 @@ const ProfilePage = () => {
       case 'activities':
         return <ActivityCard
             userId={userId}
-            itemId={item.local_results.id}
+            itemId={item.place_id}
             type={type}
-            name={item.local_results.title}
-            location={item.local_results.address}
-            rating={item.local_results.rating}
-            reviews={item.local_results.reviews}
-            priceLevel={item.local_results.price}
-            description={item.local_results.description}
-            image={item.local_results.thumbnail}
-            hours={item.local_results.hours}
-            links={item.local_results.links}
-            gps={item.local_results.gps}
-            serpData={item.local_results}
+            name={item.title}
+            location={item.address}
+            rating={item.rating}
+            reviews={item.reviews}
+            priceLevel={item.price}
+            description={item.description}
+            image={item.thumbnail}
+            hours={item.hours}
+            links={item.links}
+            gps={item.gps}
+            serpData={item}
             // onViewDetails={() =>
             //   handleActivityViewDetails(option)
             // }

@@ -185,8 +185,6 @@ const AccommodationCard = ({ userId, itemId, type, title, rating, location, desc
                                             className="w-full text-left px-2 py-1 rounded hover:bg-gray-100 flex items-center"
                                             onClick={async () => {
                                                 try {
-                                                    const meow = await personalTripsAPI.getPersonalTripById(trip._id);
-                                                    console.log("Get trip: ", meow);
                                                     await personalTripsAPI.addPlaceToTrip(trip._id, serpData, "accommodation");
                                                     alert(`Added to ${trip.title}`);
                                                     setShowTripPopup(false);
