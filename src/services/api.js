@@ -169,10 +169,10 @@ export const personalTripsAPI = {
   // Delete activity from personal trip
   deleteActivity: async (tripId, activityId) => {
     return await apiRequest(
-        `/personal-trips/${tripId}/activities/${activityId}`,
-        {
-          method: "DELETE",
-        }
+      `/personal-trips/${tripId}/activities/${activityId}`,
+      {
+        method: "DELETE",
+      }
     );
   },
 };
@@ -195,4 +195,4 @@ export const handleApiError = (error, defaultMessage = "An error occurred") => {
 };
 
 // Export token management for other components
-export { getToken, setToken, removeToken };
+export { getToken, setToken, removeToken, apiRequest };

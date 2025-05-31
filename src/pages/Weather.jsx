@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   LineChart,
   Line,
@@ -10,6 +10,7 @@ import {
 } from "recharts";
 import { motion } from "framer-motion";
 import "../css/weather-icons.min.css";
+import { weatherAPI } from "../services/weatherApi";
 
 const Weather = () => {
   const [city, setCity] = useState("");
@@ -103,14 +104,39 @@ const Weather = () => {
     fetchWeatherData("forecast", cityName, setForecast);
   };
 
-  const handleSaveCity = () => {
+  // Load saved cities from backend on mount
+  useEffect(() => {
+    const fetchSavedCities = async () => {
+      try {
+        const cities = await weatherAPI.getSavedCities();
+        setSavedCities(cities);
+      } catch (err) {
+        setError("Failed to load saved cities");
+      }
+    };
+    fetchSavedCities();
+  }, []);
+
+  // Save city to backend
+  const handleSaveCity = async () => {
     if (weather && weather.name && !savedCities.includes(weather.name)) {
-      setSavedCities([...savedCities, weather.name]);
+      try {
+        const cities = await weatherAPI.saveCity(weather.name);
+        setSavedCities(cities);
+      } catch (err) {
+        setError("Failed to save city");
+      }
     }
   };
 
-  const handleRemoveCity = (cityToRemove) => {
-    setSavedCities(savedCities.filter((c) => c !== cityToRemove));
+  // Remove city from backend
+  const handleRemoveCity = async (cityToRemove) => {
+    try {
+      const cities = await weatherAPI.removeCity(cityToRemove);
+      setSavedCities(cities);
+    } catch (err) {
+      setError("Failed to remove city");
+    }
   };
 
   const getCurrentDateTime = () => {
