@@ -10,6 +10,7 @@ const SignIn = ({ setIsLoggedIn }) => {
     rememberMe: false,
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [passwordError, setPasswordError] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -22,13 +23,26 @@ const SignIn = ({ setIsLoggedIn }) => {
       ...formData,
       [name]: type === "checkbox" ? checked : value,
     });
+
+    if (name === "password") {
+      setPasswordError(false);
+    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const { password } = formData;
+
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*[^A-Za-z0-9]).{8,}$/;
+
+    if (!passwordRegex.test(password)) {
+      setPasswordError(true);
+      return;
+    }
+
     setIsLoading(true);
     console.log("Login submitted:", formData);
-    
+
     setTimeout(() => {
       setIsLoggedIn(true);
       setIsLoading(false);
@@ -39,7 +53,7 @@ const SignIn = ({ setIsLoggedIn }) => {
   const handleGoogleSignIn = () => {
     setIsLoading(true);
     console.log("Google sign in initiated");
-    
+
     setTimeout(() => {
       setIsLoggedIn(true);
       setIsLoading(false);
@@ -129,7 +143,11 @@ const SignIn = ({ setIsLoggedIn }) => {
                 </button>
               </motion.div>
 
-              <motion.form variants={itemVariants} onSubmit={handleSubmit} className="flex-grow-1 d-flex flex-column">
+              <motion.form
+                variants={itemVariants}
+                onSubmit={handleSubmit}
+                className="flex-grow-1 d-flex flex-column"
+              >
                 <div className="mb-3">
                   <label htmlFor="email" className="form-label">
                     Email
@@ -156,8 +174,21 @@ const SignIn = ({ setIsLoggedIn }) => {
                   <label htmlFor="password" className="form-label">
                     Password
                   </label>
-                  <div className="input-group" style={{ border: "1px solid #ced4da", borderRadius: "0.375rem" }}>
-                    <span className="input-group-text bg-light" style={{ borderRight: "1px solid #ced4da" }}>
+                  <div
+                    className="input-group"
+                    style={{
+                      border: `1px solid ${passwordError ? "#dc3545" : "#ced4da"}`,
+                      borderRadius: "0.375rem",
+                      boxShadow: passwordError ? "0 0 0 0.2rem rgba(220, 53, 69, 0.25)" : "none",
+                    }}
+                  >
+                    <span
+                      className="input-group-text bg-light"
+                      style={{
+                        borderRight: `1px solid ${passwordError ? "#dc3545" : "#ced4da"}`,
+                        borderRadius: "0.375rem 0 0 0.375rem",
+                      }}
+                    >
                       <FaLock />
                     </span>
                     <input
@@ -169,9 +200,19 @@ const SignIn = ({ setIsLoggedIn }) => {
                       value={formData.password}
                       onChange={handleChange}
                       required
-                      style={{ borderLeft: "none" }}
+                      style={{
+                        borderLeft: "none",
+                        borderRadius: "0 0.375rem 0.375rem 0",
+                        outline: "none",
+                        boxShadow: "none",
+                      }}
                     />
                   </div>
+                  {passwordError && (
+                    <div style={{ color: "#dc3545", fontSize: "0.875rem", marginTop: "0.25rem" }}>
+                      Password must be at least 8 characters with symbols and letters
+                    </div>
+                  )}
                 </div>
 
                 <div className="d-flex justify-content-between mb-3">
@@ -199,7 +240,6 @@ const SignIn = ({ setIsLoggedIn }) => {
                   whileTap={{ scale: 0.98 }}
                   type="submit"
                   className="btn btn-success w-100 py-2 mb-3 mt-auto"
-                  style={{ transition: "background 0.2s" }}
                   disabled={isLoading}
                 >
                   {isLoading ? (
@@ -213,7 +253,9 @@ const SignIn = ({ setIsLoggedIn }) => {
 
                 <div className="d-flex align-items-center mb-3">
                   <hr className="flex-grow-1" style={{ borderColor: "#dee2e6" }} />
-                  <span className="px-2 text-muted" style={{ whiteSpace: "nowrap" }}>OR</span>
+                  <span className="px-2 text-muted" style={{ whiteSpace: "nowrap" }}>
+                    OR
+                  </span>
                   <hr className="flex-grow-1" style={{ borderColor: "#dee2e6" }} />
                 </div>
 
@@ -224,16 +266,16 @@ const SignIn = ({ setIsLoggedIn }) => {
                   className="btn btn-light w-100 py-2 border d-flex align-items-center justify-content-center"
                   onClick={handleGoogleSignIn}
                   disabled={isLoading}
-                  style={{ 
-                    backgroundColor: '#fff',
-                    color: '#5F6368',
-                    fontWeight: '500'
+                  style={{
+                    backgroundColor: "#fff",
+                    color: "#5F6368",
+                    fontWeight: "500",
                   }}
                 >
-                  <img 
-                    src="https://www.google.com/favicon.ico" 
+                  <img
+                    src="https://www.google.com/favicon.ico"
                     alt="Google"
-                    style={{ width: '20px', height: '20px', marginRight: '10px' }}
+                    style={{ width: "20px", height: "20px", marginRight: "10px" }}
                   />
                   Sign in with Google
                 </motion.button>
@@ -254,3 +296,4 @@ const SignIn = ({ setIsLoggedIn }) => {
 };
 
 export default SignIn;
+

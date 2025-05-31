@@ -26,12 +26,21 @@ const SignUp = () => {
     });
   };
 
+  const isPasswordInvalid =
+    formData.password.length > 0 &&
+    (formData.password.length < 8 ||
+      !/[a-zA-Z]/.test(formData.password) ||
+      !/[^\w\s]/.test(formData.password));
+
+  const isConfirmInvalid =
+    formData.confirmPassword.length > 0 &&
+    formData.confirmPassword !== formData.password;
+
   const handleSubmit = (e) => {
     e.preventDefault();
     setIsLoading(true);
     console.log("Form submitted:", formData);
-    
-    // Simulate API call
+
     setTimeout(() => {
       setIsLoading(false);
       navigate("/dashboard");
@@ -41,8 +50,7 @@ const SignUp = () => {
   const handleGoogleSignIn = () => {
     setIsLoading(true);
     console.log("Google sign up initiated");
-    
-    // Simulate Google auth
+
     setTimeout(() => {
       setIsLoading(false);
       navigate("/dashboard");
@@ -133,9 +141,7 @@ const SignUp = () => {
 
               <motion.form variants={itemVariants} onSubmit={handleSubmit} className="flex-grow-1 d-flex flex-column">
                 <div className="mb-3">
-                  <label htmlFor="username" className="form-label">
-                    Username
-                  </label>
+                  <label htmlFor="username" className="form-label">Username</label>
                   <div className="input-group" style={{ border: "1px solid #ced4da", borderRadius: "0.375rem" }}>
                     <span className="input-group-text bg-light" style={{ borderRight: "1px solid #ced4da" }}>
                       <FaUser />
@@ -155,9 +161,7 @@ const SignUp = () => {
                 </div>
 
                 <div className="mb-3">
-                  <label htmlFor="email" className="form-label">
-                    Email
-                  </label>
+                  <label htmlFor="email" className="form-label">Email</label>
                   <div className="input-group" style={{ border: "1px solid #ced4da", borderRadius: "0.375rem" }}>
                     <span className="input-group-text bg-light" style={{ borderRight: "1px solid #ced4da" }}>
                       <FaEnvelope />
@@ -177,10 +181,14 @@ const SignUp = () => {
                 </div>
 
                 <div className="mb-3">
-                  <label htmlFor="password" className="form-label">
-                    Password
-                  </label>
-                  <div className="input-group" style={{ border: "1px solid #ced4da", borderRadius: "0.375rem" }}>
+                  <label htmlFor="password" className="form-label">Password</label>
+                  <div
+                    className="input-group"
+                    style={{
+                      border: `1px solid ${isPasswordInvalid ? 'red' : '#ced4da'}`,
+                      borderRadius: "0.375rem",
+                    }}
+                  >
                     <span className="input-group-text bg-light" style={{ borderRight: "1px solid #ced4da" }}>
                       <FaLock />
                     </span>
@@ -196,13 +204,22 @@ const SignUp = () => {
                       style={{ borderLeft: "none" }}
                     />
                   </div>
+                  {isPasswordInvalid && (
+                    <small className="text-danger">
+                      Password must be at least 8 characters with symbols and letters.
+                    </small>
+                  )}
                 </div>
 
                 <div className="mb-3">
-                  <label htmlFor="confirmPassword" className="form-label">
-                    Confirm Password
-                  </label>
-                  <div className="input-group" style={{ border: "1px solid #ced4da", borderRadius: "0.375rem" }}>
+                  <label htmlFor="confirmPassword" className="form-label">Confirm Password</label>
+                  <div
+                    className="input-group"
+                    style={{
+                      border: `1px solid ${isConfirmInvalid ? 'red' : '#ced4da'}`,
+                      borderRadius: "0.375rem",
+                    }}
+                  >
                     <span className="input-group-text bg-light" style={{ borderRight: "1px solid #ced4da" }}>
                       <FaLock />
                     </span>
@@ -218,6 +235,9 @@ const SignUp = () => {
                       style={{ borderLeft: "none" }}
                     />
                   </div>
+                  {isConfirmInvalid && (
+                    <small className="text-danger">Password does not match.</small>
+                  )}
                 </div>
 
                 <div className="mb-3 form-check">
@@ -233,13 +253,8 @@ const SignUp = () => {
                   />
                   <label className="form-check-label" htmlFor="agreeTerms">
                     I agree to the{" "}
-                    <a href="#" className="text-success">
-                      Terms of Service
-                    </a>{" "}
-                    and{" "}
-                    <a href="#" className="text-success">
-                      Privacy Policy
-                    </a>
+                    <a href="#" className="text-success">Terms of Service</a> and{" "}
+                    <a href="#" className="text-success">Privacy Policy</a>
                   </label>
                 </div>
 
@@ -273,14 +288,14 @@ const SignUp = () => {
                   className="btn btn-light w-100 py-2 border d-flex align-items-center justify-content-center"
                   onClick={handleGoogleSignIn}
                   disabled={isLoading}
-                  style={{ 
+                  style={{
                     backgroundColor: '#fff',
                     color: '#5F6368',
                     fontWeight: '500'
                   }}
                 >
-                  <img 
-                    src="https://www.google.com/favicon.ico" 
+                  <img
+                    src="https://www.google.com/favicon.ico"
                     alt="Google"
                     style={{ width: '20px', height: '20px', marginRight: '10px' }}
                   />
@@ -303,3 +318,5 @@ const SignUp = () => {
 };
 
 export default SignUp;
+
+
