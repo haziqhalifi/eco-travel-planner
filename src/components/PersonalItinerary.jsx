@@ -3,13 +3,13 @@ import { Card, Button, ListGroup, Col, Row } from 'react-bootstrap';
 import { Trash2, Edit3 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-const PersonalItinerary = ({ personalItineraryItems, allTrips, onRemoveFromItinerary, formatDate }) => {
+const PersonalItinerary = ({ personalTrips, onRemoveFromItinerary, formatDate }) => {
    const navigate = useNavigate();
 
-   if (!personalItineraryItems || personalItineraryItems.length === 0) {
+   if (!personalTrips || personalTrips.length === 0) {
       return (
          <div className="mt-4 p-3 bg-light rounded shadow-sm text-center">
-            <p className="text-muted mb-0">Your personal itinerary is empty.</p>
+            <p className="text-muted mb-0">Your personal collection is empty.</p>
             <small>Add trips from the list above to get started!</small>
          </div>
       );
@@ -17,41 +17,34 @@ const PersonalItinerary = ({ personalItineraryItems, allTrips, onRemoveFromItine
 
    return (
       <div className="mt-5">
-         <h2 className="fw-bold text-forest mb-3">My Personal Itinerary</h2>
+         <h2 className="fw-bold text-forest mb-3">My Personal Trip Collection</h2>
          <Card className="shadow-sm">
             <ListGroup variant="flush">
-               {personalItineraryItems.map(item => {
-                  const tripDetails = allTrips.find(t => t.id === item.tripId);
-                  if (!tripDetails) {
-                     // This itinerary item references a trip not found in allTrips
-                     // Should ideally not happen, but good to handle
-                     console.warn(`Trip details not found for tripId: ${item.tripId}`);
-                     return (
-                        <ListGroup.Item key={item.id} variant="danger">
-                           Error: Trip data missing for an item in your itinerary.
-                        </ListGroup.Item>
-                     );
-                  }
-
+               {personalTrips.map(trip => {
                   return (
-                     <ListGroup.Item key={item.id} className="p-3">
+                     <ListGroup.Item key={trip.id} className="p-3">
                         <Row className="align-items-center">
                            <Col md={8}>
-                              <h5 className="mb-1 text-forest">{tripDetails.title}</h5>
-                              <small className="text-muted">{tripDetails.location}</small>
+                              <h5 className="mb-1 text-forest">{trip.title}</h5>
+                              <small className="text-muted">{trip.location}</small>
                               <div className="mt-2">
                                  <small className="text-muted">
-                                    Dates: {formatDate(tripDetails.startDate)} - {formatDate(tripDetails.endDate)}
+                                    Dates: {formatDate(trip.startDate)} - {formatDate(trip.endDate)}
                                  </small>
                               </div>
+                              {trip.personalTripId && (
+                                 <div className="mt-1">
+                                    <small className="text-info">✓ Customized version</small>
+                                 </div>
+                              )}
                            </Col>
                            <Col md={4} className="text-md-end d-flex flex-column flex-md-row justify-content-end align-items-stretch">
                               <Button
                                  variant="outline-secondary"
                                  size="sm"
                                  className="mb-2 mb-md-0 me-md-2 d-flex align-items-center justify-content-center"
-                                 onClick={() => navigate(`/itinerary/${tripDetails.id}`)}
-                                 aria-label={`Edit activities for ${tripDetails.title}`}
+                                 onClick={() => navigate(`/my-itinerary/${trip._id}`)}
+                                 aria-label={`Edit activities for ${trip.title}`}
                               >
                                  <Edit3 size={16} className="me-1" /> Edit
                               </Button>
@@ -59,8 +52,8 @@ const PersonalItinerary = ({ personalItineraryItems, allTrips, onRemoveFromItine
                                  variant="outline-danger"
                                  size="sm"
                                  className="d-flex align-items-center justify-content-center"
-                                 onClick={() => onRemoveFromItinerary && onRemoveFromItinerary(item.id)}
-                                 aria-label={`Remove ${tripDetails.title} from itinerary`}
+                                 onClick={() => onRemoveFromItinerary && onRemoveFromItinerary(trip._id)}
+                                 aria-label={`Remove ${trip.title} from collection`}
                               >
                                  <Trash2 size={16} className="me-1" /> Remove
                               </Button>

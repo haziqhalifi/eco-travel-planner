@@ -2,19 +2,26 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FaGoogle, FaEnvelope, FaLock, FaLeaf } from "react-icons/fa";
+import { useAuth } from "../contexts/AuthContext";
 
-const SignIn = ({ setIsLoggedIn }) => {
+const SignIn = () => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     rememberMe: false,
   });
-  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { login, isLoading, isLoggedIn } = useAuth();
 
   useEffect(() => {
     document.title = "EcoTravel | Sign In";
-  }, []);
+
+    // Redirect if already logged in
+    if (isLoggedIn) {
+      navigate("/dashboard");
+    }
+  }, [isLoggedIn, navigate]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -22,29 +29,39 @@ const SignIn = ({ setIsLoggedIn }) => {
       ...formData,
       [name]: type === "checkbox" ? checked : value,
     });
+    // Clear error when user starts typing
+    if (error) setError("");
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
-    console.log("Login submitted:", formData);
-    
-    setTimeout(() => {
-      setIsLoggedIn(true);
-      setIsLoading(false);
-      navigate("/dashboard");
-    }, 1500);
+    setError("");
+
+    // Basic validation
+    if (!formData.email || !formData.password) {
+      setError("Please fill in all fields");
+      return;
+    }
+
+    try {
+      const result = await login({
+        email: formData.email,
+        password: formData.password,
+      });
+
+      if (result.success) {
+        navigate("/dashboard");
+      } else {
+        setError(result.error);
+      }
+    } catch (error) {
+      setError("An unexpected error occurred. Please try again.");
+    }
   };
 
   const handleGoogleSignIn = () => {
-    setIsLoading(true);
-    console.log("Google sign in initiated");
-    
-    setTimeout(() => {
-      setIsLoggedIn(true);
-      setIsLoading(false);
-      navigate("/dashboard");
-    }, 1500);
+    // TODO: Implement Google OAuth integration
+    setError("Google Sign-In will be implemented soon");
   };
 
   const containerVariants = {
@@ -129,6 +146,18 @@ const SignIn = ({ setIsLoggedIn }) => {
                 </button>
               </motion.div>
 
+              {/* Error Message */}
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="alert alert-danger"
+                  role="alert"
+                >
+                  {error}
+                </motion.div>
+              )}
+
               <motion.form variants={itemVariants} onSubmit={handleSubmit} className="flex-grow-1 d-flex flex-column">
                 <div className="mb-3">
                   <label htmlFor="email" className="form-label">
@@ -147,6 +176,7 @@ const SignIn = ({ setIsLoggedIn }) => {
                       value={formData.email}
                       onChange={handleChange}
                       required
+                      disabled={isLoading}
                       style={{ borderLeft: "none" }}
                     />
                   </div>
@@ -169,6 +199,7 @@ const SignIn = ({ setIsLoggedIn }) => {
                       value={formData.password}
                       onChange={handleChange}
                       required
+                      disabled={isLoading}
                       style={{ borderLeft: "none" }}
                     />
                   </div>
@@ -183,6 +214,7 @@ const SignIn = ({ setIsLoggedIn }) => {
                       name="rememberMe"
                       checked={formData.rememberMe}
                       onChange={handleChange}
+                      disabled={isLoading}
                       style={{ border: "1px solid #ced4da" }}
                     />
                     <label className="form-check-label" htmlFor="rememberMe">
@@ -195,56 +227,51 @@ const SignIn = ({ setIsLoggedIn }) => {
                 </div>
 
                 <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={{ scale: isLoading ? 1 : 1.02 }}
+                  whileTap={{ scale: isLoading ? 1 : 0.98 }}
                   type="submit"
-                  className="btn btn-success w-100 py-2 mb-3 mt-auto"
-                  style={{ transition: "background 0.2s" }}
+                  className="btn btn-success mb-3 py-2"
                   disabled={isLoading}
+                  style={{ borderRadius: "2rem" }}
                 >
                   {isLoading ? (
-                    <div className="spinner-border spinner-border-sm" role="status">
-                      <span className="visually-hidden">Loading...</span>
-                    </div>
+                    <>
+                      <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                      Signing In...
+                    </>
                   ) : (
                     "Sign In"
                   )}
                 </motion.button>
 
                 <div className="d-flex align-items-center mb-3">
-                  <hr className="flex-grow-1" style={{ borderColor: "#dee2e6" }} />
-                  <span className="px-2 text-muted" style={{ whiteSpace: "nowrap" }}>OR</span>
-                  <hr className="flex-grow-1" style={{ borderColor: "#dee2e6" }} />
+                  <hr className="flex-grow-1" />
+                  <span className="mx-3 text-muted">or</span>
+                  <hr className="flex-grow-1" />
                 </div>
 
                 <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={{ scale: isLoading ? 1 : 1.02 }}
+                  whileTap={{ scale: isLoading ? 1 : 0.98 }}
                   type="button"
-                  className="btn btn-light w-100 py-2 border d-flex align-items-center justify-content-center"
+                  className="btn btn-outline-danger mb-3 py-2 d-flex align-items-center justify-content-center"
                   onClick={handleGoogleSignIn}
                   disabled={isLoading}
-                  style={{ 
-                    backgroundColor: '#fff',
-                    color: '#5F6368',
-                    fontWeight: '500'
-                  }}
+                  style={{ borderRadius: "2rem" }}
                 >
-                  <img 
-                    src="https://www.google.com/favicon.ico" 
-                    alt="Google"
-                    style={{ width: '20px', height: '20px', marginRight: '10px' }}
-                  />
-                  Sign in with Google
+                  <FaGoogle className="me-2" />
+                  Continue with Google
                 </motion.button>
-              </motion.form>
 
-              <motion.div variants={itemVariants} className="text-center mt-3">
-                Don't have an account?{" "}
-                <a href="/signup" className="text-success fw-semibold">
-                  Sign up
-                </a>
-              </motion.div>
+                <div className="text-center mt-auto">
+                  <p className="text-muted">
+                    Don't have an account?{" "}
+                    <a href="/signup" className="text-success text-decoration-none">
+                      Sign up here
+                    </a>
+                  </p>
+                </div>
+              </motion.form>
             </motion.div>
           </motion.div>
         </div>

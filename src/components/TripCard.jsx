@@ -11,7 +11,7 @@ const TripCard = ({ trip, onTripSelect, formatDate, calculateDuration, onAddToIt
       <Card
          className="h-100 shadow-sm border-0 trip-card"
          style={{ cursor: 'pointer', transition: 'transform 0.3s' }}
-         onClick={() => onTripSelect(trip.id)}
+         onClick={() => onTripSelect(trip.tripId)}
       >
          <div style={{ height: '200px', overflow: 'hidden' }}>
             <Card.Img
@@ -73,7 +73,7 @@ const TripCard = ({ trip, onTripSelect, formatDate, calculateDuration, onAddToIt
                      onClick={(e) => {
                         e.stopPropagation();
                         if (onAddToItinerary) {
-                           onAddToItinerary(trip.id);
+                           onAddToItinerary(trip.tripId);
                         }
                      }}
                      aria-label="Add to Itinerary"
