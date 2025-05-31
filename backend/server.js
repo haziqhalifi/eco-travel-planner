@@ -7,6 +7,7 @@ import authRoutes from "./routes/authRoutes.js";
 import tripRoutes from "./routes/tripRoutes.js";
 import personalTripRoutes from "./routes/personalTripRoutes.js";
 import serpRoutes from "./routes/serpRoutes.js";
+import weatherRoutes from "./routes/weatherRoutes.js";
 import axios from "axios";
 
 dotenv.config();
@@ -25,6 +26,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/trips", tripRoutes);
 app.use("/api/personal-trips", personalTripRoutes);
 app.use("/api/serp", serpRoutes);
+app.use("/api/weather", weatherRoutes);
 
 // Health check endpoint
 app.get("/api/health", (req, res) => {
