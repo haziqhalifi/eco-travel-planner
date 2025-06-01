@@ -1,11 +1,31 @@
+import { useEffect, useState } from "react";
 import { Bed, Map, Calculator, Cloud } from "lucide-react";
-import { Link } from "react-router-dom";
 import CardImage from "../components/cardImage";
 import Card from "../components/card";
-import pataya from "../assets/pataya.jpg";
 import forest from "../assets/forest.jpg";
+import { tripsAPI } from "../services/api";
 
 function Dashboard() {
+  const [topTrips, setTopTrips] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchTop = async () => {
+      try {
+        setLoading(true);
+        // Fetch all trips and just take the first 4
+        const res = await tripsAPI.getAllTrips();
+        setTopTrips((res.data || []).slice(0, 4));
+      } catch (err) {
+        setError("Failed to load top destinations");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTop();
+  }, []);
+
   return (
     <div className="bg-white text-dark">
       {/* Hero Section */}
@@ -26,7 +46,7 @@ function Dashboard() {
           </p>
 
           {/* Search Bar */}
-          <div className="row justify-content-center g-2">
+          {/* <div className="row justify-content-center g-2">
             <div className="col-10 col-md-3">
               <input
                 type="text"
@@ -46,9 +66,10 @@ function Dashboard() {
                 Search Eco Options
               </button>
             </div>
-          </div>
+          </div> */}
         </div>
       </section>
+
       {/* Feature Cards */}
       <section className="container py-5">
         <div className="row text-center">
@@ -91,22 +112,31 @@ function Dashboard() {
         </div>
       </section>
 
+      {/* Top Destinations Section */}
       <section className="bg-light py-5">
         <div className="container">
           <h2 className="fw-semibold mb-4 text-center">Top Destinations</h2>
-          <div className="d-flex gap-3 overflow-auto">
-            {[...Array(4)].map((_, index) => (
-              <CardImage
-                key={index}
-                title="Pataya"
-                image={pataya}
-                description="Explore our beach"
-                linkText="View details"
-              />
-            ))}
-          </div>
+          {loading ? (
+            <div className="text-center py-5">Loading...</div>
+          ) : error ? (
+            <div className="text-danger text-center py-5">{error}</div>
+          ) : (
+            <div className="d-flex gap-3 overflow-auto">
+              {topTrips.map((trip, index) => (
+                <CardImage
+                  key={trip._id || index}
+                  title={trip.title}
+                  image={trip.image}
+                  description={trip.description}
+                  linkText="View details"
+                  link={`/itinerary/${trip.tripId || trip.id}`}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </section>
+
       {/* Environmental Impact Calculator */}
       <section className="container py-5">
         <div className="row align-items-start">
