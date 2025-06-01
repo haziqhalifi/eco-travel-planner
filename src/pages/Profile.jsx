@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User, Mail, Info } from 'lucide-react';
 
 const ProfilePage = () => {
-  const [name, setName] = useState('John Doe');
-  const [email, setEmail] = useState('john@example.com');
+  const [name, setName] = useState('Loading...');
+  const [email, setEmail] = useState('Loading...');
   const [bio, setBio] = useState('Edit your Bio.');
   const [isEditing, setIsEditing] = useState(false);
-  const [tempName, setTempName] = useState(name);
-  const [tempEmail, setTempEmail] = useState(email);
-  const [tempBio, setTempBio] = useState(bio);
+  const [tempName, setTempName] = useState('');
+  const [tempEmail, setTempEmail] = useState('');
+  const [tempBio, setTempBio] = useState('');
 
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
@@ -17,12 +17,79 @@ const ProfilePage = () => {
 
   const [accountDeleted, setAccountDeleted] = useState(false);
 
-  const handleSaveProfile = () => {
-    setName(tempName);
-    setEmail(tempEmail);
-    setBio(tempBio);
-    setIsEditing(false);
-    alert('Profile updated successfully!');
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        alert('No token found, please login.');
+        return;
+      }
+
+      try {
+        const response = await fetch('http://localhost:5001/api/auth/verify', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch user data');
+        }
+
+        const data = await response.json();
+
+        setName(data.user.username);
+        setEmail(data.user.email);
+        setBio(data.user.bio || 'Edit your Bio.');
+
+        setTempName(data.user.username);
+        setTempEmail(data.user.email);
+        setTempBio(data.user.bio || 'Edit your Bio.');
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        alert('Failed to load user data.');
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  const handleSaveProfile = async () => {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      alert('No token found. Please login again.');
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:5001/api/auth/update-profile', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          username: tempName,
+          email: tempEmail,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update profile');
+      }
+
+      const data = await response.json();
+
+      setName(data.user.username);
+      setEmail(data.user.email);
+      setBio(tempBio); // bio is only local for now
+      setIsEditing(false);
+      alert('Profile updated successfully!');
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      alert('Failed to update profile. Please try again.');
+    }
   };
 
   const handleCancelEdit = () => {
@@ -32,17 +99,52 @@ const ProfilePage = () => {
     setIsEditing(false);
   };
 
-  const handleSavePassword = () => {
-    if (newPassword !== confirmNewPassword) {
-      alert('New passwords do not match.');
-      return;
+  const handleSavePassword = async () => {
+  if (newPassword !== confirmNewPassword) {
+    alert('New passwords do not match.');
+    return;
+  }
+
+  if (newPassword.length < 6) {
+    alert('New password must be at least 6 characters long.');
+    return;
+  }
+
+  const token = localStorage.getItem('authToken');
+  if (!token) {
+    alert('No token found. Please login again.');
+    return;
+  }
+
+  try {
+    const response = await fetch('http://localhost:5001/api/auth/update-password', {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        currentPassword,
+        newPassword,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Failed to update password');
     }
+
     alert('Password updated successfully!');
     setCurrentPassword('');
     setNewPassword('');
     setConfirmNewPassword('');
     setIsChangingPassword(false);
-  };
+  } catch (error) {
+    console.error('Error updating password:', error);
+    alert(error.message || 'Failed to update password. Please try again.');
+  }
+};
+
 
   const handleCancelPassword = () => {
     setCurrentPassword('');
@@ -52,9 +154,12 @@ const ProfilePage = () => {
   };
 
   const handleDeleteAccount = () => {
-    const confirmed = window.confirm('Are you sure you want to delete your account? This action is permanent.');
+    const confirmed = window.confirm(
+      'Are you sure you want to delete your account? This action is permanent.'
+    );
     if (confirmed) {
       setAccountDeleted(true);
+      // TODO: Add API call here to delete account on backend
     }
   };
 
