@@ -1,11 +1,16 @@
 import express from "express";
 // import tripsData from "../data/tripsData.js";
-import {fetchAllTrips, fetchTripById} from "../controller/tripController.js";
+import {
+  fetchAllTrips,
+  fetchTripById,
+  fetchTopTrips,
+} from "../controller/tripController.js";
 
 const router = express.Router();
 
 router.get("/", fetchAllTrips);
 router.get("/:tripId", fetchTripById);
+router.get("/top", fetchTopTrips);
 
 // @route   GET /api/trips/tags/all
 // @desc    Get all available tags

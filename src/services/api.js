@@ -131,6 +131,11 @@ export const tripsAPI = {
   getBudgetRanges: async () => {
     return await apiRequest("/trips/budget-ranges/all");
   },
+
+  // Get top trips
+  getTopTrips: async (limit = 4) => {
+    return await apiRequest(`/trips/top?limit=${limit}`);
+  },
 };
 
 // Personal Trips API

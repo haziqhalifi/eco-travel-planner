@@ -1,4 +1,8 @@
-import { getFilteredTrips, getTripById } from "../service/tripService.js";
+import {
+  getFilteredTrips,
+  getTripById,
+  getTopTrips,
+} from "../service/tripService.js";
 
 export const fetchAllTrips = async (req, res) => {
   try {
@@ -6,13 +10,11 @@ export const fetchAllTrips = async (req, res) => {
     const data = await getFilteredTrips(filters);
     res.json({ success: true, count: data.length, data });
   } catch (err) {
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Error fetching trips",
-        error: err.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Error fetching trips",
+      error: err.message,
+    });
   }
 };
 
@@ -36,12 +38,24 @@ export const fetchTripById = async (req, res) => {
 
     res.json({ success: true, data: trip });
   } catch (err) {
-    res
-      .status(500)
-      .json({
-        success: false,
-        message: "Error fetching trip",
-        error: err.message,
-      });
+    res.status(500).json({
+      success: false,
+      message: "Error fetching trip",
+      error: err.message,
+    });
+  }
+};
+
+export const fetchTopTrips = async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 4;
+    const data = await getTopTrips(limit);
+    res.json({ success: true, count: data.length, data });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: "Error fetching top trips",
+      error: err.message,
+    });
   }
 };

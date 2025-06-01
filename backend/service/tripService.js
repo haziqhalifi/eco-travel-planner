@@ -23,13 +23,13 @@ export const getFilteredTrips = async ({
   if (search) {
     const regex = new RegExp(search, "i");
     query.$or = [
-      {title: regex},
-      {description: regex},
-      {location: regex},
-      {tags : regex},
-      {transportation : regex},
-      {activities : regex},
-    ]
+      { title: regex },
+      { description: regex },
+      { location: regex },
+      { tags: regex },
+      { transportation: regex },
+      { activities: regex },
+    ];
   }
   const trips = await Trip.find(query).lean();
   return trips;
@@ -43,6 +43,13 @@ export const getTripById = async (tripId) => {
   }
 
   return trip;
+};
+
+export const getTopTrips = async (limit = 4) => {
+  // You can sort by popularity, rating, or just return the latest/first N trips
+  // For now, return the first N trips
+  const trips = await Trip.find().limit(limit).lean();
+  return trips;
 };
 
 // export const getAllTags = () => [
