@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FaGoogle, FaEnvelope, FaLock, FaLeaf } from "react-icons/fa";
+import { FaGoogle, FaEnvelope, FaLock, FaLeaf, FaEye, FaEyeSlash } from "react-icons/fa";
 
 const SignIn = ({ setIsLoggedIn }) => {
   const [formData, setFormData] = useState({
@@ -11,6 +11,7 @@ const SignIn = ({ setIsLoggedIn }) => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -192,7 +193,7 @@ const SignIn = ({ setIsLoggedIn }) => {
                       <FaLock />
                     </span>
                     <input
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       className="form-control"
                       id="password"
                       name="password"
@@ -202,11 +203,23 @@ const SignIn = ({ setIsLoggedIn }) => {
                       required
                       style={{
                         borderLeft: "none",
-                        borderRadius: "0 0.375rem 0.375rem 0",
+                        borderRight: "none",
+                        borderRadius: "0",
                         outline: "none",
                         boxShadow: "none",
                       }}
                     />
+                    <span
+                      className="input-group-text bg-light"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      style={{
+                        cursor: "pointer",
+                        borderLeft: `1px solid ${passwordError ? "#dc3545" : "#ced4da"}`,
+                        borderRadius: "0 0.375rem 0.375rem 0",
+                      }}
+                    >
+                      {showPassword ? <FaEyeSlash /> : <FaEye />}
+                    </span>
                   </div>
                   {passwordError && (
                     <div style={{ color: "#dc3545", fontSize: "0.875rem", marginTop: "0.25rem" }}>
@@ -296,5 +309,6 @@ const SignIn = ({ setIsLoggedIn }) => {
 };
 
 export default SignIn;
+
 
 
