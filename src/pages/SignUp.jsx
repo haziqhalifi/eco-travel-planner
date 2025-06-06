@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FaGoogle, FaUser, FaEnvelope, FaLock, FaLeaf } from "react-icons/fa";
+import { FaGoogle, FaUser, FaEnvelope, FaLock, FaLeaf, FaEye, FaEyeSlash } from "react-icons/fa";
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
@@ -11,6 +11,9 @@ const SignUp = () => {
     confirmPassword: "",
     agreeTerms: false,
   });
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -193,7 +196,7 @@ const SignUp = () => {
                       <FaLock />
                     </span>
                     <input
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       className="form-control"
                       id="password"
                       name="password"
@@ -201,8 +204,15 @@ const SignUp = () => {
                       value={formData.password}
                       onChange={handleChange}
                       required
-                      style={{ borderLeft: "none" }}
+                      style={{ borderLeft: "none", borderRight: "none" }}
                     />
+                    <span
+                      className="input-group-text bg-light"
+                      style={{ cursor: "pointer" }}
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <FaEyeSlash /> : <FaEye />}
+                    </span>
                   </div>
                   {isPasswordInvalid && (
                     <small className="text-danger">
@@ -224,7 +234,7 @@ const SignUp = () => {
                       <FaLock />
                     </span>
                     <input
-                      type="password"
+                      type={showConfirmPassword ? "text" : "password"}
                       className="form-control"
                       id="confirmPassword"
                       name="confirmPassword"
@@ -232,8 +242,15 @@ const SignUp = () => {
                       value={formData.confirmPassword}
                       onChange={handleChange}
                       required
-                      style={{ borderLeft: "none" }}
+                      style={{ borderLeft: "none", borderRight: "none" }}
                     />
+                    <span
+                      className="input-group-text bg-light"
+                      style={{ cursor: "pointer" }}
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    >
+                      {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                    </span>
                   </div>
                   {isConfirmInvalid && (
                     <small className="text-danger">Password does not match.</small>
@@ -318,5 +335,6 @@ const SignUp = () => {
 };
 
 export default SignUp;
+
 
 
