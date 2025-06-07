@@ -11,7 +11,7 @@ This is a team project for WIF2003 Web Programming under Dr. Chiam Yin Kia.
 - Dashboard
 - Eco-Friendly Travel Options
 - Green Itinerary Planner
-- Weather Forecast (optional)
+- Weather Forecast
 - Carbon Footprint Calculator
 - Profile Management
 
@@ -31,7 +31,7 @@ This is a team project for WIF2003 Web Programming under Dr. Chiam Yin Kia.
 ### 1. Clone the Repo
 
 ```bash
-git clone https://github.com/your-username/eco-travel-planner.git
+git clone https://github.com/haziqhalifi/eco-travel-planner.git
 cd eco-travel-planner
 ```
 

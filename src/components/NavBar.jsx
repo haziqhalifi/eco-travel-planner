@@ -1,7 +1,16 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 import Logo from "../assets/logo.png";
 
-function Navbar({ isLoggedIn }) {
+function Navbar() {
+  const { isLoggedIn, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/signin");
+  };
+
   return (
     <nav className="bg-white shadow-md p-4 sticky top-0 z-50">
       <div className="container mx-auto flex items-center justify-between">
@@ -17,7 +26,7 @@ function Navbar({ isLoggedIn }) {
           />
           <span>Eco Travel Planner</span>
         </a>
-        <div className="flex space-x-6">
+        <div className="flex space-x-6 items-center">
           {isLoggedIn ? (
             <>
               <Link
@@ -53,6 +62,16 @@ function Navbar({ isLoggedIn }) {
               >
                 Profile
               </Link>
+
+              {/* User info and logout */}
+              <div className="flex items-center">
+                <button
+                  onClick={handleLogout}
+                  className="text-dark-green hover:text-green-600 bg-transparent border-none cursor-pointer"
+                >
+                  Logout
+                </button>
+              </div>
             </>
           ) : (
             <>
