@@ -1,7 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FaGoogle, FaUser, FaEnvelope, FaLock, FaLeaf, FaEye, FaEyeSlash } from "react-icons/fa";
+import {
+  FaGoogle,
+  FaUser,
+  FaEnvelope,
+  FaLock,
+  FaLeaf,
+  FaEye,
+  FaEyeSlash,
+} from "react-icons/fa";
+import { useAuth } from "../contexts/AuthContext";
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
@@ -16,6 +25,7 @@ const SignUp = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { register } = useAuth();
 
   useEffect(() => {
     document.title = "EcoTravel | Sign Up";
@@ -39,15 +49,19 @@ const SignUp = () => {
     formData.confirmPassword.length > 0 &&
     formData.confirmPassword !== formData.password;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    console.log("Form submitted:", formData);
-
-    setTimeout(() => {
-      setIsLoading(false);
+    // Prepare registration data
+    const { username, email, password } = formData;
+    const result = await register({ username, email, password });
+    setIsLoading(false);
+    if (result.success) {
       navigate("/dashboard");
-    }, 1500);
+    } else {
+      // Optionally show error to user
+      alert(result.error || "Registration failed");
+    }
   };
 
   const handleGoogleSignIn = () => {
@@ -115,14 +129,23 @@ const SignUp = () => {
                   whileHover={{ scale: 1.1 }}
                   transition={{ type: "spring", stiffness: 400, damping: 10 }}
                 >
-                  <FaLeaf className="text-success" style={{ fontSize: "2.5rem" }} />
+                  <FaLeaf
+                    className="text-success"
+                    style={{ fontSize: "2.5rem" }}
+                  />
                 </motion.div>
               </motion.div>
 
-              <motion.h2 variants={itemVariants} className="text-center mb-1 fw-bold">
+              <motion.h2
+                variants={itemVariants}
+                className="text-center mb-1 fw-bold"
+              >
                 Welcome to EcoTravel
               </motion.h2>
-              <motion.p variants={itemVariants} className="text-center text-muted mb-4">
+              <motion.p
+                variants={itemVariants}
+                className="text-center text-muted mb-4"
+              >
                 Your gateway to sustainable travel
               </motion.p>
 
@@ -142,11 +165,26 @@ const SignUp = () => {
                 </a>
               </motion.div>
 
-              <motion.form variants={itemVariants} onSubmit={handleSubmit} className="flex-grow-1 d-flex flex-column">
+              <motion.form
+                variants={itemVariants}
+                onSubmit={handleSubmit}
+                className="flex-grow-1 d-flex flex-column"
+              >
                 <div className="mb-3">
-                  <label htmlFor="username" className="form-label">Username</label>
-                  <div className="input-group" style={{ border: "1px solid #ced4da", borderRadius: "0.375rem" }}>
-                    <span className="input-group-text bg-light" style={{ borderRight: "1px solid #ced4da" }}>
+                  <label htmlFor="username" className="form-label">
+                    Username
+                  </label>
+                  <div
+                    className="input-group"
+                    style={{
+                      border: "1px solid #ced4da",
+                      borderRadius: "0.375rem",
+                    }}
+                  >
+                    <span
+                      className="input-group-text bg-light"
+                      style={{ borderRight: "1px solid #ced4da" }}
+                    >
                       <FaUser />
                     </span>
                     <input
@@ -164,9 +202,20 @@ const SignUp = () => {
                 </div>
 
                 <div className="mb-3">
-                  <label htmlFor="email" className="form-label">Email</label>
-                  <div className="input-group" style={{ border: "1px solid #ced4da", borderRadius: "0.375rem" }}>
-                    <span className="input-group-text bg-light" style={{ borderRight: "1px solid #ced4da" }}>
+                  <label htmlFor="email" className="form-label">
+                    Email
+                  </label>
+                  <div
+                    className="input-group"
+                    style={{
+                      border: "1px solid #ced4da",
+                      borderRadius: "0.375rem",
+                    }}
+                  >
+                    <span
+                      className="input-group-text bg-light"
+                      style={{ borderRight: "1px solid #ced4da" }}
+                    >
                       <FaEnvelope />
                     </span>
                     <input
@@ -184,15 +233,22 @@ const SignUp = () => {
                 </div>
 
                 <div className="mb-3">
-                  <label htmlFor="password" className="form-label">Password</label>
+                  <label htmlFor="password" className="form-label">
+                    Password
+                  </label>
                   <div
                     className="input-group"
                     style={{
-                      border: `1px solid ${isPasswordInvalid ? 'red' : '#ced4da'}`,
+                      border: `1px solid ${
+                        isPasswordInvalid ? "red" : "#ced4da"
+                      }`,
                       borderRadius: "0.375rem",
                     }}
                   >
-                    <span className="input-group-text bg-light" style={{ borderRight: "1px solid #ced4da" }}>
+                    <span
+                      className="input-group-text bg-light"
+                      style={{ borderRight: "1px solid #ced4da" }}
+                    >
                       <FaLock />
                     </span>
                     <input
@@ -216,21 +272,29 @@ const SignUp = () => {
                   </div>
                   {isPasswordInvalid && (
                     <small className="text-danger">
-                      Password must be at least 8 characters with symbols and letters.
+                      Password must be at least 8 characters with symbols and
+                      letters.
                     </small>
                   )}
                 </div>
 
                 <div className="mb-3">
-                  <label htmlFor="confirmPassword" className="form-label">Confirm Password</label>
+                  <label htmlFor="confirmPassword" className="form-label">
+                    Confirm Password
+                  </label>
                   <div
                     className="input-group"
                     style={{
-                      border: `1px solid ${isConfirmInvalid ? 'red' : '#ced4da'}`,
+                      border: `1px solid ${
+                        isConfirmInvalid ? "red" : "#ced4da"
+                      }`,
                       borderRadius: "0.375rem",
                     }}
                   >
-                    <span className="input-group-text bg-light" style={{ borderRight: "1px solid #ced4da" }}>
+                    <span
+                      className="input-group-text bg-light"
+                      style={{ borderRight: "1px solid #ced4da" }}
+                    >
                       <FaLock />
                     </span>
                     <input
@@ -247,13 +311,17 @@ const SignUp = () => {
                     <span
                       className="input-group-text bg-light"
                       style={{ cursor: "pointer" }}
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
                     >
                       {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
                     </span>
                   </div>
                   {isConfirmInvalid && (
-                    <small className="text-danger">Password does not match.</small>
+                    <small className="text-danger">
+                      Password does not match.
+                    </small>
                   )}
                 </div>
 
@@ -270,8 +338,13 @@ const SignUp = () => {
                   />
                   <label className="form-check-label" htmlFor="agreeTerms">
                     I agree to the{" "}
-                    <a href="#" className="text-success">Terms of Service</a> and{" "}
-                    <a href="#" className="text-success">Privacy Policy</a>
+                    <a href="#" className="text-success">
+                      Terms of Service
+                    </a>{" "}
+                    and{" "}
+                    <a href="#" className="text-success">
+                      Privacy Policy
+                    </a>
                   </label>
                 </div>
 
@@ -284,7 +357,10 @@ const SignUp = () => {
                   disabled={isLoading}
                 >
                   {isLoading ? (
-                    <div className="spinner-border spinner-border-sm" role="status">
+                    <div
+                      className="spinner-border spinner-border-sm"
+                      role="status"
+                    >
                       <span className="visually-hidden">Loading...</span>
                     </div>
                   ) : (
@@ -293,9 +369,20 @@ const SignUp = () => {
                 </motion.button>
 
                 <div className="d-flex align-items-center mb-3">
-                  <hr className="flex-grow-1" style={{ borderColor: "#dee2e6" }} />
-                  <span className="px-2 text-muted" style={{ whiteSpace: "nowrap" }}>OR</span>
-                  <hr className="flex-grow-1" style={{ borderColor: "#dee2e6" }} />
+                  <hr
+                    className="flex-grow-1"
+                    style={{ borderColor: "#dee2e6" }}
+                  />
+                  <span
+                    className="px-2 text-muted"
+                    style={{ whiteSpace: "nowrap" }}
+                  >
+                    OR
+                  </span>
+                  <hr
+                    className="flex-grow-1"
+                    style={{ borderColor: "#dee2e6" }}
+                  />
                 </div>
 
                 <motion.button
@@ -306,15 +393,19 @@ const SignUp = () => {
                   onClick={handleGoogleSignIn}
                   disabled={isLoading}
                   style={{
-                    backgroundColor: '#fff',
-                    color: '#5F6368',
-                    fontWeight: '500'
+                    backgroundColor: "#fff",
+                    color: "#5F6368",
+                    fontWeight: "500",
                   }}
                 >
                   <img
                     src="https://www.google.com/favicon.ico"
                     alt="Google"
-                    style={{ width: '20px', height: '20px', marginRight: '10px' }}
+                    style={{
+                      width: "20px",
+                      height: "20px",
+                      marginRight: "10px",
+                    }}
                   />
                   Sign up with Google
                 </motion.button>
@@ -335,6 +426,3 @@ const SignUp = () => {
 };
 
 export default SignUp;
-
-
-
