@@ -1,9 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FaGoogle, FaEnvelope, FaLock, FaLeaf, FaEye, FaEyeSlash } from "react-icons/fa";
+import {
+  FaGoogle,
+  FaEnvelope,
+  FaLock,
+  FaLeaf,
+  FaEye,
+  FaEyeSlash,
+} from "react-icons/fa";
+import { useAuth } from "../contexts/AuthContext";
 
-const SignIn = ({ setIsLoggedIn }) => {
+const SignIn = () => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -13,6 +21,7 @@ const SignIn = ({ setIsLoggedIn }) => {
   const [passwordError, setPasswordError] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   useEffect(() => {
     document.title = "EcoTravel | Sign In";
@@ -30,9 +39,9 @@ const SignIn = ({ setIsLoggedIn }) => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const { password } = formData;
+    const { email, password } = formData;
 
     const passwordRegex = /^(?=.*[A-Za-z])(?=.*[^A-Za-z0-9]).{8,}$/;
 
@@ -42,13 +51,16 @@ const SignIn = ({ setIsLoggedIn }) => {
     }
 
     setIsLoading(true);
-    console.log("Login submitted:", formData);
 
-    setTimeout(() => {
-      setIsLoggedIn(true);
-      setIsLoading(false);
+    // Use context login
+    const result = await login({ email, password });
+    setIsLoading(false);
+
+    if (result.success) {
       navigate("/dashboard");
-    }, 1500);
+    } else {
+      setPasswordError(true); // Optionally show error
+    }
   };
 
   const handleGoogleSignIn = () => {
@@ -56,7 +68,6 @@ const SignIn = ({ setIsLoggedIn }) => {
     console.log("Google sign in initiated");
 
     setTimeout(() => {
-      setIsLoggedIn(true);
       setIsLoading(false);
       navigate("/dashboard");
     }, 1500);
@@ -117,14 +128,23 @@ const SignIn = ({ setIsLoggedIn }) => {
                   whileHover={{ scale: 1.1 }}
                   transition={{ type: "spring", stiffness: 400, damping: 10 }}
                 >
-                  <FaLeaf className="text-success" style={{ fontSize: "2.5rem" }} />
+                  <FaLeaf
+                    className="text-success"
+                    style={{ fontSize: "2.5rem" }}
+                  />
                 </motion.div>
               </motion.div>
 
-              <motion.h2 variants={itemVariants} className="text-center mb-1 fw-bold">
+              <motion.h2
+                variants={itemVariants}
+                className="text-center mb-1 fw-bold"
+              >
                 Welcome to EcoTravel
               </motion.h2>
-              <motion.p variants={itemVariants} className="text-center text-muted mb-4">
+              <motion.p
+                variants={itemVariants}
+                className="text-center text-muted mb-4"
+              >
                 Your gateway to sustainable travel
               </motion.p>
 
@@ -153,8 +173,17 @@ const SignIn = ({ setIsLoggedIn }) => {
                   <label htmlFor="email" className="form-label">
                     Email
                   </label>
-                  <div className="input-group" style={{ border: "1px solid #ced4da", borderRadius: "0.375rem" }}>
-                    <span className="input-group-text bg-light" style={{ borderRight: "1px solid #ced4da" }}>
+                  <div
+                    className="input-group"
+                    style={{
+                      border: "1px solid #ced4da",
+                      borderRadius: "0.375rem",
+                    }}
+                  >
+                    <span
+                      className="input-group-text bg-light"
+                      style={{ borderRight: "1px solid #ced4da" }}
+                    >
                       <FaEnvelope />
                     </span>
                     <input
@@ -178,15 +207,21 @@ const SignIn = ({ setIsLoggedIn }) => {
                   <div
                     className="input-group"
                     style={{
-                      border: `1px solid ${passwordError ? "#dc3545" : "#ced4da"}`,
+                      border: `1px solid ${
+                        passwordError ? "#dc3545" : "#ced4da"
+                      }`,
                       borderRadius: "0.375rem",
-                      boxShadow: passwordError ? "0 0 0 0.2rem rgba(220, 53, 69, 0.25)" : "none",
+                      boxShadow: passwordError
+                        ? "0 0 0 0.2rem rgba(220, 53, 69, 0.25)"
+                        : "none",
                     }}
                   >
                     <span
                       className="input-group-text bg-light"
                       style={{
-                        borderRight: `1px solid ${passwordError ? "#dc3545" : "#ced4da"}`,
+                        borderRight: `1px solid ${
+                          passwordError ? "#dc3545" : "#ced4da"
+                        }`,
                         borderRadius: "0.375rem 0 0 0.375rem",
                       }}
                     >
@@ -214,7 +249,9 @@ const SignIn = ({ setIsLoggedIn }) => {
                       onClick={() => setShowPassword((prev) => !prev)}
                       style={{
                         cursor: "pointer",
-                        borderLeft: `1px solid ${passwordError ? "#dc3545" : "#ced4da"}`,
+                        borderLeft: `1px solid ${
+                          passwordError ? "#dc3545" : "#ced4da"
+                        }`,
                         borderRadius: "0 0.375rem 0.375rem 0",
                       }}
                     >
@@ -222,8 +259,15 @@ const SignIn = ({ setIsLoggedIn }) => {
                     </span>
                   </div>
                   {passwordError && (
-                    <div style={{ color: "#dc3545", fontSize: "0.875rem", marginTop: "0.25rem" }}>
-                      Password must be at least 8 characters with symbols and letters
+                    <div
+                      style={{
+                        color: "#dc3545",
+                        fontSize: "0.875rem",
+                        marginTop: "0.25rem",
+                      }}
+                    >
+                      Password must be at least 8 characters with symbols and
+                      letters
                     </div>
                   )}
                 </div>
@@ -256,7 +300,10 @@ const SignIn = ({ setIsLoggedIn }) => {
                   disabled={isLoading}
                 >
                   {isLoading ? (
-                    <div className="spinner-border spinner-border-sm" role="status">
+                    <div
+                      className="spinner-border spinner-border-sm"
+                      role="status"
+                    >
                       <span className="visually-hidden">Loading...</span>
                     </div>
                   ) : (
@@ -265,11 +312,20 @@ const SignIn = ({ setIsLoggedIn }) => {
                 </motion.button>
 
                 <div className="d-flex align-items-center mb-3">
-                  <hr className="flex-grow-1" style={{ borderColor: "#dee2e6" }} />
-                  <span className="px-2 text-muted" style={{ whiteSpace: "nowrap" }}>
+                  <hr
+                    className="flex-grow-1"
+                    style={{ borderColor: "#dee2e6" }}
+                  />
+                  <span
+                    className="px-2 text-muted"
+                    style={{ whiteSpace: "nowrap" }}
+                  >
                     OR
                   </span>
-                  <hr className="flex-grow-1" style={{ borderColor: "#dee2e6" }} />
+                  <hr
+                    className="flex-grow-1"
+                    style={{ borderColor: "#dee2e6" }}
+                  />
                 </div>
 
                 <motion.button
@@ -288,7 +344,11 @@ const SignIn = ({ setIsLoggedIn }) => {
                   <img
                     src="https://www.google.com/favicon.ico"
                     alt="Google"
-                    style={{ width: "20px", height: "20px", marginRight: "10px" }}
+                    style={{
+                      width: "20px",
+                      height: "20px",
+                      marginRight: "10px",
+                    }}
                   />
                   Sign in with Google
                 </motion.button>
@@ -309,6 +369,3 @@ const SignIn = ({ setIsLoggedIn }) => {
 };
 
 export default SignIn;
-
-
-
