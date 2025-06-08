@@ -20,6 +20,15 @@ const SignIn = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotStep, setForgotStep] = useState(1); // 1: ask email, 2: ask new password
+  const [forgotError, setForgotError] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [showForgotNewPassword, setShowForgotNewPassword] = useState(false);
+  const [showForgotConfirmPassword, setShowForgotConfirmPassword] =
+    useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -60,6 +69,7 @@ const SignIn = () => {
       navigate("/dashboard");
     } else {
       setPasswordError(true); // Optionally show error
+      alert(result.error || "Incorrect email or password.");
     }
   };
 
@@ -71,6 +81,74 @@ const SignIn = () => {
       setIsLoading(false);
       navigate("/dashboard");
     }, 1500);
+  };
+
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    setForgotError("");
+    if (forgotStep === 1) {
+      // Simulate API call to check if email exists
+      setIsLoading(true);
+      try {
+        // Replace with real API call
+        const res = await fetch("/api/auth/check-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: forgotEmail }),
+        });
+        const data = await res.json();
+        setIsLoading(false);
+        if (data.exists) {
+          setForgotStep(2);
+        } else {
+          setForgotError("Email not found.");
+        }
+      } catch {
+        setIsLoading(false);
+        setForgotError("Server error. Try again later.");
+      }
+    } else if (forgotStep === 2) {
+      if (
+        newPassword.length < 8 ||
+        !/[A-Za-z]/.test(newPassword) ||
+        !/[^A-Za-z0-9]/.test(newPassword)
+      ) {
+        setForgotError(
+          "Password must be at least 8 characters with symbols and letters."
+        );
+        return;
+      }
+      if (newPassword !== confirmNewPassword) {
+        setForgotError("Passwords do not match.");
+        return;
+      }
+      setIsLoading(true);
+      try {
+        // Replace with real API call
+        const res = await fetch("/api/auth/reset-password", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: forgotEmail, newPassword }),
+        });
+        const data = await res.json();
+        setIsLoading(false);
+        if (data.success) {
+          alert(
+            "Password reset successful. Please sign in with your new password."
+          );
+          setShowForgotPassword(false);
+          setForgotStep(1);
+          setForgotEmail("");
+          setNewPassword("");
+          setConfirmNewPassword("");
+        } else {
+          setForgotError(data.error || "Failed to reset password.");
+        }
+      } catch {
+        setIsLoading(false);
+        setForgotError("Server error. Try again later.");
+      }
+    }
   };
 
   const containerVariants = {
@@ -287,7 +365,14 @@ const SignIn = () => {
                       Remember me
                     </label>
                   </div>
-                  <a href="#" className="text-success">
+                  <a
+                    href="#"
+                    className="text-success"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setShowForgotPassword(true);
+                    }}
+                  >
                     Forgot password?
                   </a>
                 </div>
@@ -364,6 +449,167 @@ const SignIn = () => {
           </motion.div>
         </div>
       </div>
+
+      {showForgotPassword && (
+        <div
+          className="modal d-block"
+          tabIndex="-1"
+          style={{ background: "rgba(0,0,0,0.3)" }}
+        >
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Reset Password</h5>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => {
+                    setShowForgotPassword(false);
+                    setForgotStep(1);
+                    setForgotEmail("");
+                    setForgotError("");
+                    setNewPassword("");
+                    setConfirmNewPassword("");
+                  }}
+                ></button>
+              </div>
+              <form onSubmit={handleForgotPassword}>
+                <div className="modal-body">
+                  {forgotStep === 1 && (
+                    <>
+                      <label
+                        htmlFor="forgotEmail"
+                        className="form-label"
+                        style={{ fontSize: "0.9rem" }}
+                      >
+                        Enter your email address
+                      </label>
+                      <input
+                        type="email"
+                        className="form-control mb-2"
+                        id="forgotEmail"
+                        value={forgotEmail}
+                        onChange={(e) => setForgotEmail(e.target.value)}
+                        required
+                        style={{
+                          border: "1px solid #ced4da",
+                          borderRadius: "0.375rem",
+                        }}
+                      />
+                    </>
+                  )}
+                  {forgotStep === 2 && (
+                    <>
+                      <label
+                        htmlFor="newPassword"
+                        className="form-label"
+                        style={{ fontSize: "0.9rem" }}
+                      >
+                        New Password
+                      </label>
+                      <div
+                        className="input-group mb-2"
+                        style={{
+                          border: "1px solid #ced4da",
+                          borderRadius: "0.375rem",
+                        }}
+                      >
+                        <input
+                          type={showForgotNewPassword ? "text" : "password"}
+                          className="form-control"
+                          id="newPassword"
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          required
+                          style={{ border: "none", boxShadow: "none" }}
+                        />
+                        <span
+                          className="input-group-text bg-light"
+                          style={{ cursor: "pointer" }}
+                          onClick={() =>
+                            setShowForgotNewPassword((prev) => !prev)
+                          }
+                        >
+                          {showForgotNewPassword ? <FaEyeSlash /> : <FaEye />}
+                        </span>
+                      </div>
+                      <label
+                        htmlFor="confirmNewPassword"
+                        className="form-label"
+                        style={{ fontSize: "0.9rem" }}
+                      >
+                        Confirm New Password
+                      </label>
+                      <div
+                        className="input-group mb-2"
+                        style={{
+                          border: "1px solid #ced4da",
+                          borderRadius: "0.375rem",
+                        }}
+                      >
+                        <input
+                          type={showForgotConfirmPassword ? "text" : "password"}
+                          className="form-control"
+                          id="confirmNewPassword"
+                          value={confirmNewPassword}
+                          onChange={(e) =>
+                            setConfirmNewPassword(e.target.value)
+                          }
+                          required
+                          style={{ border: "none", boxShadow: "none" }}
+                        />
+                        <span
+                          className="input-group-text bg-light"
+                          style={{ cursor: "pointer" }}
+                          onClick={() =>
+                            setShowForgotConfirmPassword((prev) => !prev)
+                          }
+                        >
+                          {showForgotConfirmPassword ? (
+                            <FaEyeSlash />
+                          ) : (
+                            <FaEye />
+                          )}
+                        </span>
+                      </div>
+                    </>
+                  )}
+                  {forgotError && (
+                    <div className="text-danger small mt-1">{forgotError}</div>
+                  )}
+                </div>
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => {
+                      setShowForgotPassword(false);
+                      setForgotStep(1);
+                      setForgotEmail("");
+                      setForgotError("");
+                      setNewPassword("");
+                      setConfirmNewPassword("");
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn btn-success"
+                    disabled={isLoading}
+                  >
+                    {isLoading
+                      ? "Please wait..."
+                      : forgotStep === 1
+                      ? "Next"
+                      : "Reset Password"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -172,4 +172,64 @@ router.get("/verify", async (req, res) => {
   }
 });
 
+// @route   POST /api/auth/check-email
+// @desc    Check if email exists for forgot password
+// @access  Public
+router.post("/check-email", async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res
+        .status(400)
+        .json({ exists: false, error: "Email is required" });
+    }
+    const user = await User.findOne({ email });
+    if (user) {
+      return res.json({ exists: true });
+    } else {
+      return res.json({ exists: false });
+    }
+  } catch (error) {
+    res.status(500).json({ exists: false, error: "Server error" });
+  }
+});
+
+// @route   POST /api/auth/reset-password
+// @desc    Reset password for user (forgot password)
+// @access  Public
+router.post("/reset-password", async (req, res) => {
+  try {
+    const { email, newPassword } = req.body;
+    if (!email || !newPassword) {
+      return res
+        .status(400)
+        .json({ success: false, error: "Email and new password are required" });
+    }
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ success: false, error: "User not found" });
+    }
+    if (
+      newPassword.length < 8 ||
+      !/[A-Za-z]/.test(newPassword) ||
+      !/[^A-Za-z0-9]/.test(newPassword)
+    ) {
+      return res
+        .status(400)
+        .json({
+          success: false,
+          error:
+            "Password must be at least 8 characters with symbols and letters.",
+        });
+    }
+    const saltRounds = 12;
+    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+    user.password = hashedPassword;
+    await user.save();
+    res.json({ success: true, message: "Password reset successful" });
+  } catch (error) {
+    res.status(500).json({ success: false, error: "Server error" });
+  }
+});
+
 export default router;
