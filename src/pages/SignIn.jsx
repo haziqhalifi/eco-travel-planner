@@ -28,27 +28,17 @@ const SignIn = () => {
   useEffect(() => {
     document.title = "EcoTravel | Sign In";
     // Check for remembered token
-    const remembered = localStorage.getItem("ecoTravelRememberMe");
-    if (remembered) {
-      try {
-        const { token, email, expiry } = JSON.parse(remembered);
-        if (Date.now() < expiry && token) {
-          // Set token in localStorage for authAPI
-          localStorage.setItem("authToken", token);
-          setFormData((prev) => ({ ...prev, email, rememberMe: true }));
-          // Auto-login: check if already authenticated and redirect
-          // Use a minimal delay to ensure AuthContext updates
-          setTimeout(() => {
-            navigate("/dashboard");
-          }, 100);
-        } else {
-          localStorage.removeItem("ecoTravelRememberMe");
-          localStorage.removeItem("authToken");
-        }
-      } catch {
-        localStorage.removeItem("ecoTravelRememberMe");
-        localStorage.removeItem("authToken");
-      }
+    const rememberedToken = getRememberedToken();
+    if (rememberedToken) {
+      const { token, email } = rememberedToken;
+      // Set token in localStorage for authAPI
+      localStorage.setItem("authToken", token);
+      setFormData((prev) => ({ ...prev, email, rememberMe: true }));
+      // Auto-login: check if already authenticated and redirect
+      // Use a minimal delay to ensure AuthContext updates
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 100);
     }
   }, []);
 
