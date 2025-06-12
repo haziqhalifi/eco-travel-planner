@@ -8,6 +8,9 @@ function Navbar() {
 
   const handleLogout = () => {
     logout();
+    // Remove JWT token and rememberMe data
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("ecoTravelRememberMe");
     navigate("/signin");
   };
 

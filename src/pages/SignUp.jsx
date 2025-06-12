@@ -1,15 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import {
-  FaGoogle,
-  FaUser,
-  FaEnvelope,
-  FaLock,
-  FaLeaf,
-  FaEye,
-  FaEyeSlash,
-} from "react-icons/fa";
+import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { useAuth } from "../contexts/AuthContext";
 
 const SignUp = () => {
@@ -64,16 +56,6 @@ const SignUp = () => {
     }
   };
 
-  const handleGoogleSignIn = () => {
-    setIsLoading(true);
-    console.log("Google sign up initiated");
-
-    setTimeout(() => {
-      setIsLoading(false);
-      navigate("/dashboard");
-    }, 1500);
-  };
-
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -124,18 +106,6 @@ const SignUp = () => {
               animate="visible"
               className="h-100 d-flex flex-column"
             >
-              <motion.div variants={itemVariants} className="text-center mb-4">
-                <motion.div
-                  whileHover={{ scale: 1.1 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                >
-                  <FaLeaf
-                    className="text-success"
-                    style={{ fontSize: "2.5rem" }}
-                  />
-                </motion.div>
-              </motion.div>
-
               <motion.h2
                 variants={itemVariants}
                 className="text-center mb-1 fw-bold"
@@ -366,48 +336,6 @@ const SignUp = () => {
                   ) : (
                     "Create Account"
                   )}
-                </motion.button>
-
-                <div className="d-flex align-items-center mb-3">
-                  <hr
-                    className="flex-grow-1"
-                    style={{ borderColor: "#dee2e6" }}
-                  />
-                  <span
-                    className="px-2 text-muted"
-                    style={{ whiteSpace: "nowrap" }}
-                  >
-                    OR
-                  </span>
-                  <hr
-                    className="flex-grow-1"
-                    style={{ borderColor: "#dee2e6" }}
-                  />
-                </div>
-
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  type="button"
-                  className="btn btn-light w-100 py-2 border d-flex align-items-center justify-content-center"
-                  onClick={handleGoogleSignIn}
-                  disabled={isLoading}
-                  style={{
-                    backgroundColor: "#fff",
-                    color: "#5F6368",
-                    fontWeight: "500",
-                  }}
-                >
-                  <img
-                    src="https://www.google.com/favicon.ico"
-                    alt="Google"
-                    style={{
-                      width: "20px",
-                      height: "20px",
-                      marginRight: "10px",
-                    }}
-                  />
-                  Sign up with Google
                 </motion.button>
               </motion.form>
 
