@@ -1,14 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import {
-  FaGoogle,
-  FaEnvelope,
-  FaLock,
-  FaLeaf,
-  FaEye,
-  FaEyeSlash,
-} from "react-icons/fa";
+import { FaEnvelope, FaLock, FaLeaf, FaEye, FaEyeSlash } from "react-icons/fa";
 import { useAuth } from "../contexts/AuthContext";
 
 const SignIn = () => {
@@ -71,16 +64,6 @@ const SignIn = () => {
       setPasswordError(true); // Optionally show error
       alert(result.error || "Incorrect email or password.");
     }
-  };
-
-  const handleGoogleSignIn = () => {
-    setIsLoading(true);
-    console.log("Google sign in initiated");
-
-    setTimeout(() => {
-      setIsLoading(false);
-      navigate("/dashboard");
-    }, 1500);
   };
 
   const handleForgotPassword = async (e) => {
@@ -412,31 +395,6 @@ const SignIn = () => {
                     style={{ borderColor: "#dee2e6" }}
                   />
                 </div>
-
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  type="button"
-                  className="btn btn-light w-100 py-2 border d-flex align-items-center justify-content-center"
-                  onClick={handleGoogleSignIn}
-                  disabled={isLoading}
-                  style={{
-                    backgroundColor: "#fff",
-                    color: "#5F6368",
-                    fontWeight: "500",
-                  }}
-                >
-                  <img
-                    src="https://www.google.com/favicon.ico"
-                    alt="Google"
-                    style={{
-                      width: "20px",
-                      height: "20px",
-                      marginRight: "10px",
-                    }}
-                  />
-                  Sign in with Google
-                </motion.button>
               </motion.form>
 
               <motion.div variants={itemVariants} className="text-center mt-3">
