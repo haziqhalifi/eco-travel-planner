@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FaEnvelope, FaLock, FaLeaf, FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { useAuth } from "../contexts/AuthContext";
 
 const SignIn = () => {
@@ -27,6 +27,29 @@ const SignIn = () => {
 
   useEffect(() => {
     document.title = "EcoTravel | Sign In";
+    // Check for remembered token
+    const remembered = localStorage.getItem("ecoTravelRememberMe");
+    if (remembered) {
+      try {
+        const { token, email, expiry } = JSON.parse(remembered);
+        if (Date.now() < expiry && token) {
+          // Set token in localStorage for authAPI
+          localStorage.setItem("authToken", token);
+          setFormData((prev) => ({ ...prev, email, rememberMe: true }));
+          // Auto-login: check if already authenticated and redirect
+          // Use a minimal delay to ensure AuthContext updates
+          setTimeout(() => {
+            navigate("/dashboard");
+          }, 100);
+        } else {
+          localStorage.removeItem("ecoTravelRememberMe");
+          localStorage.removeItem("authToken");
+        }
+      } catch {
+        localStorage.removeItem("ecoTravelRememberMe");
+        localStorage.removeItem("authToken");
+      }
+    }
   }, []);
 
   const handleChange = (e) => {
@@ -43,7 +66,7 @@ const SignIn = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { email, password } = formData;
+    const { email, password, rememberMe } = formData;
 
     const passwordRegex = /^(?=.*[A-Za-z])(?=.*[^A-Za-z0-9]).{8,}$/;
 
@@ -53,12 +76,23 @@ const SignIn = () => {
     }
 
     setIsLoading(true);
-
     // Use context login
     const result = await login({ email, password });
     setIsLoading(false);
-
     if (result.success) {
+      // Get token from localStorage (set by authAPI.login)
+      const token = localStorage.getItem("authToken");
+      if (rememberMe && token) {
+        // Store token and email for 30 days
+        const expiry = Date.now() + 30 * 24 * 60 * 60 * 1000;
+        localStorage.setItem(
+          "ecoTravelRememberMe",
+          JSON.stringify({ token, email, expiry })
+        );
+      } else {
+        localStorage.removeItem("ecoTravelRememberMe");
+        if (!rememberMe) localStorage.removeItem("authToken");
+      }
       navigate("/dashboard");
     } else {
       setPasswordError(true); // Optionally show error
@@ -184,18 +218,6 @@ const SignIn = () => {
               animate="visible"
               className="h-100 d-flex flex-column"
             >
-              <motion.div variants={itemVariants} className="text-center mb-4">
-                <motion.div
-                  whileHover={{ scale: 1.1 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                >
-                  <FaLeaf
-                    className="text-success"
-                    style={{ fontSize: "2.5rem" }}
-                  />
-                </motion.div>
-              </motion.div>
-
               <motion.h2
                 variants={itemVariants}
                 className="text-center mb-1 fw-bold"
@@ -378,23 +400,6 @@ const SignIn = () => {
                     "Sign In"
                   )}
                 </motion.button>
-
-                <div className="d-flex align-items-center mb-3">
-                  <hr
-                    className="flex-grow-1"
-                    style={{ borderColor: "#dee2e6" }}
-                  />
-                  <span
-                    className="px-2 text-muted"
-                    style={{ whiteSpace: "nowrap" }}
-                  >
-                    OR
-                  </span>
-                  <hr
-                    className="flex-grow-1"
-                    style={{ borderColor: "#dee2e6" }}
-                  />
-                </div>
               </motion.form>
 
               <motion.div variants={itemVariants} className="text-center mt-3">
