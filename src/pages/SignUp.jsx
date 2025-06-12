@@ -1,14 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import {
-  FaUser,
-  FaEnvelope,
-  FaLock,
-  FaLeaf,
-  FaEye,
-  FaEyeSlash,
-} from "react-icons/fa";
+import { FaUser, FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { useAuth } from "../contexts/AuthContext";
 
 const SignUp = () => {
@@ -113,18 +106,6 @@ const SignUp = () => {
               animate="visible"
               className="h-100 d-flex flex-column"
             >
-              <motion.div variants={itemVariants} className="text-center mb-4">
-                <motion.div
-                  whileHover={{ scale: 1.1 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                >
-                  <FaLeaf
-                    className="text-success"
-                    style={{ fontSize: "2.5rem" }}
-                  />
-                </motion.div>
-              </motion.div>
-
               <motion.h2
                 variants={itemVariants}
                 className="text-center mb-1 fw-bold"
@@ -356,23 +337,6 @@ const SignUp = () => {
                     "Create Account"
                   )}
                 </motion.button>
-
-                <div className="d-flex align-items-center mb-3">
-                  <hr
-                    className="flex-grow-1"
-                    style={{ borderColor: "#dee2e6" }}
-                  />
-                  <span
-                    className="px-2 text-muted"
-                    style={{ whiteSpace: "nowrap" }}
-                  >
-                    OR
-                  </span>
-                  <hr
-                    className="flex-grow-1"
-                    style={{ borderColor: "#dee2e6" }}
-                  />
-                </div>
               </motion.form>
 
               <motion.div variants={itemVariants} className="text-center mt-3">
