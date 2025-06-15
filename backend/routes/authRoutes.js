@@ -2,45 +2,31 @@ import express from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import authenticateToken from "../middleware/auth.js"; // Ensure this is at the top
 
 const router = express.Router();
 
-// @route   POST /api/auth/register
-// @desc    Register a new user
-// @access  Public
+// [REGISTER] POST /api/auth/register
 router.post("/register", async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
-    // Validation
     if (!username || !email || !password) {
-      return res.status(400).json({
-        message: "Please provide username, email, and password",
-      });
+      return res.status(400).json({ message: "Please provide username, email, and password" });
     }
 
     if (password.length < 6) {
-      return res.status(400).json({
-        message: "Password must be at least 6 characters long",
-      });
+      return res.status(400).json({ message: "Password must be at least 6 characters long" });
     }
 
-    // Check if user exists
-    const existingUser = await User.findOne({
-      $or: [{ email }, { username }],
-    });
-
+    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
     if (existingUser) {
-      return res.status(400).json({
-        message: "User with this email or username already exists",
-      });
+      return res.status(400).json({ message: "User with this email or username already exists" });
     }
 
-    // Hash password
     const saltRounds = 12;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    // Create user
     const user = new User({
       username,
       email,
@@ -50,13 +36,8 @@ router.post("/register", async (req, res) => {
 
     await user.save();
 
-    // Generate token
     const token = jwt.sign(
-      {
-        userId: user._id,
-        username: user.username,
-        email: user.email,
-      },
+      { userId: user._id, username: user.username, email: user.email },
       process.env.JWT_SECRET || "fallback_secret",
       { expiresIn: "24h" }
     );
@@ -64,58 +45,30 @@ router.post("/register", async (req, res) => {
     res.status(201).json({
       message: "User created successfully",
       token,
-      user: {
-        id: user._id,
-        username: user.username,
-        email: user.email,
-      },
+      user: { id: user._id, username: user.username, email: user.email },
     });
   } catch (error) {
     console.error("Registration error:", error);
-    res.status(500).json({
-      message: "Server error during registration",
-      error: error.message,
-    });
+    res.status(500).json({ message: "Server error during registration", error: error.message });
   }
 });
 
-// @route   POST /api/auth/login
-// @desc    Login user
-// @access  Public
+// [LOGIN] POST /api/auth/login
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Validation
     if (!email || !password) {
-      return res.status(400).json({
-        message: "Please provide email and password",
-      });
+      return res.status(400).json({ message: "Please provide email and password" });
     }
 
-    // Find user
     const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({
-        message: "Invalid credentials",
-      });
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    // Check password
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({
-        message: "Invalid credentials",
-      });
-    }
-
-    // Generate token
     const token = jwt.sign(
-      {
-        userId: user._id,
-        username: user.username,
-        email: user.email,
-      },
+      { userId: user._id, username: user.username, email: user.email },
       process.env.JWT_SECRET || "fallback_secret",
       { expiresIn: "24h" }
     );
@@ -123,60 +76,34 @@ router.post("/login", async (req, res) => {
     res.json({
       message: "Login successful",
       token,
-      user: {
-        id: user._id,
-        username: user.username,
-        email: user.email,
-      },
+      user: { id: user._id, username: user.username, email: user.email },
     });
   } catch (error) {
     console.error("Login error:", error);
-    res.status(500).json({
-      message: "Server error during login",
-      error: error.message,
-    });
+    res.status(500).json({ message: "Server error during login", error: error.message });
   }
 });
 
-// @route   GET /api/auth/verify
-// @desc    Verify token and get user info
-// @access  Private
+// [VERIFY] GET /api/auth/verify
 router.get("/verify", async (req, res) => {
   try {
     const authHeader = req.headers["authorization"];
     const token = authHeader && authHeader.split(" ")[1];
 
-    if (!token) {
-      return res.status(401).json({ message: "No token provided" });
-    }
+    if (!token) return res.status(401).json({ message: "No token provided" });
 
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET || "fallback_secret"
-    );
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || "fallback_secret");
     const user = await User.findById(decoded.userId).select("-password");
 
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-    res.json({
-      user: {
-        id: user._id,
-        username: user.username,
-        email: user.email,
-      },
-    });
+    res.json({ user: { id: user._id, username: user.username, email: user.email } });
   } catch (error) {
     res.status(401).json({ message: "Invalid token" });
   }
 });
 
-// @route   PATCH /api/auth/update-profile
-// @desc    Update user's email and username
-// @access  Private
-import authenticateToken from "../middleware/auth.js"; // Make sure this is at the top
-
+// [UPDATE PROFILE] PATCH /api/auth/update-profile
 router.patch("/update-profile", authenticateToken, async (req, res) => {
   try {
     const userId = req.user.userId;
@@ -192,9 +119,7 @@ router.patch("/update-profile", authenticateToken, async (req, res) => {
     });
 
     if (existingUser) {
-      return res.status(400).json({
-        message: "Email or username is already taken",
-      });
+      return res.status(400).json({ message: "Email or username is already taken" });
     }
 
     const updatedUser = await User.findByIdAndUpdate(
@@ -209,10 +134,7 @@ router.patch("/update-profile", authenticateToken, async (req, res) => {
 
     res.json({
       message: "Profile updated",
-      user: {
-        username: updatedUser.username,
-        email: updatedUser.email,
-      },
+      user: { username: updatedUser.username, email: updatedUser.email },
     });
   } catch (error) {
     console.error("Update profile error:", error);
@@ -220,6 +142,7 @@ router.patch("/update-profile", authenticateToken, async (req, res) => {
   }
 });
 
+// [UPDATE PASSWORD] PATCH /api/auth/update-password
 router.patch("/update-password", authenticateToken, async (req, res) => {
   try {
     const userId = req.user.userId;
@@ -234,22 +157,15 @@ router.patch("/update-password", authenticateToken, async (req, res) => {
     }
 
     const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    // Verify current password
     const isMatch = await bcrypt.compare(currentPassword, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: "Current password is incorrect" });
     }
 
-    // Hash new password
     const saltRounds = 12;
     const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds);
-
-    // Update password
     user.password = hashedNewPassword;
     await user.save();
 
@@ -260,6 +176,50 @@ router.patch("/update-password", authenticateToken, async (req, res) => {
   }
 });
 
+// [CHECK EMAIL] POST /api/auth/check-email
+router.post("/check-email", async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ exists: false, error: "Email is required" });
 
+    const user = await User.findOne({ email });
+    return res.json({ exists: !!user });
+  } catch (error) {
+    res.status(500).json({ exists: false, error: "Server error" });
+  }
+});
+
+// [RESET PASSWORD] POST /api/auth/reset-password
+router.post("/reset-password", async (req, res) => {
+  try {
+    const { email, newPassword } = req.body;
+    if (!email || !newPassword) {
+      return res.status(400).json({ success: false, error: "Email and new password are required" });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ success: false, error: "User not found" });
+
+    if (
+      newPassword.length < 8 ||
+      !/[A-Za-z]/.test(newPassword) ||
+      !/[^A-Za-z0-9]/.test(newPassword)
+    ) {
+      return res.status(400).json({
+        success: false,
+        error: "Password must be at least 8 characters with symbols and letters.",
+      });
+    }
+
+    const saltRounds = 12;
+    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+    user.password = hashedPassword;
+    await user.save();
+
+    res.json({ success: true, message: "Password reset successful" });
+  } catch (error) {
+    res.status(500).json({ success: false, error: "Server error" });
+  }
+});
 
 export default router;
