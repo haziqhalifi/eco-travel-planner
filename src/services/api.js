@@ -106,9 +106,14 @@ export const userAPI = {
 
   // Toggle a favorite (add/remove based on current state)
   toggleFavourite: async (userId, itemId, itemType) => {
+    // Validate that itemId and itemType are provided
+    if (!itemId || !itemType) {
+      throw new Error("Missing itemId or itemType");
+    }
+
     return await apiRequest(`/users/${userId}/favorites/${itemId}/toggle`, {
       method: "POST",
-      body: JSON.stringify({ itemId, itemType }),
+      body: JSON.stringify({ objectId: itemId, itemId, itemType }),
     });
   },
 };
@@ -117,10 +122,10 @@ export const ecoOptionsAPI = {
   findDocumentByPropertyToken: async (itemId, itemType) => {
     return await apiRequest(`/search/${itemId}`, {
       method: "POST",
-      body: JSON.stringify({itemType}),
-    })
-  }
-}
+      body: JSON.stringify({ itemType }),
+    });
+  },
+};
 
 // Trips API
 export const tripsAPI = {
@@ -192,7 +197,7 @@ export const personalTripsAPI = {
       type: placeType,
       serpData: serpData,
     };
-    console.log("Payload: " , payload);
+    console.log("Payload: ", payload);
 
     return await apiRequest(`/personal-trips/${tripId}/add-place`, {
       method: "POST",

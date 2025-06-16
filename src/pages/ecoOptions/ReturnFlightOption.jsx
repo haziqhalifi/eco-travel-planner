@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp, Plane, Clock, MapPin, Leaf, Heart } from 'lucide-react';
 import { userAPI } from "../../services/api.js";
 
-const ReturnFlightOption = ({ returnFlight, userId, bookingToken, onSelectReturn, flights, layovers, total_duration, carbon_emissions, price, type, airline_logo }) => {
+const ReturnFlightOption = ({ returnFlight, userId, bookingToken, flights, layovers, total_duration, carbon_emissions, price, airline_logo }) => {
     const [showDetails, setShowDetails] = useState(false);
     const [isFavorited, setIsFavorited] = useState(false);
 
@@ -90,8 +90,24 @@ const ReturnFlightOption = ({ returnFlight, userId, bookingToken, onSelectReturn
     };
 
     const handleToggleFavorite = async () => {
+        console.log("Debug - userId:", userId);
+        console.log("Debug - bookingToken:", bookingToken);
+        console.log("Debug - returnFlight:", returnFlight);
+        console.log("Debug - itemType:", 'transportation');
+
+        // Generate a fallback ID if bookingToken is not available
+        const flightId = bookingToken ||
+            returnFlight?.booking_token ||
+            returnFlight?.id ||
+            `flight_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+        if (!flightId) {
+            console.error("Unable to generate flight ID for favorites");
+            return;
+        }
+
         try {
-            await userAPI.toggleFavourite(userId, bookingToken, 'transportation');
+            await userAPI.toggleFavourite(userId, flightId, 'transportation');
             setIsFavorited(!isFavorited);
         } catch (err) {
             console.error("Failed to toggle return flight favourite", err);
@@ -102,18 +118,24 @@ const ReturnFlightOption = ({ returnFlight, userId, bookingToken, onSelectReturn
     useEffect(() => {
         const checkFavoriteStatus = async () => {
             try {
+                const flightId = bookingToken ||
+                    returnFlight?.booking_token ||
+                    returnFlight?.id;
+
+                if (!flightId) return;
+
                 const favouritesRes = await userAPI.getFavourites(userId);
                 const transportationFavourites = favouritesRes.data.transportation || [];
-                setIsFavorited(transportationFavourites.includes(bookingToken));
+                setIsFavorited(transportationFavourites.includes(flightId));
             } catch (err) {
                 console.error("Failed to fetch favorite status", err);
             }
         };
 
-        if (userId && bookingToken) {
+        if (userId) {
             checkFavoriteStatus();
         }
-    }, [userId, bookingToken]);
+    }, [userId, bookingToken, returnFlight]);
 
     return (
         <div className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow">
@@ -215,13 +237,12 @@ const ReturnFlightOption = ({ returnFlight, userId, bookingToken, onSelectReturn
 
                     <button
                         onClick={handleToggleFavorite}
-                        className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors font-medium ${
-                            isFavorited
-                                ? 'bg-red-50 text-red-600 border border-red-600 hover:bg-red-100'
-                                : 'bg-pink-50 text-pink-600 border border-pink-600 hover:bg-pink-100'
-                        }`}
+                        className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors font-medium ${isFavorited
+                            ? 'bg-red-50 text-red-600 border border-red-600 hover:bg-red-100'
+                            : 'bg-pink-50 text-pink-600 border border-pink-600 hover:bg-pink-100'
+                            }`}
                     >
-                        <Heart className={`w-4 h-4 ${isFavorited ? 'fill-current' : ''}`}/>
+                        <Heart className={`w-4 h-4 ${isFavorited ? 'fill-current' : ''}`} />
                         <span>{isFavorited ? 'Remove from Favorites' : 'Add to Favorites'}</span>
                     </button>
 
@@ -347,8 +368,8 @@ const ReturnFlightOption = ({ returnFlight, userId, bookingToken, onSelectReturn
                                     <div className="flex justify-between">
                                         <span>Difference:</span>
                                         <span className={`font-medium ${returnFlight.emissions.difference_percent < 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                {returnFlight.emissions.difference_percent > 0 ? '+' : ''}{returnFlight.emissions.difference_percent}%
-                            </span>
+                                            {returnFlight.emissions.difference_percent > 0 ? '+' : ''}{returnFlight.emissions.difference_percent}%
+                                        </span>
                                     </div>
                                 )}
                             </div>

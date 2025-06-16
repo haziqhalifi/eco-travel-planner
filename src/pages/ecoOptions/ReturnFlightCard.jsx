@@ -4,40 +4,40 @@ import { userAPI } from "../../services/api.js";
 import ReturnFlightOption from '../ecoOptions/ReturnFlightOption.jsx';
 
 const ReturnFlightCard = ({
-                              flight,
-                              flights,
-                              returnFlights = [],
-                              layovers = [],
-                              stops_description,
-                              total_duration,
-                              price,
-                              emissions,
-                              travelClass,
-                              extensions = [],
-                              type,
-                              departure_token,
-                              onClose,
-                              flightSegments = [],
-                              layoverSegments = [],
-                              userId,
-                              airline,
-                              flightNumber,
-                              departureAirport,
-                              departureTime,
-                              arrivalAirport,
-                              arrivalTime,
-                              stops,
-                              logoUrl,
-                              all_airlines = [],
-                              onViewDetails,
-                              onSelectFlight
-                          }) => {
+    flight,
+    flights,
+    returnFlights = [],
+    layovers = [],
+    stops_description,
+    total_duration,
+    price,
+    emissions,
+    travelClass,
+    extensions = [],
+    type,
+    departure_token,
+    onClose,
+    flightSegments = [],
+    layoverSegments = [],
+    userId,
+    airline,
+    flightNumber,
+    departureAirport,
+    departureTime,
+    arrivalAirport,
+    arrivalTime,
+    stops,
+    logoUrl,
+    all_airlines = [],
+    onViewDetails,
+    onSelectFlight
+}) => {
     const [showDetails, setShowDetails] = useState(false);
     const [selectedDeparture, setSelectedDeparture] = useState(null);
     const [showReturnFlights, setShowReturnFlights] = useState(false);
     const [selectedReturn, setSelectedReturn] = useState(null);
 
-    console.log("fligthts: ",flight)
+    console.log("fligthts: ", flight)
     const formatTime = (timeString) => {
         if (!timeString) return '';
         return new Date(timeString).toLocaleTimeString('en-MY', {
@@ -295,8 +295,8 @@ const ReturnFlightCard = ({
                             <div className="flex justify-between">
                                 <span className="text-gray-600">Stops:</span>
                                 <span className="font-medium">
-                        {flight.stops === 0 ? 'Non-stop' : `${flight.stops} stop${flight.stops > 1 ? 's' : ''}`}
-                    </span>
+                                    {flight.stops === 0 ? 'Non-stop' : `${flight.stops} stop${flight.stops > 1 ? 's' : ''}`}
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -309,11 +309,11 @@ const ReturnFlightCard = ({
                                     <div key={index} className="flex items-center space-x-2 text-sm">
                                         <div className="w-1.5 h-1.5 bg-blue-400 rounded-full"></div>
                                         <span className="text-blue-600">
-                                {segment.from} → {segment.to}
-                            </span>
+                                            {segment.from} → {segment.to}
+                                        </span>
                                         <span className="text-gray-500">
-                                ({segment.flightNumber})
-                            </span>
+                                            ({segment.flightNumber})
+                                        </span>
                                     </div>
                                 ))}
                             </div>
@@ -328,9 +328,9 @@ const ReturnFlightCard = ({
                                     <div key={index} className="flex items-center space-x-2 text-sm">
                                         <div className="w-1.5 h-1.5 bg-orange-400 rounded-full"></div>
                                         <span className="text-orange-600">
-                                {layover.airportName} ({layover.airportCode}) - {formatDuration(layover.duration)}
+                                            {layover.airportName} ({layover.airportCode}) - {formatDuration(layover.duration)}
                                             {layover.overnight && <span className="text-orange-600 ml-1">(Overnight)</span>}
-                            </span>
+                                        </span>
                                     </div>
                                 ))}
                             </div>
@@ -343,7 +343,7 @@ const ReturnFlightCard = ({
             {showReturnFlights && (
                 <div className="bg-blue-50 p-6 border-t border-blue-100">
                     <div className="flex items-center space-x-2 mb-4">
-                        <ArrowRight className="w-5 h-5 text-blue-600"/>
+                        <ArrowRight className="w-5 h-5 text-blue-600" />
                         <h3 className="text-lg font-bold text-gray-900">Select Return Flight</h3>
                     </div>
 
@@ -370,19 +370,34 @@ const ReturnFlightCard = ({
                         {returnFlights.map((returnFlight, index) => {
                             console.log("returnFlight", returnFlight);
                             return (
+                                // <ReturnFlightOption
+                                //     key={index}
+                                //     returnFlight={returnFlight}
+                                //     userId={userId}
+                                //     bookingToken={returnFlight.bookingToken}
+                                //     onSelectReturn={handleSelectReturn}
+                                //     flights={returnFlight.flightSegments}
+                                //     layovers={returnFlight.layoverSegments}
+                                //     total_duration={returnFlight.total_duration}
+                                //     carbon_emission={returnFlight.emissions}
+                                //     price={returnFlight.price}
+                                //     type={returnFlight.type}
+                                //     airline_logo={returnFlight.logoUrl}
+                                // />
+
                                 <ReturnFlightOption
                                     key={index}
                                     returnFlight={returnFlight}
                                     userId={userId}
-                                    bookingToken={returnFlight.bookingToken}
+                                    bookingToken={returnFlight.booking_token}
                                     onSelectReturn={handleSelectReturn}
-                                    flights={returnFlight.flightSegments}
-                                    layovers={returnFlight.layoverSegments}
+                                    flights={returnFlight.flights}
+                                    layovers={returnFlight.layovers}
                                     total_duration={returnFlight.total_duration}
-                                    carbon_emission={returnFlight.emissions}
+                                    carbon_emission={returnFlight.carbon_emissions}
                                     price={returnFlight.price}
                                     type={returnFlight.type}
-                                    airline_logo={returnFlight.logoUrl}
+                                    airline_logo={returnFlight.airline_log}
                                 />
                             );
                         })}
