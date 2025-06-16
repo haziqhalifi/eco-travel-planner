@@ -7,6 +7,7 @@ const TransportationSchema = new mongoose.Schema({
         arrival_id: { type: String, required: true },
         outbound_date: { type: String, required: true },     // format: YYYY-MM-DD
         return_date: { type: String, required: true },       // format: YYYY-MM-DD
+        departure_token: {type: String, required: false},
     },
 
     // id: { type: String, required: true },                // unique flight identifier

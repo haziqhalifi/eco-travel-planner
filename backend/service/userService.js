@@ -20,7 +20,7 @@ export const getAllFavourites = async (req, res) => {
 
 
 export const toggleFavourites = async (userId, docId, itemId, itemType) => {
-  if (!["accommodations", "restaurants", "activities", "transportation"].includes(itemType)) {
+  if (!["accommodations", "restaurants", "activities", "transportation", "accommodation", "restaurant", "activity", "transportation"].includes(itemType)) {
     throw new Error("Invalid item type");
   }
 
