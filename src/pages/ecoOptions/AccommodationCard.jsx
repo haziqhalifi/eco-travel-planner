@@ -91,7 +91,7 @@ const AccommodationCard = ({ userId, itemId, type, title, rating, location, desc
             }
         };
 
-        if (userId && itemId) { // Only run if we have the necessary IDs
+        if (userId && itemId) {
             fetchAndDetermineFavouriteStatus();
         }
     }, [itemId, type, userId, setIsFavorited, setFavourites]);

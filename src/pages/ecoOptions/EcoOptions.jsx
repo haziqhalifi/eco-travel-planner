@@ -5,9 +5,10 @@ import AccommodationCard from "./AccommodationCard.jsx";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { searchConfigs } from "./SearchConfigs";
-import { DetailedFlightCard, FlightCard } from "./FlightCard.jsx";
+import { DetailedFlightCard, SingleFlightCard } from "./SingleFlightCard.jsx";
 import ActivityCard, { ActivityDetailView } from "./ActivityCard.jsx";
 import {useAuth} from "../../contexts/AuthContext.jsx";
+import ReturnFlightCard from "./ReturnFlightCard.jsx";
 
 const EcoOptions = () => {
   const { user } = useAuth();
@@ -24,6 +25,7 @@ const EcoOptions = () => {
   const [destination, setDestination] = useState("");
   const [departureDate, setDepartureDate] = useState(null);
   const [returnDate, setReturnDate] = useState(null);
+  const [departureToken, setDepartureToken] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
   const [showActivityDetailView, setShowActivityDetailView] = useState(false);
   const [selectedFlight, setSelectedFlight] = useState(null);
@@ -48,6 +50,8 @@ const EcoOptions = () => {
         destination,
         departureDate,
         returnDate,
+        type: 1, // Always round trip
+        ...(departureToken && { departureToken }), // only if it exists
       };
     } else if (activeTab === "activity" || activeTab === "restaurant") {
       allInputs = {
@@ -70,12 +74,218 @@ const EcoOptions = () => {
         res = await axios.post(cfg.endpoint, params);
       }
 
+      console.log("API params", params)
       console.log("API response:", res.data);
       const items = cfg.mapResults(res.data) || [];
       console.log("Mapped items for", activeTab, ":", items);
-      setTravelOptions(items);
+
+      // Special handling for transportation (flights) to get return flights
+      if (activeTab === "transportation" && !departureToken && items.length > 0) {
+        // This means `departureToken` from component state is falsy (initial user search)
+        console.log(`Frontend: Found ${items.length} outbound transportation items. Fetching returns for each.`);
+
+        const flightOptionsWithReturnsPromises = items.map(async (outboundFlightItem) => {
+          // Each `outboundFlightItem` here is a mapped outbound flight object from the `items` array.
+          // It should already have `outboundFlightItem.return_flights = []` from the initial backend response & mapping.
+          let processedOutboundFlight = { ...outboundFlightItem }; // Start with a copy
+
+          if (outboundFlightItem && outboundFlightItem.departureToken) {
+            console.log(`Frontend: Processing outbound ID: ${outboundFlightItem.id}, Token: ${outboundFlightItem.departureToken}`);
+            try {
+              // Prepare parameters for the dedicated return flight endpoint
+              // This uses cfg.buildParams which you should have defined in searchConfigs
+              const returnParams = cfg.buildParams({
+                origin: origin,
+                destination: destination,
+                departureDate: departureDate,
+                returnDate: returnDate,
+                departureToken: outboundFlightItem.departureToken,
+              });
+
+              // Call 2: Fetch and Update Return Flights (to the dedicated endpoint)
+              let returnRes;
+              if (cfg.method === "get") {
+                returnRes = await axios.get('/api/serp/search/returnFlight', {
+                  params: returnParams,
+                  headers: {
+                    type: activeTab,
+                  },
+                });
+              } else {
+                returnRes = await axios.post(cfg.endpoint, returnParams);
+              }
+
+              console.log(`Frontend: Backend response from /search/returnFlight: `, returnRes.data.data);
+              const response = returnRes.data.data;
+              if (response) {
+                // Backend has updated the DB and returned the *entire modified serpData* for the original search.
+                const updatedSerpDataForThisSearch = response;
+
+                // Find our specific outboundFlight within this updatedSerpData
+                // to get its now-populated return_flights.
+                let foundUpdatedOfferInSerpData = null;
+                if (updatedSerpDataForThisSearch.best_flights) {
+                  foundUpdatedOfferInSerpData = updatedSerpDataForThisSearch.best_flights.find(
+                      f => f.departure_token === outboundFlightItem.departureToken
+                  );
+                }
+                if (!foundUpdatedOfferInSerpData && updatedSerpDataForThisSearch.other_flights) {
+                  foundUpdatedOfferInSerpData = updatedSerpDataForThisSearch.other_flights.find(
+                      f => f.departure_token === outboundFlightItem.departureToken
+                  );
+                }
+
+                if (foundUpdatedOfferInSerpData && foundUpdatedOfferInSerpData.return_flights) {
+                  const rawReturnOffers = foundUpdatedOfferInSerpData.return_flights;
+                  const mappedActualReturnFlights = cfg.mapResults({ other_flights: rawReturnOffers }, true) || [];
+
+                  console.log(`Frontend: Mapped actual return flights for Token ${outboundFlightItem.departureToken}: Count = ${mappedActualReturnFlights.length}`);
+                  processedOutboundFlight.return_flights = mappedActualReturnFlights; // Update the mapped object
+
+                } else {
+                  console.warn(`Frontend: Did not find updated offer or its return_flights for Token ${outboundFlightItem.departureToken} in backend's updatedSerpData.`);
+                }
+              } else {
+                console.error(`Frontend: Backend /search/returnFlight did not return updatedSerpData for Token ${outboundFlightItem.departureToken}.`);
+              }
+            } catch (error) {
+              console.error(`Frontend: Error calling backend /search/returnFlight for Token ${outboundFlightItem.departureToken}:`, error.response ? error.response.data : error.message, error);
+            }
+          } else {
+            console.log(`Frontend: Outbound flight ID: ${outboundFlightItem.id} has no departure_token or is undefined. Skipping return flight fetch.`);
+          }
+          return processedOutboundFlight;
+        });
+        const flightOptionsWithReturns = await Promise.all(flightOptionsWithReturnsPromises);
+        console.log("Frontend: Final flightOptionsWithReturns (all items processed):", flightOptionsWithReturns);
+        setTravelOptions(flightOptionsWithReturns);
+
+      } else {
+        // For non-transportation types, or if transportation had no items initially
+        console.log(`Frontend: Setting travel options for non-transportation or initial state (Type: ${activeTab}):`, items);
+        setTravelOptions(items);
+      }
+
     } catch (err) {
       console.error(`Error fetching ${activeTab}`, err);
+      setTravelOptions([]); // Set empty array on error
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSearchOne = async () => {
+    setLoading(true);
+    const cfg = searchConfigs[activeTab];
+
+    let allInputs = {};
+    // ... (your existing allInputs setup) ...
+    if (activeTab === "accommodation") {
+      allInputs = {
+        searchTerm,
+        checkInDate,
+        checkOutDate,
+        adults,
+      };
+    } else if (activeTab === "transportation") {
+      allInputs = {
+        origin,
+        destination,
+        departureDate,
+        returnDate,
+        type: 1, // Always round trip
+        ...(departureToken && { departureToken }), // only if it exists
+      };
+    } else if (activeTab === "activity" || activeTab === "restaurant") {
+      allInputs = {
+        searchTerm,
+      };
+    }
+
+    const params = cfg.buildParams(allInputs);
+
+    try {
+      let res;
+      if (cfg.method === "get") {
+        res = await axios.get(cfg.endpoint, {
+          params,
+          headers: {
+            type: activeTab,
+          },
+        });
+      } else {
+        res = await axios.post(cfg.endpoint, params);
+      }
+
+      console.log("API response (Initial Outbound):", res.data); // Log initial outbound response
+      const items = cfg.mapResults(res.data, false) || [];
+      console.log("Mapped initial outbound items:", items);
+
+      if (activeTab === "transportation" && !departureToken && items.length > 0) {
+        // --- MODIFICATION START: Process only the first item ---
+        const firstOutboundFlight = items[0];
+        let updatedFirstFlight = { ...firstOutboundFlight, returnFlights: [] }; // Initialize with empty returns
+
+        console.log("Processing first outbound flight:", firstOutboundFlight);
+        console.log("Departure token for first flight:", firstOutboundFlight.departureToken);
+
+        if (firstOutboundFlight && firstOutboundFlight.departureToken) {
+          try {
+            const returnInputs = {
+              origin: origin,
+              destination: destination,
+              departureDate: departureDate,
+              returnDate: returnDate,
+              type: 1,
+              departureToken: firstOutboundFlight.departureToken
+            };
+            console.log("Parameters for fetching return flights:", returnInputs);
+
+            const returnParams = cfg.buildParams(returnInputs); // Ensure buildParams handles departureToken correctly
+            console.log("Built params for return flights (to backend):", returnParams);
+
+            let returnRes;
+            if (cfg.method === "get") {
+              console.log("returnParams meowm", returnParams)
+              returnRes = await axios.get('/api/serp/search/returnFlight', {
+                params: returnParams,
+                headers: {
+                  type: activeTab,
+                },
+              });
+              console.log("returnRes meowm",returnRes)
+            } else {
+              returnRes = await axios.post(cfg.endpoint, returnParams);
+            }
+
+            console.log(`API response for return flights (Token: ${firstOutboundFlight.departureToken}):`, returnRes.data);
+            const returnFlights = cfg.mapResults(returnRes.data, true) || [];
+            console.log(`Mapped return flights for ${firstOutboundFlight.airline || 'first flight'}:`, returnFlights);
+
+            updatedFirstFlight.returnFlights = returnFlights;
+
+          } catch (error) {
+            console.error("Error fetching return flights for the first item:", error.response ? error.response.data : error.message, error);
+          }
+        } else {
+          console.log("First outbound flight does not have a departure_token or is undefined.");
+        }
+
+        // Create the final array for setTravelOptions
+        // It will contain the (potentially) updated first flight, and the rest of the original items unchanged
+        const flightOptionsWithReturns = [
+          updatedFirstFlight,
+          ...items.slice(1).map(flight => ({ ...flight, returnFlights: [] })) // Keep other items with empty returns
+        ];
+        console.log("Final flightOptionsWithReturns (with only first item processed for returns):", flightOptionsWithReturns);
+        setTravelOptions(flightOptionsWithReturns);
+      } else {
+        setTravelOptions(items);
+      }
+
+    } catch (err) {
+      console.error(`Error fetching ${activeTab}:`, err.response ? err.response.data : err.message, err);
+      setTravelOptions([]);
     } finally {
       setLoading(false);
     }
@@ -402,28 +612,69 @@ const EcoOptions = () => {
                       } else if (activeTab === "transportation") {
                         return (
                           <>
-                            <FlightCard
-                              userId={userId}
-                              key={option.id}
-                              type={activeTab}
-                              airline={option.airline}
-                              flightNumber={option.flightNumber}
-                              departureAirport={option.departureAirport}
-                              departureTime={option.departureTime}
-                              arrivalAirport={option.arrivalAirport}
-                              arrivalTime={option.arrivalTime}
-                              total_duration={option.total_duration}
-                              stops={option.stops}
-                              stops_description={
-                                option.stops_description || "Non-stop"
-                              } // Default value
-                              travelClass="Economy"
-                              price={option.price}
-                              emissions={option.emissions}
-                              logoUrl={option.logoUrl}
-                              all_airlines={option.all_airlines || []} // Ensure it's passed
-                              onViewDetails={() => handleViewDetails(option)}
-                            />
+                            {/*<SingleFlightCard*/}
+                            {/*  userId={userId}*/}
+                            {/*  key={option.id}*/}
+                            {/*  type={activeTab}*/}
+                            {/*  airline={option.airline}*/}
+                            {/*  flightNumber={option.flightNumber}*/}
+                            {/*  departureAirport={option.departureAirport}*/}
+                            {/*  departureTime={option.departureTime}*/}
+                            {/*  arrivalAirport={option.arrivalAirport}*/}
+                            {/*  arrivalTime={option.arrivalTime}*/}
+                            {/*  total_duration={option.total_duration}*/}
+                            {/*  stops={option.stops}*/}
+                            {/*  stops_description={*/}
+                            {/*    option.stops_description || "Non-stop"*/}
+                            {/*  } // Default value*/}
+                            {/*  travelClass="Economy"*/}
+                            {/*  price={option.price}*/}
+                            {/*  emissions={option.emissions}*/}
+                            {/*  logoUrl={option.logoUrl}*/}
+                            {/*  all_airlines={option.all_airlines || []} // Ensure it's passed*/}
+                            {/*  onViewDetails={() => handleViewDetails(option)}*/}
+                            {/*/>*/}
+                            <ReturnFlightCard
+                                // Basic identifiers
+                                userId={userId}
+                                key={option.id}
+                                type={activeTab}
+
+                                // Main flight info (from your config mapping)
+                                flight={option} // Pass the entire option object
+                                flights={option.flights}
+                                airline={option.airline}
+                                flightNumber={option.flightNumber}
+                                departureAirport={option.departureAirport}
+                                departureTime={option.departureTime}
+                                arrivalAirport={option.arrivalAirport}
+                                arrivalTime={option.arrivalTime}
+                                total_duration={option.total_duration}
+                                stops={option.stops}
+                                stops_description={option.stops_description || "Non-stop"}
+                                travelClass={option.travelClass || "Economy"}
+                                price={option.price}
+                                emissions={option.emissions}
+                                logoUrl={option.logoUrl}
+                                all_airlines={option.all_airlines || []}
+
+                                // Tokens for booking and return flights
+                                // booking_token={option.bookingToken}
+                                departure_token={option.departureToken}
+
+                                // Detailed flight segments (from your config)
+                                flightSegments={option.flightSegments || []}
+                                layoverSegments={option.layoverSegments || []}
+
+                                // Return flights (populated by the enhanced search logic)
+                                returnFlights={option.return_flights || []} // This contains the return flight options
+
+                                // Layovers (if you have this data in your config)
+                                layovers={option.layovers || []}
+
+                                // Additional props that might be useful
+                                extensions={option.extensions || []}
+                                />
                             {activeTab === "transportation" &&
                               selectedFlight && showFlightDetailView && (
                                 <DetailedFlightCard
@@ -441,7 +692,7 @@ const EcoOptions = () => {
                                   extensions={selectedFlight.extensions}
                                   type={selectedFlight.type}
                                   booking_token={selectedFlight.booking_token}
-                                  departure_token={selectedFlight.departure_token}
+                                  departure_token={selectedFlight.departureToken}
                                   flightSegments={selectedFlight.flightSegments}
                                   layoverSegments={selectedFlight.layoverSegments}
                                   onClose={handleCloseDetails}

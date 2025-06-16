@@ -8,9 +8,11 @@ export async function findDocumentByPropertyToken(propertyToken, itemType) {
         accommodations: Accommodation,
         restaurants: Restaurant,
         activities: Activity,
-        transportation: Transportation,
+        transportations: Transportation,
     };
 
+    console.log(itemType)
+    console.log(propertyToken)
     switch(itemType) {
         case "accommodation":
             itemType = "accommodations";
@@ -21,8 +23,11 @@ export async function findDocumentByPropertyToken(propertyToken, itemType) {
         case "activity":
             itemType = "activities"
             break;
-
+        case "transportation":
+            itemType = "transportations"
+            break;
     }
+
     const Model = modelMap[itemType];
     if (!Model) {
         throw new Error("Invalid item type");
@@ -38,17 +43,50 @@ export async function findDocumentByPropertyToken(propertyToken, itemType) {
         case "activities":
             query = { "serpData.local_results.place_id": propertyToken };
             break;
-        case "transportation":
-            // query = { "serpData.flights.unique_flight_id_key": favoriteId };
-            console.warn(`Transportation query in findDocumentByFavoriteId needs specific implementation based on stored ID and data structure.`);
-            throw new Error(`Query for transportation favorites not yet implemented in findDocumentByFavoriteId.`);
-            // break;
+        case "transportations":
+            // query = {
+            //     $or: [
+            //         { "serpData.best_flights.return_flights.bookingToken": propertyToken },
+            //         { "serpData.other_flights.return_flights.bookingToken": propertyToken }
+            //     ]
+            // };
+
+            query = {
+                $or: [
+                    {
+                        "serpData.best_flights": {
+                            $elemMatch: {
+                                return_flights: {
+                                    $elemMatch: {
+                                        booking_token: propertyToken
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "serpData.other_flights": {
+                            $elemMatch: {
+                                return_flights: {
+                                    $elemMatch: {
+                                        booking_token: propertyToken
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            };
+
+            break;
         default:
             throw new Error(`Unhandled item type for query construction: ${itemType}`);
     }
 
     const doc = await Model.findOne(query);
 
+    if (itemType === "transportations")
+        console.log("transport doc:", doc)
     if (!doc) {
         throw new Error(`No document found with property_token ${propertyToken} in ${itemType}`);
     }
