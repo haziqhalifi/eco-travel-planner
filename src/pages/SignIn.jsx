@@ -4,6 +4,24 @@ import { motion } from "framer-motion";
 import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
 import { useAuth } from "../contexts/AuthContext";
 
+const getRememberedToken = () => {
+  const item = localStorage.getItem("ecoTravelRememberMe");
+  if (!item) return null;
+
+  try {
+    const parsed = JSON.parse(item);
+    if (parsed.expiry && parsed.expiry > Date.now()) {
+      return parsed;
+    } else {
+      localStorage.removeItem("ecoTravelRememberMe");
+      return null;
+    }
+  } catch {
+    localStorage.removeItem("ecoTravelRememberMe");
+    return null;
+  }
+};
+
 const SignIn = () => {
   const [formData, setFormData] = useState({
     email: "",
