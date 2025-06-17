@@ -116,15 +116,15 @@ const AccommodationCard = ({ userId, itemId, type, title, rating, location, desc
                 </div>
 
                 {/* Plus Icon */}
-                <button
-                    onClick={() => setShowTripPopup(true)}
-                    className="absolute top-2 right-2 bg-white p-1 rounded-full shadow-md hover:bg-gray-100"
-                    aria-label="Add to trip"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-700" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
-                    </svg>
-                </button>
+                {/*<button*/}
+                {/*    onClick={() => setShowTripPopup(true)}*/}
+                {/*    className="absolute top-2 right-2 bg-white p-1 rounded-full shadow-md hover:bg-gray-100"*/}
+                {/*    aria-label="Add to trip"*/}
+                {/*>*/}
+                {/*    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-700" viewBox="0 0 20 20" fill="currentColor">*/}
+                {/*        <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />*/}
+                {/*    </svg>*/}
+                {/*</button>*/}
             </div>
 
             <div className="p-4">
@@ -205,15 +205,15 @@ const AccommodationCard = ({ userId, itemId, type, title, rating, location, desc
                         )}
 
 
-                        <button
-                            className="mt-4 w-full bg-dark-green text-white py-2 rounded hover:bg-blue-600"
-                            onClick={() => {
-                                alert("Create a new trip");
-                                setShowTripPopup(false);
-                            }}
-                        >
-                            Create New Trip
-                        </button>
+                        {/*<button*/}
+                        {/*    className="mt-4 w-full bg-dark-green text-white py-2 rounded hover:bg-blue-600"*/}
+                        {/*    onClick={() => {*/}
+                        {/*        alert("Create a new trip");*/}
+                        {/*        setShowTripPopup(false);*/}
+                        {/*    }}*/}
+                        {/*>*/}
+                        {/*    Create New Trip*/}
+                        {/*</button>*/}
                     </div>
                 </div>
             )}

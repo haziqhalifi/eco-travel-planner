@@ -100,21 +100,21 @@ export default function ActivityCard({
                     </div>
 
                     {/* Plus Icon */}
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            setShowTripPopup(true);
-                        }}
-                        className="absolute top-2 right-2 bg-white p-1 rounded-full shadow-md hover:bg-gray-100"
-                        aria-label="Add to trip"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-700" viewBox="0 0 20 20"
-                             fill="currentColor">
-                            <path fillRule="evenodd"
-                                  d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
-                                  clipRule="evenodd"/>
-                        </svg>
-                    </button>
+                    {/*<button*/}
+                    {/*    onClick={(e) => {*/}
+                    {/*        e.stopPropagation();*/}
+                    {/*        setShowTripPopup(true);*/}
+                    {/*    }}*/}
+                    {/*    className="absolute top-2 right-2 bg-white p-1 rounded-full shadow-md hover:bg-gray-100"*/}
+                    {/*    aria-label="Add to trip"*/}
+                    {/*>*/}
+                    {/*    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-700" viewBox="0 0 20 20"*/}
+                    {/*         fill="currentColor">*/}
+                    {/*        <path fillRule="evenodd"*/}
+                    {/*              d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"*/}
+                    {/*              clipRule="evenodd"/>*/}
+                    {/*    </svg>*/}
+                    {/*</button>*/}
                 </div>
             )}
 
@@ -255,16 +255,16 @@ export default function ActivityCard({
                             <p className="text-gray-500 text-center py-2">No trips found</p>
                         )}
 
-                        <button
-                            className="mt-4 w-full bg-dark-green text-white py-2 rounded hover:bg-blue-600"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                alert("Create a new trip");
-                                setShowTripPopup(false);
-                            }}
-                        >
-                            Create New Trip
-                        </button>
+                        {/*<button*/}
+                        {/*    className="mt-4 w-full bg-dark-green text-white py-2 rounded hover:bg-blue-600"*/}
+                        {/*    onClick={(e) => {*/}
+                        {/*        e.stopPropagation();*/}
+                        {/*        alert("Create a new trip");*/}
+                        {/*        setShowTripPopup(false);*/}
+                        {/*    }}*/}
+                        {/*>*/}
+                        {/*    Create New Trip*/}
+                        {/*</button>*/}
                     </div>
                 </div>
             )}
