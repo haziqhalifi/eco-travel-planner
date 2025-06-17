@@ -20,7 +20,7 @@ const Weather = () => {
   const [savedCities, setSavedCities] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const apiKey = import.meta.env.VITE_WEATHER_API_KEY;
+  const apiKey = "8e54d5510227752f8c346d3e9313a108"
 
   const fetchWeatherData = async (endpoint, cityName, setData) => {
     try {
