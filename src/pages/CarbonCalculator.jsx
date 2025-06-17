@@ -1,9 +1,14 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 
 function CarbonCalculator() {
   const [vehicleType, setVehicleType] = useState('');
   const [carUsage, setCarUsage] = useState('');
-  const [flightHours, setFlightHours] = useState('');
+  const [electricityUsage, setElectricityUsage] = useState('');
+  const [foodType, setFoodType] = useState('');
+  const [shortFlight, setShortFlight] = useState('');
+  const [mediumFlight, setMediumFlight] = useState('');
+  const [longFlight, setLongFlight] = useState('');
   const [footprint, setFootprint] = useState(null);
 
   const styles = {
@@ -27,8 +32,7 @@ function CarbonCalculator() {
       padding: '0.5rem',
       border: '1px solid #ccc',
       borderRadius: '8px',
-      height: '5rem'
-      
+      height: '3rem'
     },
     select: {
       width: '50%',
@@ -60,7 +64,7 @@ function CarbonCalculator() {
     }
   };
 
-  const handleCalculate = () => {
+  const handleCalculate = async () => {
     let vehicleFactor = 0;
     switch (vehicleType) {
       case 'Diesel Car': vehicleFactor = 0.27; break;
@@ -69,15 +73,40 @@ function CarbonCalculator() {
       case 'Bicycle':
       case 'Scooter':
       case 'None': vehicleFactor = 0; break;
-      case 'Other': vehicleFactor = 0.20; break;
-      default: vehicleFactor = 0;
+      default: vehicleFactor = 0.2;
     }
 
-    const carEmissions = parseFloat(carUsage || 0) * vehicleFactor * 30; // assuming daily usage * 30 days
-    const flightEmissions = parseFloat(flightHours || 0) * 90; // approx. 90 kg CO2 per flight hour
-    const total = carEmissions + flightEmissions;
+    const foodFactors = { Vegetarian: 3, 'Non-Vegetarian': 7, Vegan: 2 };
+    const flightFactors = { short: 80, medium: 90, long: 100 };
 
+    const carEmissions = parseFloat(carUsage || 0) * vehicleFactor * 30;
+    const electricityEmissions = parseFloat(electricityUsage || 0) * 0.233;
+    const foodEmissions = (foodFactors[foodType] || 3) * 30;
+    const flightEmissions =
+      parseFloat(shortFlight || 0) * flightFactors.short +
+      parseFloat(mediumFlight || 0) * flightFactors.medium +
+      parseFloat(longFlight || 0) * flightFactors.long;
+
+    const total = carEmissions + electricityEmissions + foodEmissions + flightEmissions;
     setFootprint(total.toFixed(0));
+
+    try {
+      await axios.post("http://localhost:5001/api/carbon/saveFootprint", {
+        vehicleType,
+        carUsage: parseFloat(carUsage || 0),
+        electricityUsage: parseFloat(electricityUsage || 0),
+        foodType,
+        shortFlight: parseFloat(shortFlight || 0),
+        mediumFlight: parseFloat(mediumFlight || 0),
+        longFlight: parseFloat(longFlight || 0),
+        totalEmission: parseFloat(total.toFixed(0)),
+      });
+
+      alert("Footprint saved to backend!");
+    } catch (error) {
+      console.error("Error saving footprint:", error);
+      alert("Failed to save footprint.");
+    }
   };
 
   return (
@@ -96,47 +125,51 @@ function CarbonCalculator() {
             <h2>Input Your Activity</h2>
 
             <div style={styles.inputGroup}>
-              <label htmlFor="vehicleType" style={styles.label}>Type of Vehicle</label>
-              <select
-                id="vehicleType"
-                value={vehicleType}
-                onChange={(e) => setVehicleType(e.target.value)}
-                style={styles.select}
-              >
+              <label style={styles.label}>Type of Vehicle</label>
+              <select style={styles.select} value={vehicleType} onChange={(e) => setVehicleType(e.target.value)}>
                 <option value="">Select vehicle type</option>
                 <option value="None">None</option>
                 <option value="Diesel Car">Diesel Car</option>
                 <option value="Petrol Car">Petrol Car</option>
                 <option value="Electric Car">Electric Car</option>
                 <option value="Bicycle">Bicycle</option>
-                <option value="Electric Scooter">Scooter</option>
-                <option value="Diesel Motorcyle">Other</option>
-                <option value="Petrol Motorcyle">Other</option>
+                <option value="Scooter">Scooter</option>
               </select>
             </div>
 
             <div style={styles.inputGroup}>
-              <label htmlFor="car" style={styles.label}>Daily car usage (km)</label>
-              <input
-                type="number"
-                id="car"
-                placeholder="e.g., 25"
-                value={carUsage}
-                onChange={(e) => setCarUsage(e.target.value)}
-                style={styles.input}
-              />
+              <label style={styles.label}>Daily car usage (km)</label>
+              <input style={styles.input} type="number" value={carUsage} onChange={(e) => setCarUsage(e.target.value)} />
             </div>
 
             <div style={styles.inputGroup}>
-              <label htmlFor="flight" style={styles.label}>Monthly flights (hours)</label>
-              <input
-                type="number"
-                id="flight"
-                placeholder="e.g., 3"
-                value={flightHours}
-                onChange={(e) => setFlightHours(e.target.value)}
-                style={styles.input}
-              />
+              <label style={styles.label}>Electricity usage (kWh/month)</label>
+              <input style={styles.input} type="number" value={electricityUsage} onChange={(e) => setElectricityUsage(e.target.value)} />
+            </div>
+
+            <div style={styles.inputGroup}>
+              <label style={styles.label}>Diet Type</label>
+              <select style={styles.select} value={foodType} onChange={(e) => setFoodType(e.target.value)}>
+                <option value="">Select Diet</option>
+                <option value="Vegetarian">Vegetarian</option>
+                <option value="Non-Vegetarian">Non-Vegetarian</option>
+                <option value="Vegan">Vegan</option>
+              </select>
+            </div>
+
+            <div style={styles.inputGroup}>
+              <label style={styles.label}>Short Flights (1–3 hrs/month)</label>
+              <input style={styles.input} type="number" value={shortFlight} onChange={(e) => setShortFlight(e.target.value)} />
+            </div>
+
+            <div style={styles.inputGroup}>
+              <label style={styles.label}>Medium Flights (3–6 hrs/month)</label>
+              <input style={styles.input} type="number" value={mediumFlight} onChange={(e) => setMediumFlight(e.target.value)} />
+            </div>
+
+            <div style={styles.inputGroup}>
+              <label style={styles.label}>Long Flights (6+ hrs/month)</label>
+              <input style={styles.input} type="number" value={longFlight} onChange={(e) => setLongFlight(e.target.value)} />
             </div>
 
             <button style={styles.button} onClick={handleCalculate}>

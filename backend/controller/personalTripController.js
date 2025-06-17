@@ -63,3 +63,22 @@ export const getPersonalTrip = async (req, res) => {
     res.status(400).json({success: false, message: err.message});
   }
 }
+
+export const addActivity = async (req, res) => {
+  try {
+    const {activity, date} = req.body;
+    const trip = await service.addActivityToTrip(req.user.userId,req.params.tripId, activity, date);
+    return res.json({success: true, data: trip});
+  } catch (err) {
+    res.status(400).json({success: false, message: err.message});
+  }
+}
+
+export const deleteActivity = async (req, res) => {
+  try {
+    const trip = await service.deleteActivityFromTrip(req.user.userId, req.params.tripId, req.params.activityId);
+    return res.json({success: true, data: trip});
+  } catch (err) {
+    res.status(400).json({success: false, message: err.message});
+  }
+}
