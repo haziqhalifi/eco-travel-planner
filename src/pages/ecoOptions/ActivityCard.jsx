@@ -61,7 +61,6 @@ export default function ActivityCard({
 
                 if (typeof itemId === 'string' && favouritesList.includes(itemId)) {
                     setIsFavorited(true);
-                    console.log(`Match found for current item! Property token: ${itemId} is in favourites.`);
                 }
             } catch (error) {
                 console.error("Failed to fetch favourites or determine status:", error);
@@ -294,71 +293,6 @@ const extractKeywords = (reviews) => {
         .slice(0, 15)
         .map(([word, count]) => ({ word, count }));
 };
-
-
-// const ReviewCard = ({ review, onAddKeywordFilter }) => {
-//     return (
-//         <div className="border rounded-lg p-4 mb-4 bg-white shadow-sm">
-//             <div className="flex justify-between items-center mb-2">
-//                 <div className="flex items-center">
-//                     <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600">
-//                         {review.author.charAt(0)}
-//                     </div>
-//                     <div className="ml-2">
-//                         <p className="font-medium">{review.author}</p>
-//                         <div className="flex items-center">
-//                             <div className="flex">
-//                                 {[...Array(review.rating)].map((_, i) => (
-//                                     <Star key={i} size={14} className="text-yellow-500 fill-current" />
-//                                 ))}
-//                                 {[...Array(5 - review.rating)].map((_, i) => (
-//                                     <Star key={i + review.rating} size={14} className="text-gray-300" />
-//                                 ))}
-//                             </div>
-//                             <span className="ml-2 text-xs text-gray-500">{review.date}</span>
-//                         </div>
-//                     </div>
-//                 </div>
-//                 <div className="text-sm text-gray-500">
-//                     <span>👍 {review.helpful}</span>
-//                 </div>
-//             </div>
-//
-//             <p className="text-gray-700 mb-2">{review.text}</p>
-//
-//             {review.images && (
-//                 <div className="flex space-x-2 mb-2">
-//                     {review.images.map((img, i) => (
-//                         <img
-//                             key={i}
-//                             src={img}
-//                             alt="Review photo"
-//                             className="h-20 w-24 object-cover rounded"
-//                         />
-//                     ))}
-//                 </div>
-//             )}
-//
-//             {/* Extract clickable keywords from review */}
-//             <div className="flex flex-wrap mt-2">
-//                 {review.text.split(" ")
-//                     .filter(word => word.length > 4 && !['and', 'the', 'that', 'this', 'with'].includes(word.toLowerCase()))
-//                     .filter((v, i, a) => a.indexOf(v) === i)
-//                     .slice(0, 3)
-//                     .map((word, i) => (
-//                         <button
-//                             key={i}
-//                             onClick={() => onAddKeywordFilter(word.toLowerCase().replace(/[^a-z0-9]/g, ''))}
-//                             className="text-xs bg-gray-100 hover:bg-gray-200 rounded-full px-2 py-1 mr-1 mb-1"
-//                         >
-//                             {word.replace(/[^a-zA-Z0-9]/g, '')}
-//                         </button>
-//                     ))
-//                 }
-//             </div>
-//         </div>
-//     );
-// };
 
 // Helper component for restaurant rating stars
 const RatingStars = ({ rating }) => {

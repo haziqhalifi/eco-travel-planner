@@ -82,7 +82,6 @@ const AccommodationCard = ({ userId, itemId, type, title, rating, location, desc
 
                 if (typeof itemId === 'string' && favouritesList.includes(itemId)) {
                     setIsFavorited(true);
-                    console.log(`Match found for current item! Property token: ${itemId} is in favourites.`);
                 }
 
             } catch (error) {

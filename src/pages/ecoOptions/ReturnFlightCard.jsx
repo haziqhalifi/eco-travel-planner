@@ -37,7 +37,6 @@ const ReturnFlightCard = ({
     const [showReturnFlights, setShowReturnFlights] = useState(false);
     const [selectedReturn, setSelectedReturn] = useState(null);
 
-    console.log("fligthts: ", flight)
     const formatTime = (timeString) => {
         if (!timeString) return '';
         return new Date(timeString).toLocaleTimeString('en-MY', {

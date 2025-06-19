@@ -74,23 +74,14 @@ const EcoOptions = () => {
         res = await axios.post(cfg.endpoint, params);
       }
 
-      console.log("API params", params)
-      console.log("API response:", res.data);
       const items = cfg.mapResults(res.data) || [];
-      console.log("Mapped items for", activeTab, ":", items);
 
       // Special handling for transportation (flights) to get return flights
       if (activeTab === "transportation" && !departureToken && items.length > 0) {
-        // This means `departureToken` from component state is falsy (initial user search)
-        console.log(`Frontend: Found ${items.length} outbound transportation items. Fetching returns for each.`);
-
         const flightOptionsWithReturnsPromises = items.map(async (outboundFlightItem) => {
-          // Each `outboundFlightItem` here is a mapped outbound flight object from the `items` array.
-          // It should already have `outboundFlightItem.return_flights = []` from the initial backend response & mapping.
           let processedOutboundFlight = { ...outboundFlightItem }; // Start with a copy
 
           if (outboundFlightItem && outboundFlightItem.departureToken) {
-            console.log(`Frontend: Processing outbound ID: ${outboundFlightItem.id}, Token: ${outboundFlightItem.departureToken}`);
             try {
               // Prepare parameters for the dedicated return flight endpoint
               // This uses cfg.buildParams which you should have defined in searchConfigs
@@ -118,11 +109,8 @@ const EcoOptions = () => {
               console.log(`Frontend: Backend response from /search/returnFlight: `, returnRes.data.data);
               const response = returnRes.data.data;
               if (response) {
-                // Backend has updated the DB and returned the *entire modified serpData* for the original search.
                 const updatedSerpDataForThisSearch = response;
 
-                // Find our specific outboundFlight within this updatedSerpData
-                // to get its now-populated return_flights.
                 let foundUpdatedOfferInSerpData = null;
                 if (updatedSerpDataForThisSearch.best_flights) {
                   foundUpdatedOfferInSerpData = updatedSerpDataForThisSearch.best_flights.find(
@@ -704,13 +692,12 @@ const EcoOptions = () => {
                         activeTab === "activity"||
                         activeTab === "restaurant"
                       ) {
-                        console.log("links", option.links)
                         return (
                           <>
                             <ActivityCard
                               userId={userId}
                               itemId={option.id}
-                              type={activeTab}
+                              type={activeTab === "activity" ? "activities" : "restaurants"}
                               name={option.name}
                               location={option.location}
                               rating={option.rating}

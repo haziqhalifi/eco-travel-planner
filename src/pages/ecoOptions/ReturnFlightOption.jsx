@@ -6,8 +6,6 @@ const ReturnFlightOption = ({ returnFlight, userId, bookingToken, flights, layov
     const [showDetails, setShowDetails] = useState(false);
     const [isFavorited, setIsFavorited] = useState(false);
 
-    console.log("returnFlight", returnFlight);
-
     const formatTime = (timeString) => {
         if (!timeString) return '';
         return new Date(timeString).toLocaleTimeString('en-MY', {

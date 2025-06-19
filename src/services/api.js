@@ -1,6 +1,6 @@
 // API configuration
 const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:5001/api";
+    import.meta.env.VITE_API_URL || "http://localhost:5001/api";
 
 // Token management
 const getToken = () => localStorage.getItem("authToken");
@@ -223,10 +223,10 @@ export const personalTripsAPI = {
   // Delete activity from personal trip
   deleteActivity: async (tripId, activityId) => {
     return await apiRequest(
-      `/personal-trips/${tripId}/activities/${activityId}`,
-      {
-        method: "DELETE",
-      }
+        `/personal-trips/${tripId}/activities/${activityId}`,
+        {
+          method: "DELETE",
+        }
     );
   },
 };
@@ -236,8 +236,8 @@ export const handleApiError = (error, defaultMessage = "An error occurred") => {
   console.error("API Error:", error);
 
   if (
-    error.message.includes("401") ||
-    error.message.includes("Invalid token")
+      error.message.includes("401") ||
+      error.message.includes("Invalid token")
   ) {
     // Token expired or invalid
     authAPI.logout();

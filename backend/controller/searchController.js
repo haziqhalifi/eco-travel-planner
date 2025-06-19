@@ -166,9 +166,6 @@ export const handleSearchReturnFlights = async (req, res) => {
         // console.log('[DB_UPDATE_RETURNS] Successfully fetched return flights from SerpAPI.');
         console.log("raw flights", rawReturnFlightsData)
 
-        // The content to put into the `return_flights` array.
-        // This will be the array of return flight offers from SerpApi's response (e.g., rawReturnFlightsData.other_flights).
-        // Your frontend mapResults will then map this when it displays the data.
         let newReturnFlightsContent = [];
         if (rawReturnFlightsData.other_flights && Array.isArray(rawReturnFlightsData.other_flights)) {
             newReturnFlightsContent = rawReturnFlightsData.other_flights;
@@ -180,59 +177,6 @@ export const handleSearchReturnFlights = async (req, res) => {
 
         // 4. Update the specific flight offer within existingDocument.serpData
         let offerWasUpdated = false;
-
-        // const updateSerpDataFlights = (flightOffersArray) => {
-        //     if (flightOffersArray && Array.isArray(flightOffersArray)) {
-        //         for (let i = 0; i < flightOffersArray.length; i++) {
-        //             if (flightOffersArray[i].departure_token === departure_token) {
-        //                 flightOffersArray[i].return_flights = newReturnFlightsContent;
-        //                 offerWasUpdated = true;
-        //                 console.log("departureID", flightOffersArray[i].total_duration)
-        //                 console.log("Return flights length " , newReturnFlightsContent.length)
-        //                 console.log("Return flights departure token", departure_token)
-        //                 console.log("Return flights", newReturnFlightsContent)
-        //                 break; // Found and updated
-        //             }
-        //         }
-        //     }
-        // };
-        //
-        // console.log("Return flights", newReturnFlightsContent);
-        //
-        // updateSerpDataFlights(existingDocument.serpData.best_flights);
-        // updateSerpDataFlights(existingDocument.serpData.other_flights);
-
-//         let updateResult = await model.updateOne(
-//             {
-//                 ...findDocQuery,
-//                 'serpData.best_flights.departure_token': departure_token
-//             },
-//             {
-//                 $set: {
-//                     'serpData.best_flights.$.return_flights': newReturnFlightsContent
-//                 }
-//             }
-//         );
-//
-// // 3. If nothing was updated in best_flights, try other_flights
-//         if (updateResult.modifiedCount === 0) {
-//             updateResult = await model.updateOne(
-//                 {
-//                     ...findDocQuery,
-//                     'serpData.other_flights.departure_token': departure_token
-//                 },
-//                 {
-//                     $set: {
-//                         'serpData.other_flights.$.return_flights': newReturnFlightsContent
-//                     }
-//                 }
-//             );
-//         }
-//
-//         console.log("updateResults", updateResult.)
-//         if (updateResult.modifiedCount === 0) {
-//             return res.status(404).json({ error: 'departure_token not found in either best_flights or other_flights.' });
-//         }
 
         const targetTokenForUpdate = departure_token;
         let offerActuallyUpdatedInDB = false;
@@ -269,15 +213,6 @@ export const handleSearchReturnFlights = async (req, res) => {
         } else {
             console.log("[DB_UPDATE_RETURNS] Re-fetched doc has no best_flights or it's empty.");
         }
-
-        // if (!offerWasUpdated) {
-        //     console.warn('[DB_UPDATE_RETURNS] Target departure_token not found within the serpData of the matched document.');
-        //     return res.status(404).json({ error: 'Target departure_token not found in the stored document.' });
-        // }
-
-        // 5. Mark serpData as modified and save the document
-        // existingDocument.markModified('serpData'); // Very important for Mongoose MixedType or complex nested objects
-        // await existingDocument.save();
 
         console.log("existingDocument.serpData", existingDocument.serpData);
         // console.log('[DB_UPDATE_RETURNS] Document updated successfully in DB.');

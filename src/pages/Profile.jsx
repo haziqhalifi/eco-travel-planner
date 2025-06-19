@@ -395,7 +395,7 @@ const ProfilePage = () => {
           />
         );
       case 'transportation':
-        const bookingToken = item.booking_token || item.bookingToken;
+        { const bookingToken = item.booking_token || item.bookingToken;
         return (
           <ReturnFlightOption
             key={`${type}-${index}`}
@@ -412,7 +412,7 @@ const ProfilePage = () => {
             isFavorite={returnFlightFavorites[bookingToken]}
             onToggleFavorite={() => handleReturnFlightToggleFavorite(item)}
           />
-        );
+        ); }
       case 'restaurants':
       case 'activities':
         return (
@@ -685,9 +685,11 @@ const ProfilePage = () => {
                         : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
                     }`}
                   >
-                    {getFilteredFavorites().map((item, index) =>
-                      renderFavoriteItem(item, selectedFilter === 'all' ? item.type : selectedFilter, index)
-                    )}
+                    {getFilteredFavorites()
+                        .filter(item => selectedFilter === 'all' ? item.type !== 'transportation' : true)
+                        .map((item, index) =>
+                            renderFavoriteItem(item, selectedFilter === 'all' ? item.type : selectedFilter, index)
+                        )}
                   </div>
 
                   {selectedFilter === 'all' && favorites.transportation?.length > 0 && (
