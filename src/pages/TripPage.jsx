@@ -289,13 +289,13 @@ const Trip = () => {
                 <>
                   <div className="text-center mb-5 d-flex justify-content-between align-items-center">
                     <h1 className="mb-0 text-center flex-grow-1">Travel Plans</h1>
-                    <Button
-                        variant="success"
-                        className="d-flex align-items-center"
-                        onClick={() => setShowNewTripForm(true)}
-                    >
-                      <Plus size={18} className="me-1"/> Create New Trip
-                    </Button>
+                    {/*<Button*/}
+                    {/*    variant="success"*/}
+                    {/*    className="d-flex align-items-center"*/}
+                    {/*    onClick={() => setShowNewTripForm(true)}*/}
+                    {/*>*/}
+                    {/*  <Plus size={18} className="me-1"/> Create New Trip*/}
+                    {/*</Button>*/}
                   </div>
                   <p className="text-muted text-center mb-4">
                     Select a trip to view detailed itinerary

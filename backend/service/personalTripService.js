@@ -1,6 +1,8 @@
 import User from "../models/User.js";
 import PersonalTrip from "../models/PersonalTrip.js";
 import Trip from "../models/Trip.js";
+import {getTripById} from "./tripService.js";
+import mongoose from "mongoose";
 import Activity from "../models/Activity.js";
 
 export const getAllPersonalTrips = async (userId) => {
@@ -49,6 +51,32 @@ export const getPersonalTripById = async (userId, ptId) => {
   if (!trip) throw new Error("Trip not found");
   return trip;
 }
+
+export const getPersonalTripByIdAndUpdate = async (userId, tripId, update) => {
+  // Check if the user exists
+  console.log("Updating trip:", { tripId, userId, update });
+  const user = await User.findById(userId);
+  if (!user) throw new Error("User not found");
+
+  console.log(typeof update.type, update.type); // should print: string accommodation
+  console.log(typeof update.serpData, update.serpData);
+
+  const updatedTrip = await PersonalTrip.findOneAndUpdate(
+      { _id: tripId },    // filter by trip ID and user ID
+      {
+        $push: {
+          addedPlaces: {
+            type: update.type,     // e.g. 'accommodation'
+            serpData: update.serpData  // your place data object
+          }
+        }
+      },
+      { new: true }   // return the updated document
+  );
+  if (!updatedTrip) throw new Error("Trip not found or update failed" + updatedTrip);
+
+  return updatedTrip;
+};
 
 export const deletePersonalTrip = async (userId, ptId) => {
   const user = await User.findById(userId);

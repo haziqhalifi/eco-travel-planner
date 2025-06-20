@@ -12,7 +12,7 @@ export const searchConfigs = {
             eco_certified: true,
         }),
         mapResults: (data) => (data.properties || []).map((h, i) => ({
-            id: `hotel-${i}`,
+            id: h.property_token,
             type: 'Accommodation',
             name: h.name,
             location: h.gps_coordinates
@@ -26,22 +26,49 @@ export const searchConfigs = {
             // image: Array.isArray(h.images) && h.images.length > 0
             //     ? `http://localhost:5173/proxy-image?url=${encodeURIComponent(h.images[0].thumbnail)}`
             //     : 'https://via.placeholder.com/150'
-
         })),
     },
     transportation: {
         endpoint: '/api/serp/search',
         method: 'get',
-        buildParams: ({ origin, destination, departureDate, returnDate }) => ({
-            engine: 'google_flights',
-            departure_id: origin,
-            arrival_id: destination,
-            outbound_date: departureDate.toISOString().slice(0, 10),
-            return_date: returnDate.toISOString().slice(0, 10),
-            currency: 'MYR',
-            emissions: 1
-        }),
-        mapResults: (data) => {
+        buildParams: ({ origin, destination, departureDate, returnDate, departureToken }) => {
+            // engine: 'google_flights',
+            // departure_id: origin,
+            // arrival_id: destination,
+            // type: 1, //return flight
+            // outbound_date: departureDate.toISOString().slice(0, 10),
+            // return_date: returnDate.toISOString().slice(0, 10),
+            // ...(departureToken && { departure_token: departureToken }),
+            // currency: 'MYR',
+            // emissions: 1,
+            if (departureToken) {
+                console.log("buildParams: Detected departureToken, building params for token search.");
+                return {
+                    engine: 'google_flights',
+                    departure_id: origin,
+                    arrival_id: destination,
+                    type: 1, //return flight
+                    outbound_date: departureDate.toISOString().slice(0, 10),
+                    return_date: returnDate.toISOString().slice(0, 10),
+                    departure_token: departureToken,
+                    currency: 'MYR',
+                    emissions: 1,
+                };
+            } else {
+                console.log("buildParams: No departureToken, building params for initial search.");
+                return {
+                    engine: 'google_flights',
+                    departure_id: origin,
+                    arrival_id: destination,
+                    type: 1, //return flight
+                    outbound_date: departureDate.toISOString().slice(0, 10),
+                    return_date: returnDate.toISOString().slice(0, 10),
+                    currency: 'MYR',
+                    emissions: 1,
+                };
+            }
+        },
+        mapResults: (data, isReturnFlightSearch) => {
             const flights = [];
 
             ['best_flights', 'other_flights'].forEach((key) => {
@@ -87,8 +114,29 @@ export const searchConfigs = {
                         overnight: layover.overnight || false
                     })) : [];
 
-                    flights.push({
-                        id: `flight-${key}-${groupIdx}`,
+                    // flights.push({
+                    //     id: `flight-${key}-${groupIdx}`,
+                    //     airline: firstLeg.airline || 'N/A',
+                    //     flightNumber: firstLeg.flight_number || 'N/A',
+                    //     departureAirport: firstLeg.departure_airport?.id || 'N/A',
+                    //     departureTime: firstLeg.departure_airport?.time || 'N/A',
+                    //     arrivalAirport: lastLeg.arrival_airport?.id || 'N/A',
+                    //     arrivalTime: lastLeg.arrival_airport?.time || 'N/A',
+                    //     total_duration: group.total_duration,
+                    //     stops: legs.length - 1,
+                    //     all_airlines: allAirlines,
+                    //     price: group.price ? `RM ${group.price}` : 'N/A',
+                    //     emissions,
+                    //     logoUrl: firstLeg.logoUrl || group.airline_logo || '',
+                    //     travelClass: firstLeg.travel_class || 'Economy',
+                    //     departureToken: group.departure_token,
+                    //     // bookingToken: group.booking_token || 'N/A',
+                    //     flightSegments,
+                    //     layoverSegments,
+                    //     returnFlights: group.return_flights,
+                    // });
+                    const mappedFlight = {
+                        id: `flight-${key}-${groupIdx}${isReturnFlightSearch ? '-return' : ''}`,
                         airline: firstLeg.airline || 'N/A',
                         flightNumber: firstLeg.flight_number || 'N/A',
                         departureAirport: firstLeg.departure_airport?.id || 'N/A',
@@ -102,18 +150,26 @@ export const searchConfigs = {
                         emissions,
                         logoUrl: firstLeg.logoUrl || group.airline_logo || '',
                         travelClass: firstLeg.travel_class || 'Economy',
-                        bookingToken: group.booking_token || 'N/A',
+                        departureToken: group.departure_token,
+                        // bookingToken: group.booking_token || 'N/A',
                         flightSegments,
-                        layoverSegments
-                    });
+                        layoverSegments,
+                        return_flights: group.return_flights
+                    };
+
+                    if (isReturnFlightSearch) {
+                        // For return flights, we expect a booking_token
+                        mappedFlight.bookingToken = group.booking_token || 'N/A';
+                    } else {
+                        mappedFlight.departureToken = group.departure_token;
+                    }
+
+                    flights.push(mappedFlight);
                 });
             });
 
             return flights;
         }
-
-
-
     },
 
     restaurant: {
@@ -138,8 +194,11 @@ export const searchConfigs = {
                 return [];
             }
 
+            console.log(data.local_results);
+
             return data.local_results.map((r, i) => ({
-                id:           `restaurant-${i}`,
+                // id:           `restaurant-${i}`,
+                id:           r.place_id,
                 type:         'Restaurant',
                 name:         r.title,
                 location:     r.address,
@@ -173,7 +232,8 @@ export const searchConfigs = {
             gl: 'us',
         }),
         mapResults: (data) => (data.local_results || []).map((a, i) => ({
-            id:           `activity-${i}`,
+            // id:           `activity-${i}`,
+            id:           a.place_id,
             type:         'Activities',
             name:         a.title,
             location:     a.address,

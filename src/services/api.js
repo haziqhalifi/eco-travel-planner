@@ -1,6 +1,6 @@
 // API configuration
 const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:5001/api";
+    import.meta.env.VITE_API_URL || "http://localhost:5001/api";
 
 // Token management
 const getToken = () => localStorage.getItem("authToken");
@@ -96,6 +96,37 @@ export const authAPI = {
   },
 };
 
+export const userAPI = {
+  // Get all favorites
+  getFavourites: async (userId) => {
+    return await apiRequest(`/users/${userId}/favorites`, {
+      method: "GET",
+    });
+  },
+
+  // Toggle a favorite (add/remove based on current state)
+  toggleFavourite: async (userId, itemId, itemType) => {
+    // Validate that itemId and itemType are provided
+    if (!itemId || !itemType) {
+      throw new Error("Missing itemId or itemType");
+    }
+
+    return await apiRequest(`/users/${userId}/favorites/${itemId}/toggle`, {
+      method: "POST",
+      body: JSON.stringify({ objectId: itemId, itemId, itemType }),
+    });
+  },
+};
+
+export const ecoOptionsAPI = {
+  findDocumentByPropertyToken: async (itemId, itemType) => {
+    return await apiRequest(`/search/${itemId}`, {
+      method: "POST",
+      body: JSON.stringify({ itemType }),
+    });
+  },
+};
+
 // Trips API
 export const tripsAPI = {
   // Get all trips with optional filters
@@ -151,6 +182,29 @@ export const personalTripsAPI = {
     });
   },
 
+  // addPlaceToTrip: async (tripId, serpData, placeType) => {
+  //   const payload = {
+  //     type: placeType,  // or dynamic type if needed
+  //     serpData,
+  //   };
+  //
+  //   const res = await axios.post(`/api/personal-trips/${tripId}/add-place`, payload);
+  //   return res.data;
+  // },
+
+  addPlaceToTrip: async (tripId, serpData, placeType) => {
+    const payload = {
+      type: placeType,
+      serpData: serpData,
+    };
+    console.log("Payload: ", payload);
+
+    return await apiRequest(`/personal-trips/${tripId}/add-place`, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  },
+
   // Remove trip from personal collection
   removeTripFromPersonal: async (tripId) => {
     return await apiRequest(`/personal-trips/${tripId}`, {
@@ -169,10 +223,10 @@ export const personalTripsAPI = {
   // Delete activity from personal trip
   deleteActivity: async (tripId, activityId) => {
     return await apiRequest(
-      `/personal-trips/${tripId}/activities/${activityId}`,
-      {
-        method: "DELETE",
-      }
+        `/personal-trips/${tripId}/activities/${activityId}`,
+        {
+          method: "DELETE",
+        }
     );
   },
 };
@@ -182,8 +236,8 @@ export const handleApiError = (error, defaultMessage = "An error occurred") => {
   console.error("API Error:", error);
 
   if (
-    error.message.includes("401") ||
-    error.message.includes("Invalid token")
+      error.message.includes("401") ||
+      error.message.includes("Invalid token")
   ) {
     // Token expired or invalid
     authAPI.logout();

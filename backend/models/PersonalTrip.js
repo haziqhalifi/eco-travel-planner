@@ -10,6 +10,11 @@ const activitySchema = new mongoose.Schema({
   imageUrl: String,
 });
 
+const addedPlaceSchema = new mongoose.Schema({
+  type: { type: String, required: true },
+  data: { type: mongoose.Schema.Types.Mixed, required: true }
+});
+
 const personalTripSchema = new mongoose.Schema({
   tripId: {
     type: String,
@@ -48,7 +53,20 @@ const personalTripSchema = new mongoose.Schema({
       },
       activities: [activitySchema]
     }
+  ],
+  addedPlaces: [
+    {
+      type: { type: String, required: true }, // this is fine because it's inside an object
+      serpData: { type: mongoose.Schema.Types.Mixed, required: true }
+    }
   ]
+  // addedPlaces: [
+  //   new mongoose.Schema({
+  //     type: String,
+  //     data: mongoose.Schema.Types.Mixed
+  //   })
+  // ]
+  // addedPlaces: [addedPlaceSchema]
 })
 
 

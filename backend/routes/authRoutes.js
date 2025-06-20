@@ -2,6 +2,7 @@ import express from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import authenticateToken from "../middleware/auth.js";
 
 const router = express.Router();
 
@@ -229,6 +230,95 @@ router.post("/reset-password", async (req, res) => {
     res.json({ success: true, message: "Password reset successful" });
   } catch (error) {
     res.status(500).json({ success: false, error: "Server error" });
+  }
+});
+
+// @route   PATCH /api/auth/update-profile
+// @desc    Update user's email and username
+// @access  Private
+router.patch("/update-profile", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { username, email } = req.body;
+
+    if (!username || !email) {
+      return res.status(400).json({ message: "Username and email are required" });
+    }
+
+    const existingUser = await User.findOne({
+      $or: [{ email }, { username }],
+      _id: { $ne: userId },
+    });
+
+    if (existingUser) {
+      return res.status(400).json({
+        message: "Email or username is already taken",
+      });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { username, email },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({
+      message: "Profile updated",
+      user: {
+        username: updatedUser.username,
+        email: updatedUser.email,
+      },
+    });
+  } catch (error) {
+    console.error("Update profile error:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
+// @route   PATCH /api/auth/update-password
+// @desc    Update user's password (when logged in)
+// @access  Private
+router.patch("/update-password", authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: "Current and new passwords are required" });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: "New password must be at least 6 characters long" });
+    }
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Verify current password
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Current password is incorrect" });
+    }
+
+    // Hash new password
+    const saltRounds = 12;
+    const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds);
+
+    // Update password
+    user.password = hashedNewPassword;
+    await user.save();
+
+    res.json({ message: "Password updated successfully" });
+  } catch (error) {
+    console.error("Update password error:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 });
 

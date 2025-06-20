@@ -1,7 +1,11 @@
 import React, {useEffect, useState} from 'react';
 import { Star, MapPin, Clock, Phone, Globe, ChevronDown, ChevronUp, Search, Tag, DollarSign } from 'lucide-react';
+import {personalTripsAPI, userAPI} from "../../services/api.js";
 
 export default function ActivityCard({
+                                         userId,
+                                         itemId,
+                                         type,
                                          name,
                                          location,
                                          rating,
@@ -12,25 +16,73 @@ export default function ActivityCard({
                                          hours,
                                          links,
                                          gps,
+                                         serpData,
                                          onViewDetails,
                                      }) {
-    const [isFavorited, setIsFavorited] = useState(false);
     const [showTripPopup, setShowTripPopup] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
 
-    const trips = [
-        "North America Trip",
-        "South East Asia Trip",
-        "Japan Trip",
-        "Australia Trip",
-        "Europe Adventure",
-        "South America Expedition"
-    ];
+    const [trips, setTrips] = useState([]);
+    const [loadingTrips, setLoadingTrips] = useState(true);
+    const [favourites, setFavourites] = useState([]);
+    const [isFavorited, setIsFavorited] = useState(false);
+
+    useEffect(() => {
+        async function fetchTrips() {
+            try {
+                const response = await personalTripsAPI.getPersonalTrips();
+                if (response.success) {
+                    setTrips(response.data);
+                }
+            } catch (err) {
+                console.error("Failed to fetch trips:", err);
+            } finally {
+                setLoadingTrips(false);
+            }
+        }
+        fetchTrips();
+    }, []);
 
     // Filter trips based on search term
     const filteredTrips = trips.filter(trip =>
-        trip.toLowerCase().includes(searchTerm.toLowerCase())
+        trip.title && trip.title.toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+    useEffect(() => {
+        const fetchAndDetermineFavouriteStatus = async () => {
+            setIsFavorited(false); // Default to not favorited
+
+            try {
+                const favouritesRes = await userAPI.getFavourites(userId);
+                let favouritesList = []
+                if (type === "activities") favouritesList = favouritesRes.data.activities;
+                else if (type === "restaurants") favouritesList = favouritesRes.data.restaurants;
+                setFavourites(favouritesList);
+
+                if (typeof itemId === 'string' && favouritesList.includes(itemId)) {
+                    setIsFavorited(true);
+                }
+            } catch (error) {
+                console.error("Failed to fetch favourites or determine status:", error);
+                setIsFavorited(false);
+            }
+        };
+
+        if (userId && itemId) { // Only run if we have the necessary IDs
+            fetchAndDetermineFavouriteStatus();
+        }
+    }, [itemId, type, userId, setIsFavorited, setFavourites]);
+
+    const handleToggleFavourite = async () => {
+        try {
+            // const doc = await ecoOptionsAPI.findDocumentByPropertyToken(itemId, type);
+            // const docId = doc.data;
+            await userAPI.toggleFavourite(userId, itemId, type);
+            setIsFavorited(prev => !prev);
+        } catch (err) {
+            console.error("Failed to toggle favourite", err);
+        }
+    };
 
     return (
         <div className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col relative" onClick={onViewDetails}>
@@ -42,20 +94,26 @@ export default function ActivityCard({
                         alt={name}
                         className="w-full h-full object-cover"
                     />
+                    <div className="absolute top-2 left-2 bg-green-100 text-green-800 text-xs px-2 py-1 rounded">
+                        {type}
+                    </div>
 
                     {/* Plus Icon */}
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            setShowTripPopup(true);
-                        }}
-                        className="absolute top-2 right-2 bg-white p-1 rounded-full shadow-md hover:bg-gray-100"
-                        aria-label="Add to trip"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-700" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
-                        </svg>
-                    </button>
+                    {/*<button*/}
+                    {/*    onClick={(e) => {*/}
+                    {/*        e.stopPropagation();*/}
+                    {/*        setShowTripPopup(true);*/}
+                    {/*    }}*/}
+                    {/*    className="absolute top-2 right-2 bg-white p-1 rounded-full shadow-md hover:bg-gray-100"*/}
+                    {/*    aria-label="Add to trip"*/}
+                    {/*>*/}
+                    {/*    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-700" viewBox="0 0 20 20"*/}
+                    {/*         fill="currentColor">*/}
+                    {/*        <path fillRule="evenodd"*/}
+                    {/*              d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"*/}
+                    {/*              clipRule="evenodd"/>*/}
+                    {/*    </svg>*/}
+                    {/*</button>*/}
                 </div>
             )}
 
@@ -120,9 +178,11 @@ export default function ActivityCard({
 
                 {/* Heart Icon for Favorites */}
                 <button
-                    onClick={() => setIsFavorited(!isFavorited)}
-                    className="absolute bottom-3 right-3 text-red-500 text-xl bg-transparent border-none focus:outline-none"
-                    aria-label="Add to favorites"
+                    onClick={handleToggleFavourite}
+                    className={`absolute bottom-3 right-3 text-xl bg-transparent border-none focus:outline-none ${
+                        isFavorited ? "text-red-500" : "text-gray-400"
+                    }`}
+                    aria-label={isFavorited ? "Remove from favorites" : "Add to favorites"}
                 >
                     {isFavorited ? "❤️" : "🤍"}
                 </button>
@@ -130,12 +190,13 @@ export default function ActivityCard({
 
             {/* Trip Selection Popup */}
             {showTripPopup && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50" onClick={(e) => {
-                    e.stopPropagation();
-                    setShowTripPopup(false);
-                }}>
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+                     onClick={(e) => {
+                         e.stopPropagation();
+                         setShowTripPopup(false);
+                     }}>
                     <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex justify-between items-center mb-4">
+                    <div className="flex justify-between items-center mb-4">
                             <h3 className="font-bold text-lg">Select a Trip</h3>
                             <button
                                 onClick={(e) => {
@@ -162,41 +223,47 @@ export default function ActivityCard({
                             />
                         </div>
 
-                        {/* Trips List */}
-                        <div className="max-h-60 overflow-y-auto">
-                            {filteredTrips.length > 0 ? (
-                                <ul className="divide-y divide-gray-200">
-                                    {filteredTrips.map((trip, index) => (
-                                        <li key={index} className="py-2">
-                                            <button
-                                                className="w-full text-left px-2 py-1 rounded hover:bg-gray-100 flex items-center"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    alert(`Added to ${trip}`);
+                        {loadingTrips ? (
+                            <p>Loading trips...</p>
+                        ) : filteredTrips.length > 0 ? (
+                            <ul className="max-h-60 overflow-y-auto divide-y divide-gray-200">
+                                {filteredTrips.map((trip) => (
+                                    <li key={trip._id} className="py-2">
+                                        <button
+                                            className="w-full text-left px-2 py-1 rounded hover:bg-gray-100 flex items-center"
+                                            onClick={async () => {
+                                                try {
+                                                    const meow = await personalTripsAPI.getPersonalTripById(trip._id);
+                                                    console.log("Get trip: ", meow);
+                                                    await personalTripsAPI.addPlaceToTrip(trip._id, serpData, placeType);
+                                                    alert(`Added to ${trip.title}`);
                                                     setShowTripPopup(false);
-                                                }}
-                                            >
-                                                <span className="mr-2">📋</span>
-                                                {trip}
-                                            </button>
-                                        </li>
-                                    ))}
-                                </ul>
-                            ) : (
-                                <p className="text-gray-500 text-center py-2">No trips found</p>
-                            )}
-                        </div>
+                                                } catch (err) {
+                                                    alert("Failed to add activity to trip");
+                                                    console.error(err);
+                                                }
+                                            }}
+                                        >
+                                            <span className="mr-2">📋</span>
+                                            {trip.title}
+                                        </button>
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <p className="text-gray-500 text-center py-2">No trips found</p>
+                        )}
 
-                        <button
-                            className="mt-4 w-full bg-dark-green text-white py-2 rounded hover:bg-blue-600"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                alert("Create a new trip");
-                                setShowTripPopup(false);
-                            }}
-                        >
-                            Create New Trip
-                        </button>
+                        {/*<button*/}
+                        {/*    className="mt-4 w-full bg-dark-green text-white py-2 rounded hover:bg-blue-600"*/}
+                        {/*    onClick={(e) => {*/}
+                        {/*        e.stopPropagation();*/}
+                        {/*        alert("Create a new trip");*/}
+                        {/*        setShowTripPopup(false);*/}
+                        {/*    }}*/}
+                        {/*>*/}
+                        {/*    Create New Trip*/}
+                        {/*</button>*/}
                     </div>
                 </div>
             )}
@@ -226,71 +293,6 @@ const extractKeywords = (reviews) => {
         .slice(0, 15)
         .map(([word, count]) => ({ word, count }));
 };
-
-
-// const ReviewCard = ({ review, onAddKeywordFilter }) => {
-//     return (
-//         <div className="border rounded-lg p-4 mb-4 bg-white shadow-sm">
-//             <div className="flex justify-between items-center mb-2">
-//                 <div className="flex items-center">
-//                     <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600">
-//                         {review.author.charAt(0)}
-//                     </div>
-//                     <div className="ml-2">
-//                         <p className="font-medium">{review.author}</p>
-//                         <div className="flex items-center">
-//                             <div className="flex">
-//                                 {[...Array(review.rating)].map((_, i) => (
-//                                     <Star key={i} size={14} className="text-yellow-500 fill-current" />
-//                                 ))}
-//                                 {[...Array(5 - review.rating)].map((_, i) => (
-//                                     <Star key={i + review.rating} size={14} className="text-gray-300" />
-//                                 ))}
-//                             </div>
-//                             <span className="ml-2 text-xs text-gray-500">{review.date}</span>
-//                         </div>
-//                     </div>
-//                 </div>
-//                 <div className="text-sm text-gray-500">
-//                     <span>👍 {review.helpful}</span>
-//                 </div>
-//             </div>
-//
-//             <p className="text-gray-700 mb-2">{review.text}</p>
-//
-//             {review.images && (
-//                 <div className="flex space-x-2 mb-2">
-//                     {review.images.map((img, i) => (
-//                         <img
-//                             key={i}
-//                             src={img}
-//                             alt="Review photo"
-//                             className="h-20 w-24 object-cover rounded"
-//                         />
-//                     ))}
-//                 </div>
-//             )}
-//
-//             {/* Extract clickable keywords from review */}
-//             <div className="flex flex-wrap mt-2">
-//                 {review.text.split(" ")
-//                     .filter(word => word.length > 4 && !['and', 'the', 'that', 'this', 'with'].includes(word.toLowerCase()))
-//                     .filter((v, i, a) => a.indexOf(v) === i)
-//                     .slice(0, 3)
-//                     .map((word, i) => (
-//                         <button
-//                             key={i}
-//                             onClick={() => onAddKeywordFilter(word.toLowerCase().replace(/[^a-z0-9]/g, ''))}
-//                             className="text-xs bg-gray-100 hover:bg-gray-200 rounded-full px-2 py-1 mr-1 mb-1"
-//                         >
-//                             {word.replace(/[^a-zA-Z0-9]/g, '')}
-//                         </button>
-//                     ))
-//                 }
-//             </div>
-//         </div>
-//     );
-// };
 
 // Helper component for restaurant rating stars
 const RatingStars = ({ rating }) => {
